@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -48,14 +48,24 @@ function firstValue(items: ChartDatum[]) {
   return items[0]?.label ?? "Not available";
 }
 
-function toMarkdownFile(drug: string, report: string) {
-  const blob = new Blob([report], { type: "text/markdown;charset=utf-8" });
+function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${drug.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-faers-report.md`;
+  link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function toMarkdownFile(drug: string, report: string) {
+  const blob = new Blob([report], { type: "text/markdown;charset=utf-8" });
+  downloadBlob(
+    `${drug.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-faers-report.md`,
+    blob,
+  );
 }
 
 function csvValue(value: string | number | null | undefined) {
@@ -78,12 +88,7 @@ function downloadCsv(
     ...rows.map((row) => headers.map((header) => csvValue(row[header])).join(",")),
   ].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(filename, blob);
 }
 
 function slug(value: string) {
@@ -773,6 +778,10 @@ export function PharmacovigilanceDashboard() {
   const [isSignalLoading, setIsSignalLoading] = useState(false);
   const [isComparisonLoading, setIsComparisonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const analysisRequestId = useRef(0);
+  const reportRequestId = useRef(0);
+  const signalRequestId = useRef(0);
+  const comparisonRequestId = useRef(0);
 
   const topReaction = useMemo(
     () => (analysis ? firstValue(analysis.topReactions) : "Not loaded"),
@@ -780,7 +789,15 @@ export function PharmacovigilanceDashboard() {
   );
 
   async function runAnalysis(nextDrug = drug) {
+    const requestId = analysisRequestId.current + 1;
+    analysisRequestId.current = requestId;
+    reportRequestId.current += 1;
+    signalRequestId.current += 1;
+    comparisonRequestId.current += 1;
     setIsLoading(true);
+    setIsReporting(false);
+    setIsSignalLoading(false);
+    setIsComparisonLoading(false);
     setError(null);
     setReport(null);
     setSignal(null);
@@ -794,6 +811,8 @@ export function PharmacovigilanceDashboard() {
         throw new Error(payload.error ?? "Unable to analyze FAERS data.");
       }
 
+      if (requestId !== analysisRequestId.current) return;
+
       setAnalysis(payload);
       setComparatorDrug(payload.drug.toLowerCase() === "warfarin" ? "metformin" : "warfarin");
       const defaultEvent = payload.topReactions?.[0]?.label ?? "";
@@ -802,14 +821,19 @@ export function PharmacovigilanceDashboard() {
         void runSignal(payload.drug, defaultEvent);
       }
     } catch (error) {
+      if (requestId !== analysisRequestId.current) return;
       setError(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
-      setIsLoading(false);
+      if (requestId === analysisRequestId.current) {
+        setIsLoading(false);
+      }
     }
   }
 
   async function generateReport() {
     if (!analysis) return;
+    const requestId = reportRequestId.current + 1;
+    reportRequestId.current = requestId;
     setIsReporting(true);
     setError(null);
 
@@ -827,16 +851,23 @@ export function PharmacovigilanceDashboard() {
         throw new Error(payload.error ?? "Unable to generate report.");
       }
 
+      if (requestId !== reportRequestId.current) return;
+
       setReport(payload);
     } catch (error) {
+      if (requestId !== reportRequestId.current) return;
       setError(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
-      setIsReporting(false);
+      if (requestId === reportRequestId.current) {
+        setIsReporting(false);
+      }
     }
   }
 
   async function runComparison() {
     if (!analysis || selectedEvent.trim().length < 2) return;
+    const requestId = comparisonRequestId.current + 1;
+    comparisonRequestId.current = requestId;
     setIsComparisonLoading(true);
     setError(null);
 
@@ -850,18 +881,27 @@ export function PharmacovigilanceDashboard() {
         throw new Error(payload.error ?? "Unable to compare drugs.");
       }
 
+      if (requestId !== comparisonRequestId.current) return;
+
       setComparison(payload);
     } catch (error) {
+      if (requestId !== comparisonRequestId.current) return;
       setError(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
-      setIsComparisonLoading(false);
+      if (requestId === comparisonRequestId.current) {
+        setIsComparisonLoading(false);
+      }
     }
   }
 
   async function runSignal(signalDrug = analysis?.drug ?? drug, event = selectedEvent) {
     const normalizedEvent = event.trim().toUpperCase();
     if (!signalDrug || normalizedEvent.length < 2) return;
+    const requestId = signalRequestId.current + 1;
+    signalRequestId.current = requestId;
+    comparisonRequestId.current += 1;
     setIsSignalLoading(true);
+    setIsComparisonLoading(false);
     setError(null);
 
     try {
@@ -874,17 +914,26 @@ export function PharmacovigilanceDashboard() {
         throw new Error(payload.error ?? "Unable to compute signal metrics.");
       }
 
+      if (requestId !== signalRequestId.current) return;
+
       setSignal(payload);
       setSelectedEvent(payload.event ?? normalizedEvent);
       setComparison(null);
     } catch (error) {
+      if (requestId !== signalRequestId.current) return;
       setError(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
-      setIsSignalLoading(false);
+      if (requestId === signalRequestId.current) {
+        setIsSignalLoading(false);
+      }
     }
   }
 
   function changeSignalEvent(event: string) {
+    signalRequestId.current += 1;
+    comparisonRequestId.current += 1;
+    setIsSignalLoading(false);
+    setIsComparisonLoading(false);
     setSelectedEvent(event.toUpperCase());
     setSignal(null);
     setComparison(null);
@@ -1146,6 +1195,8 @@ export function PharmacovigilanceDashboard() {
               comparison={comparison}
               isComparisonLoading={isComparisonLoading}
               onComparatorChange={(value) => {
+                comparisonRequestId.current += 1;
+                setIsComparisonLoading(false);
                 setComparatorDrug(value);
                 setComparison(null);
               }}

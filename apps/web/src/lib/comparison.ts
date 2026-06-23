@@ -39,7 +39,7 @@ function rowFromSignal(
   };
 }
 
-function buildSummary(
+export function buildComparisonSummary(
   primary: DrugComparison["rows"][number],
   comparator: DrugComparison["rows"][number],
 ) {
@@ -80,6 +80,14 @@ function buildSummary(
     };
   }
 
+  if (lowerShare === 0) {
+    return {
+      higherEventShareDrug: higher.drug,
+      eventShareRatio: null,
+      summary: `${higher.drug} has the higher event reporting share for this MedDRA term in FAERS, while ${lower.drug} has zero event reporting share in the matched query. This is a reporting-share comparison, not a clinical risk comparison.`,
+    };
+  }
+
   const ratio = roundMetric(higherShare / lowerShare);
 
   return {
@@ -108,7 +116,7 @@ export async function compareDrugs(
     event: primarySignal.event,
     generatedAt: new Date().toISOString(),
     rows: [primary, comparator],
-    comparison: buildSummary(primary, comparator),
+    comparison: buildComparisonSummary(primary, comparator),
     assumptions: [
       "Comparison uses FAERS report shares per 1,000 suspect-drug reports.",
       "Both drugs use the same MedDRA preferred-term event query.",

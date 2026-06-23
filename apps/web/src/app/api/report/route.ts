@@ -162,7 +162,19 @@ async function generateOpenAiReport(
 }
 
 export async function POST(request: Request) {
-  const parsed = bodySchema.safeParse(await request.json());
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      {
+        error: "Invalid JSON request body.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const parsed = bodySchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(

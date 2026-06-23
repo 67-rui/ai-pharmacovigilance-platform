@@ -189,6 +189,14 @@ function getOutcomeValue(items: ChartDatum[]) {
   return items.find((item) => item.label === "1")?.value ?? 0;
 }
 
+export function buildAgeDistribution(items: ChartDatum[]) {
+  return sumBuckets(
+    items.filter((item) => Number.isFinite(Number(item.label))),
+    (item) => bucketAge(Number(item.label)),
+    ["0-17", "18-44", "45-64", "65-74", "75-84", "85+"],
+  );
+}
+
 async function getSeriousOutcomes(search: string) {
   const outcomes = await Promise.all(
     outcomeFields.map(async ([label, field]) => {
@@ -338,11 +346,7 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
   );
   const seriousnessMapped = mapLabels(seriousness, seriousnessLabels);
   const roleDistribution = mapLabels(roleCounts, roleLabels);
-  const ageDistribution = sumBuckets(
-    ageCounts,
-    (item) => bucketAge(Number(item.label)),
-    ["0-17", "18-44", "45-64", "65-74", "75-84", "85+"],
-  );
+  const ageDistribution = buildAgeDistribution(ageCounts);
 
   return {
     drug: normalizedDrug,
