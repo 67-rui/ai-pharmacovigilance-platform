@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -189,6 +190,33 @@ function comparisonCsvRows(comparison: DrugComparison) {
   }));
 }
 
+function LoadingActionIcon({
+  isLoading,
+  Icon,
+  size = 16,
+}: {
+  isLoading: boolean;
+  Icon: LucideIcon;
+  size?: number;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative inline-flex shrink-0 items-center justify-center"
+      style={{ height: size, width: size }}
+    >
+      <Icon
+        size={size}
+        className={`transition-opacity ${isLoading ? "opacity-0" : "opacity-100"}`}
+      />
+      <RefreshCw
+        size={size}
+        className={`absolute inset-0 transition-opacity ${isLoading ? "animate-spin opacity-100" : "opacity-0"}`}
+      />
+    </span>
+  );
+}
+
 function HorizontalBars({
   data,
   color = "#0f766e",
@@ -355,11 +383,7 @@ function SignalPanel({
             disabled={isSignalLoading || selectedEvent.trim().length < 2}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isSignalLoading ? (
-              <RefreshCw size={16} className="animate-spin" />
-            ) : (
-              <Activity size={16} />
-            )}
+            <LoadingActionIcon isLoading={isSignalLoading} Icon={Activity} />
             Compute
           </button>
           {signal ? (
@@ -543,11 +567,7 @@ function ComparisonPanel({
             }
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isComparisonLoading ? (
-              <RefreshCw size={16} className="animate-spin" />
-            ) : (
-              <Activity size={16} />
-            )}
+            <LoadingActionIcon isLoading={isComparisonLoading} Icon={Activity} />
             Compare
           </button>
           {comparison ? (
@@ -897,7 +917,7 @@ export function PharmacovigilanceDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main translate="no" className="min-h-screen bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -930,7 +950,7 @@ export function PharmacovigilanceDashboard() {
                 disabled={isLoading || drug.trim().length < 2}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
-                {isLoading ? <RefreshCw size={17} className="animate-spin" /> : <Search size={17} />}
+                <LoadingActionIcon isLoading={isLoading} Icon={Search} size={17} />
                 Analyze
               </button>
             </form>
@@ -1036,11 +1056,7 @@ export function PharmacovigilanceDashboard() {
                     disabled={isReporting}
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
                   >
-                    {isReporting ? (
-                      <RefreshCw size={16} className="animate-spin" />
-                    ) : (
-                      <FileText size={16} />
-                    )}
+                    <LoadingActionIcon isLoading={isReporting} Icon={FileText} />
                     Report
                   </button>
                 </div>
