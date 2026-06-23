@@ -13,6 +13,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Inspect source provenance, including query assumptions and public openFDA request URLs.
 - Compute PRR and ROR disproportionality metrics with a 2x2 reporting table and ROR 95% confidence interval.
 - Enter custom MedDRA preferred terms for user-defined drug-event signal checks.
+- Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Export dashboard data, signal tables, drug comparisons, and Markdown reports.
@@ -24,8 +25,9 @@ This project turns a drug name into adverse event patterns, disproportionality s
 2. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
 3. Inspect the source provenance panel to understand exactly how openFDA was queried.
 4. Select or type a MedDRA preferred term, then compute PRR/ROR signal metrics.
-5. Compare the selected drug against another drug for the same event.
-6. Generate a safety summary and export Markdown or CSV artifacts.
+5. Rank the top reported MedDRA terms to prioritize signal-review candidates.
+6. Compare the selected drug against another drug for the same event.
+7. Generate a safety summary and export Markdown or CSV artifacts.
 
 ## Product Screens
 
@@ -115,6 +117,17 @@ Metrics:
 
 The app labels elevated reporting signals when PRR and ROR are at least 2 and the drug-event cell count is at least 3. This threshold is used for demo triage only; it is not a regulatory decision rule.
 
+### Signal Ranking
+
+The ranking panel computes PRR and ROR for the top reported MedDRA preferred terms and orders them by:
+
+- Signal interpretation class
+- Drug-event report count
+- PRR
+- ROR
+
+This gives reviewers a prioritized triage table across multiple candidate events. It is still a reporting-signal workflow, not a clinical risk ranking.
+
 ### Drug Comparison
 
 The comparison panel evaluates two drugs against the same MedDRA event and shows:
@@ -150,6 +163,7 @@ Quality guardrails:
 |---|---|
 | `GET /api/faers?drug=metformin` | Returns FAERS aggregate dashboard data and source provenance. |
 | `GET /api/signal?drug=metformin&event=NAUSEA` | Returns PRR/ROR signal metrics for a drug-event pair. |
+| `GET /api/rankings?drug=metformin&event=NAUSEA&event=DIARRHOEA` | Ranks multiple candidate events by signal metrics. |
 | `GET /api/compare?primary=metformin&comparator=warfarin&event=NAUSEA` | Compares event reporting share across two drugs. |
 | `POST /api/report` | Generates a safety summary from a FAERS analysis payload. |
 
@@ -171,6 +185,7 @@ ai-pharmacovigilance-platform/
   apps/web/
     src/app/api/faers/route.ts
     src/app/api/signal/route.ts
+    src/app/api/rankings/route.ts
     src/app/api/compare/route.ts
     src/app/api/report/route.ts
     src/components/PharmacovigilanceDashboard.tsx
@@ -225,6 +240,8 @@ Current tests cover:
 - PRR/ROR calculations
 - ROR confidence interval behavior
 - Signal classification thresholds
+- Signal ranking sort order
+- Signal ranking API route behavior
 
 These unit tests do not make live openFDA requests.
 
@@ -249,8 +266,7 @@ Near-term priorities:
 - Add mocked API route tests.
 - Add PDF report export.
 - Add saved report history.
-- Add signal ranking across top reactions.
 
 ## Resume Bullet
 
-Built an AI-powered pharmacovigilance dashboard using openFDA FAERS data to analyze adverse event patterns, compute PRR/ROR disproportionality metrics, compare drug-event reporting shares, and generate prompt-versioned safety summaries with explicit FAERS limitations and reviewer guardrails.
+Built an AI-powered pharmacovigilance dashboard using openFDA FAERS data to analyze adverse event patterns, rank PRR/ROR signal candidates, compare drug-event reporting shares, and generate prompt-versioned safety summaries with explicit FAERS limitations and reviewer guardrails.

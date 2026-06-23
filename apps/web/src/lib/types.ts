@@ -97,3 +97,19 @@ export type DrugComparison = {
   };
   assumptions: string[];
 };
+
+export type SignalRanking = {
+  drug: string;
+  generatedAt: string;
+  rows: Array<{
+    event: string;
+    eventReports: number;
+    prr: number | null;
+    ror: number | null;
+    rorLower95: number | null;
+    rorUpper95: number | null;
+    interpretationLabel: SignalAnalysis["interpretation"]["label"];
+    interpretationSummary: string;
+  }>;
+  assumptions: string[];
+};

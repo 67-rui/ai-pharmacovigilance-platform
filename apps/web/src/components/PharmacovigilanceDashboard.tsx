@@ -41,6 +41,7 @@ import type {
   FaersAnalysis,
   ReportResponse,
   SignalAnalysis,
+  SignalRanking,
 } from "@/lib/types";
 
 const pieColors = ["#0f766e", "#be123c", "#2563eb", "#64748b"];
@@ -193,6 +194,20 @@ function comparisonCsvRows(comparison: DrugComparison) {
     eventReports: row.eventReports,
     otherEventReports: row.otherEventReports,
     eventSharePerThousand: row.eventSharePerThousand,
+    prr: row.prr,
+    ror: row.ror,
+    rorLower95: row.rorLower95,
+    rorUpper95: row.rorUpper95,
+    interpretationLabel: row.interpretationLabel,
+  }));
+}
+
+function rankingCsvRows(ranking: SignalRanking) {
+  return ranking.rows.map((row, index) => ({
+    rank: index + 1,
+    drug: ranking.drug,
+    event: row.event,
+    eventReports: row.eventReports,
     prr: row.prr,
     ror: row.ror,
     rorLower95: row.rorLower95,
@@ -585,6 +600,114 @@ function SignalPanel({
   );
 }
 
+function SignalRankingPanel({
+  analysis,
+  ranking,
+  isRankingLoading,
+  onRunRanking,
+  onExportRankingCsv,
+}: {
+  analysis: FaersAnalysis;
+  ranking: SignalRanking | null;
+  isRankingLoading: boolean;
+  onRunRanking: () => void;
+  onExportRankingCsv: () => void;
+}) {
+  const candidateCount = Math.min(analysis.topReactions.length, 6);
+
+  return (
+    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Signal prioritization
+          </div>
+          <h2 className="mt-1 text-base font-semibold text-slate-950">
+            Ranked top MedDRA signal candidates
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onRunRanking}
+            disabled={isRankingLoading || candidateCount === 0}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
+            <LoadingActionIcon isLoading={isRankingLoading} Icon={Activity} />
+            Rank top signals
+          </button>
+          {ranking ? (
+            <button
+              type="button"
+              onClick={onExportRankingCsv}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+            >
+              <Download size={16} />
+              CSV
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {ranking ? (
+        <div className="space-y-4">
+          <div className="overflow-auto rounded-lg border border-slate-200">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                <tr>
+                  <th className="px-3 py-3">Rank</th>
+                  <th className="px-3 py-3">Event</th>
+                  <th className="px-3 py-3">Drug-event reports</th>
+                  <th className="px-3 py-3">PRR</th>
+                  <th className="px-3 py-3">ROR</th>
+                  <th className="px-3 py-3">ROR 95% CI</th>
+                  <th className="px-3 py-3">Interpretation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 bg-white text-slate-700">
+                {ranking.rows.map((row, index) => (
+                  <tr key={row.event}>
+                    <td className="px-3 py-3 font-mono">{index + 1}</td>
+                    <td className="px-3 py-3 font-semibold text-slate-950">
+                      {row.event}
+                    </td>
+                    <td className="px-3 py-3 font-mono">
+                      {formatNumber(row.eventReports)}
+                    </td>
+                    <td className="px-3 py-3 font-mono">{metricText(row.prr)}</td>
+                    <td className="px-3 py-3 font-mono">{metricText(row.ror)}</td>
+                    <td className="px-3 py-3 font-mono">
+                      {row.rorLower95 === null || row.rorUpper95 === null
+                        ? "N/A"
+                        : `${row.rorLower95} - ${row.rorUpper95}`}
+                    </td>
+                    <td className="px-3 py-3">{row.interpretationLabel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+            <div className="font-semibold">Ranking boundary</div>
+            <ul className="mt-2 grid gap-2 md:grid-cols-2">
+              {ranking.assumptions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : (
+        <div className="flex min-h-48 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-500">
+          {isRankingLoading
+            ? "Ranking top signal candidates"
+            : `Rank the top ${candidateCount} reported MedDRA terms with PRR and ROR.`}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ComparisonPanel({
   primaryDrug,
   selectedEvent,
@@ -835,16 +958,19 @@ export function PharmacovigilanceDashboard() {
   const [report, setReport] = useState<ReportResponse | null>(null);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [signal, setSignal] = useState<SignalAnalysis | null>(null);
+  const [ranking, setRanking] = useState<SignalRanking | null>(null);
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [isSignalLoading, setIsSignalLoading] = useState(false);
+  const [isRankingLoading, setIsRankingLoading] = useState(false);
   const [isComparisonLoading, setIsComparisonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const analysisRequestId = useRef(0);
   const reportRequestId = useRef(0);
   const signalRequestId = useRef(0);
+  const rankingRequestId = useRef(0);
   const comparisonRequestId = useRef(0);
 
   const topReaction = useMemo(
@@ -857,14 +983,17 @@ export function PharmacovigilanceDashboard() {
     analysisRequestId.current = requestId;
     reportRequestId.current += 1;
     signalRequestId.current += 1;
+    rankingRequestId.current += 1;
     comparisonRequestId.current += 1;
     setIsLoading(true);
     setIsReporting(false);
     setIsSignalLoading(false);
+    setIsRankingLoading(false);
     setIsComparisonLoading(false);
     setError(null);
     setReport(null);
     setSignal(null);
+    setRanking(null);
     setComparison(null);
 
     try {
@@ -958,6 +1087,41 @@ export function PharmacovigilanceDashboard() {
     }
   }
 
+  async function runRanking() {
+    if (!analysis || !analysis.topReactions.length) return;
+    const requestId = rankingRequestId.current + 1;
+    rankingRequestId.current = requestId;
+    setIsRankingLoading(true);
+    setError(null);
+
+    const params = new URLSearchParams({
+      drug: analysis.drug,
+    });
+    analysis.topReactions.slice(0, 6).forEach((event) => {
+      params.append("event", event.label);
+    });
+
+    try {
+      const response = await fetch(`/api/rankings?${params.toString()}`);
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Unable to rank signal candidates.");
+      }
+
+      if (requestId !== rankingRequestId.current) return;
+
+      setRanking(payload);
+    } catch (error) {
+      if (requestId !== rankingRequestId.current) return;
+      setError(error instanceof Error ? error.message : "Unexpected error.");
+    } finally {
+      if (requestId === rankingRequestId.current) {
+        setIsRankingLoading(false);
+      }
+    }
+  }
+
   async function runSignal(signalDrug = analysis?.drug ?? drug, event = selectedEvent) {
     const normalizedEvent = event.trim().toUpperCase();
     if (!signalDrug || normalizedEvent.length < 2) return;
@@ -1014,6 +1178,11 @@ export function PharmacovigilanceDashboard() {
       `${slug(signal.drug)}-${slug(signal.event)}-signal.csv`,
       signalCsvRows(signal),
     );
+  }
+
+  function exportRankingCsv() {
+    if (!ranking) return;
+    downloadCsv(`${slug(ranking.drug)}-signal-ranking.csv`, rankingCsvRows(ranking));
   }
 
   function exportComparisonCsv() {
@@ -1250,6 +1419,14 @@ export function PharmacovigilanceDashboard() {
               onEventChange={changeSignalEvent}
               onRunSignal={() => void runSignal()}
               onExportSignalCsv={exportSignalCsv}
+            />
+
+            <SignalRankingPanel
+              analysis={analysis}
+              ranking={ranking}
+              isRankingLoading={isRankingLoading}
+              onRunRanking={() => void runRanking()}
+              onExportRankingCsv={exportRankingCsv}
             />
 
             <ComparisonPanel

@@ -53,7 +53,8 @@ Priority backlog:
 - Done: Add confidence interval calculations for ROR.
 - Done: Add event search so reviewers can select a MedDRA preferred term.
 - Done: Add drug-vs-drug comparison for same-class or user-selected drugs.
-- P2: Add a basic signal ranking table with filters for seriousness, frequency, PRR, and ROR.
+- Done: Add a basic signal ranking table across top reactions using report volume, PRR, and ROR.
+- P2: Add filters for seriousness, frequency, PRR, and ROR in the ranking table.
 
 Acceptance criteria:
 
@@ -220,6 +221,6 @@ Each meaningful feature should include:
 
 1. Add PDF report export.
 2. Add saved report history.
-3. Add a signal ranking table across top reactions.
+3. Add ranking filters for seriousness, frequency, PRR, and ROR.
 4. Add deployment-ready environment documentation.
 5. Add a case study page for portfolio storytelling.
