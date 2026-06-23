@@ -16,6 +16,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
+- Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown reports.
 - Verify core query-building and signal-metric logic with Vitest.
 
@@ -147,7 +148,16 @@ The report API supports two modes:
 - `template`: deterministic local fallback when no `OPENAI_API_KEY` is configured.
 - `openai`: optional OpenAI Responses API generation when an API key is available.
 
-The current report prompt is versioned in [docs/prompts/faers-safety-report-v1.md](docs/prompts/faers-safety-report-v1.md). Report responses include the prompt version and a quality checklist.
+The current report prompt is versioned in [docs/prompts/faers-safety-report-v2.md](docs/prompts/faers-safety-report-v2.md). Report responses include the prompt version, a structured report object, derived Markdown, and a quality checklist.
+
+Report output is validated with a zod schema before it is rendered. This gives the AI layer an explicit contract:
+
+- `title`
+- `safetySignalOverview`
+- `keyPatterns`
+- `reviewerFollowUp`
+- `limitations`
+- `qualityChecks`
 
 Quality guardrails:
 
@@ -190,12 +200,14 @@ ai-pharmacovigilance-platform/
     src/app/api/report/route.ts
     src/components/PharmacovigilanceDashboard.tsx
     src/lib/openfda.ts
+    src/lib/report.ts
     src/lib/signal.ts
     src/lib/comparison.ts
     src/lib/*.test.ts
   docs/
     assets/
     prompts/faers-safety-report-v1.md
+    prompts/faers-safety-report-v2.md
     project-plan.md
     roadmap.md
 ```

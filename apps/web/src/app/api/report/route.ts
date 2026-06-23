@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import {
+  REPORT_PROMPT_VERSION,
+  REPORT_QUALITY_CHECKLIST,
+  buildTemplateStructuredReport,
+  parseStructuredReport,
+  structuredReportToMarkdown,
+} from "../../../lib/report";
 import type { FaersAnalysis, ReportResponse } from "@/lib/types";
 
 const chartDatumSchema = z.object({
@@ -42,63 +49,42 @@ const bodySchema = z.object({
   analysis: analysisSchema,
 });
 
-const REPORT_PROMPT_VERSION = "faers-safety-report-v1";
-
-const REPORT_QUALITY_CHECKLIST = [
-  "No causal claims from FAERS report counts.",
-  "No incidence, prevalence, or true-risk estimates.",
-  "FAERS limitations are stated explicitly.",
-  "Reviewer follow-up questions are included.",
-  "Signal language is framed as hypothesis generation.",
-];
-
-function listTop(items: { label: string; value: number }[], limit = 5) {
-  return items
-    .slice(0, limit)
-    .map((item) => `${item.label} (${item.value.toLocaleString()})`)
-    .join(", ");
-}
-
-function templateReport(analysis: FaersAnalysis) {
-  return [
-    `## ${analysis.drug} FAERS Safety Summary`,
-    "",
-    `The openFDA FAERS query matched ${analysis.totalReports.toLocaleString()} suspect-drug reports. Dashboard panels are generated from aggregate FAERS count queries for adverse reactions, demographics, seriousness, outcomes, and reporting year ranges.`,
-    "",
-    "### Signal Triage",
-    `- Most frequently reported reactions: ${listTop(analysis.topReactions) || "not available"}.`,
-    `- Seriousness distribution: ${listTop(analysis.seriousness, 2) || "not available"}.`,
-    `- Serious outcome flags: ${listTop(analysis.seriousOutcomes) || "not available"}.`,
-    "",
-    "### Demographic Pattern",
-    `- Sex distribution: ${listTop(analysis.sexDistribution, 3) || "not available"}.`,
-    `- Age distribution: ${listTop(analysis.ageDistribution, 7) || "not available"}.`,
-    "",
-    "### Reviewer Notes",
-    "- Treat these counts as signal-triage inputs rather than incidence estimates.",
-    "- Review duplicate handling, co-medications, indication, dose, chronology, and dechallenge/rechallenge evidence before escalating a signal.",
-    "- Compare against class alternatives and background disease risk before forming a hypothesis.",
-    "",
-    "### Report Quality Checklist",
-    ...REPORT_QUALITY_CHECKLIST.map((item) => `- ${item}`),
-    "",
-    "### Limitations",
-    ...analysis.limitations.map((item) => `- ${item}`),
-  ].join("\n");
-}
-
 function buildPrompt(analysis: FaersAnalysis) {
   return [
     "You are preparing a pharmacovigilance triage report for a pharmacist or drug safety reviewer.",
     `Prompt version: ${REPORT_PROMPT_VERSION}.`,
     "Use only the JSON statistics below. Do not invent clinical facts or causal claims.",
-    "Write concise Markdown with these sections: Safety Signal Overview, Key Patterns, Reviewer Follow-up, Limitations.",
+    "Return strict JSON only. Do not wrap it in Markdown or a code fence.",
+    "The JSON object must contain these keys exactly: title, safetySignalOverview, keyPatterns, reviewerFollowUp, limitations, qualityChecks.",
+    "Use concise reviewer-ready language. keyPatterns, reviewerFollowUp, limitations, and qualityChecks must be arrays of strings.",
     "Always state that FAERS reports cannot establish incidence or causality and that this is not medical advice.",
     "Quality checklist that must be satisfied:",
     ...REPORT_QUALITY_CHECKLIST.map((item) => `- ${item}`),
     "",
     JSON.stringify(analysis, null, 2),
   ].join("\n");
+}
+
+function parseJsonFromText(text: string) {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  return JSON.parse(fenced?.[1] ?? trimmed);
+}
+
+function buildTemplateResponse(
+  analysis: FaersAnalysis,
+  warning?: string,
+): ReportResponse {
+  const structuredReport = buildTemplateStructuredReport(analysis);
+
+  return {
+    mode: "template",
+    report: structuredReportToMarkdown(structuredReport),
+    structuredReport,
+    promptVersion: REPORT_PROMPT_VERSION,
+    qualityChecklist: REPORT_QUALITY_CHECKLIST,
+    warning,
+  };
 }
 
 function extractResponseText(payload: unknown) {
@@ -147,15 +133,17 @@ async function generateOpenAiReport(
     throw new Error(`OpenAI report generation failed: ${text}`);
   }
 
-  const report = extractResponseText(await response.json()).trim();
-  if (!report) {
+  const reportText = extractResponseText(await response.json()).trim();
+  if (!reportText) {
     throw new Error("OpenAI returned an empty report.");
   }
+  const structuredReport = parseStructuredReport(parseJsonFromText(reportText));
 
   return {
     mode: "openai",
     model,
-    report,
+    report: structuredReportToMarkdown(structuredReport),
+    structuredReport,
     promptVersion: REPORT_PROMPT_VERSION,
     qualityChecklist: REPORT_QUALITY_CHECKLIST,
   };
@@ -188,13 +176,12 @@ export async function POST(request: Request) {
   const analysis = parsed.data.analysis as FaersAnalysis;
 
   if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({
-      mode: "template",
-      report: templateReport(analysis),
-      promptVersion: REPORT_PROMPT_VERSION,
-      qualityChecklist: REPORT_QUALITY_CHECKLIST,
-      warning: "OPENAI_API_KEY is not configured; generated a local template report.",
-    } satisfies ReportResponse);
+    return NextResponse.json(
+      buildTemplateResponse(
+        analysis,
+        "OPENAI_API_KEY is not configured; generated a local template report.",
+      ),
+    );
   }
 
   try {
@@ -203,12 +190,6 @@ export async function POST(request: Request) {
     const warning =
       error instanceof Error ? error.message : "OpenAI report generation failed.";
 
-    return NextResponse.json({
-      mode: "template",
-      report: templateReport(analysis),
-      promptVersion: REPORT_PROMPT_VERSION,
-      qualityChecklist: REPORT_QUALITY_CHECKLIST,
-      warning,
-    } satisfies ReportResponse);
+    return NextResponse.json(buildTemplateResponse(analysis, warning));
   }
 }

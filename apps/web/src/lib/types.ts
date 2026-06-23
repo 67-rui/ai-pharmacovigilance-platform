@@ -35,10 +35,20 @@ export type FaersAnalysis = {
 export type ReportResponse = {
   mode: "openai" | "template";
   report: string;
+  structuredReport: StructuredReport;
   promptVersion: string;
   qualityChecklist: string[];
   model?: string;
   warning?: string;
+};
+
+export type StructuredReport = {
+  title: string;
+  safetySignalOverview: string;
+  keyPatterns: string[];
+  reviewerFollowUp: string[];
+  limitations: string[];
+  qualityChecks: string[];
 };
 
 export type SignalAnalysis = {

@@ -1383,6 +1383,9 @@ export function PharmacovigilanceDashboard() {
                       <span className="rounded-md bg-emerald-100 px-2 py-1 text-emerald-800">
                         {report.promptVersion}
                       </span>
+                      <span className="rounded-md bg-blue-100 px-2 py-1 text-blue-800">
+                        Schema validated
+                      </span>
                       {report.warning ? (
                         <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-800">
                           Fallback
@@ -1399,9 +1402,94 @@ export function PharmacovigilanceDashboard() {
                         ))}
                       </ul>
                     </div>
-                    <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md bg-slate-950 p-4 text-sm leading-6 text-slate-50">
-                      {report.report}
-                    </pre>
+                    <div className="grid gap-3 lg:grid-cols-[1fr_0.85fr]">
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Safety signal overview
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-slate-700">
+                            {report.structuredReport.safetySignalOverview}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Key patterns
+                          </div>
+                          <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                            {report.structuredReport.keyPatterns.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Reviewer follow-up
+                          </div>
+                          <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                            {report.structuredReport.reviewerFollowUp.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Raw statistics anchor
+                          </div>
+                          <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <dt className="text-slate-500">Reports</dt>
+                              <dd className="font-semibold text-slate-950">
+                                {formatNumber(analysis.totalReports)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500">Top reaction</dt>
+                              <dd className="font-semibold text-slate-950">
+                                {topReaction}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500">Source</dt>
+                              <dd className="font-semibold text-slate-950">
+                                {analysis.source.name}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500">Mode</dt>
+                              <dd className="font-semibold text-slate-950">
+                                {report.mode}
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Limitations
+                          </div>
+                          <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                            {report.structuredReport.limitations.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <details className="rounded-md border border-slate-200 bg-white">
+                      <summary className="cursor-pointer px-3 py-2 text-sm font-semibold text-slate-700">
+                        Markdown preview
+                      </summary>
+                      <pre className="max-h-80 overflow-auto whitespace-pre-wrap border-t border-slate-200 bg-slate-950 p-4 text-sm leading-6 text-slate-50">
+                        {report.report}
+                      </pre>
+                    </details>
                   </div>
                 ) : (
                   <div className="flex min-h-72 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">

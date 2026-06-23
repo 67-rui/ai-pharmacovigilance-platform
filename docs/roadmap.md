@@ -75,10 +75,10 @@ Goal: Turn the AI summary into a more trustworthy reviewer artifact.
 Priority backlog:
 
 - Done: Add structured report sections: Signal Overview, Key Patterns, Reviewer Follow-up, Limitations.
-- P0: Add JSON schema validation for report inputs and outputs.
+- Done: Add JSON schema validation for report inputs and outputs.
 - Done: Add prompt versioning in `docs/prompts/`.
 - Done: Add report quality checklist: no causal claims, no incidence claims, mentions FAERS limitations, includes reviewer next steps.
-- P1: Add side-by-side raw statistics and AI narrative.
+- Done: Add side-by-side raw statistics and AI narrative.
 - P2: Add report tone modes: pharmacist review, regulatory briefing, portfolio summary.
 
 Acceptance criteria:
@@ -211,7 +211,7 @@ Each meaningful feature should include:
 
 ## Next Top 5 Actions
 
-1. Add JSON schema validation for report responses.
+1. Done: Add JSON schema validation for report responses.
 2. Done: Add drug-vs-drug comparison for user-selected products.
 3. Done: Add CSV export for chart data and signal tables.
 4. Add README walkthrough with screenshots.
