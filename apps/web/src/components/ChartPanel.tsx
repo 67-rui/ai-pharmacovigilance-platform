@@ -8,7 +8,7 @@ type ChartPanelProps = {
 
 export function ChartPanel({ title, eyebrow, children }: ChartPanelProps) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-4 flex min-h-10 items-start justify-between gap-3">
         <div>
           {eyebrow ? (
@@ -19,7 +19,7 @@ export function ChartPanel({ title, eyebrow, children }: ChartPanelProps) {
           <h2 className="text-base font-semibold text-slate-950">{title}</h2>
         </div>
       </div>
-      <div className="h-72">{children}</div>
+      <div className="h-72 min-w-0">{children}</div>
     </section>
   );
 }

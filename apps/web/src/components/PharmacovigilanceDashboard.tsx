@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useMemo, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Activity,
   AlertTriangle,
@@ -21,7 +28,6 @@ import {
   Cell,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -222,6 +228,51 @@ function LoadingActionIcon({
   );
 }
 
+function MeasuredChartFrame({
+  children,
+}: {
+  children: (size: { width: number; height: number }) => ReactNode;
+}) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const element = frameRef.current;
+    if (!element) return;
+
+    const updateSize = () => {
+      const rect = element.getBoundingClientRect();
+      const nextSize = {
+        width: Math.floor(rect.width),
+        height: Math.floor(rect.height),
+      };
+
+      if (nextSize.width <= 0 || nextSize.height <= 0) {
+        setSize(null);
+        return;
+      }
+
+      setSize((current) =>
+        current?.width === nextSize.width && current.height === nextSize.height
+          ? current
+          : nextSize,
+      );
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={frameRef} className="h-full w-full min-w-0">
+      {size ? children(size) : null}
+    </div>
+  );
+}
+
 function HorizontalBars({
   data,
   color = "#0f766e",
@@ -232,26 +283,30 @@ function HorizontalBars({
   if (!data.length) return <EmptyChart />;
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 4, right: 20, bottom: 4, left: 118 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-        <XAxis type="number" tickLine={false} axisLine={false} />
-        <YAxis
-          type="category"
-          dataKey="label"
-          width={110}
-          tickLine={false}
-          axisLine={false}
-          tick={{ fontSize: 12 }}
-        />
-        <Tooltip />
-        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
+    <MeasuredChartFrame>
+      {({ width, height }) => (
+        <BarChart
+          width={width}
+          height={height}
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 20, bottom: 4, left: 118 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" tickLine={false} axisLine={false} />
+          <YAxis
+            type="category"
+            dataKey="label"
+            width={110}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 12 }}
+          />
+          <Tooltip />
+          <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
+        </BarChart>
+      )}
+    </MeasuredChartFrame>
   );
 }
 
@@ -259,26 +314,28 @@ function DonutChart({ data }: { data: ChartDatum[] }) {
   if (!data.length) return <EmptyChart />;
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="label"
-          innerRadius={62}
-          outerRadius={96}
-          paddingAngle={2}
-        >
-          {data.map((item, index) => (
-            <Cell
-              key={item.label}
-              fill={pieColors[index % pieColors.length]}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
+    <MeasuredChartFrame>
+      {({ width, height }) => (
+        <PieChart width={width} height={height}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="label"
+            innerRadius={62}
+            outerRadius={96}
+            paddingAngle={2}
+          >
+            {data.map((item, index) => (
+              <Cell
+                key={item.label}
+                fill={pieColors[index % pieColors.length]}
+              />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      )}
+    </MeasuredChartFrame>
   );
 }
 
@@ -286,27 +343,34 @@ function TrendChart({ data }: { data: ChartDatum[] }) {
   if (!data.length) return <EmptyChart />;
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={data} margin={{ top: 8, right: 18, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} />
-        <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke="#2563eb"
-          fill="url(#trendFill)"
-          strokeWidth={2}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <MeasuredChartFrame>
+      {({ width, height }) => (
+        <AreaChart
+          width={width}
+          height={height}
+          data={data}
+          margin={{ top: 8, right: 18, left: 0, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} />
+          <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
+          <Tooltip />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="#2563eb"
+            fill="url(#trendFill)"
+            strokeWidth={2}
+          />
+        </AreaChart>
+      )}
+    </MeasuredChartFrame>
   );
 }
 
