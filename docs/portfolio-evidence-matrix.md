@@ -31,7 +31,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Medication intake | `apps/web/src/lib/medicationIntake.ts`, `apps/web/src/lib/ocrQuality.ts`, `apps/web/src/app/api/intake/medication/route.ts` |
 | Structured reports | `apps/web/src/lib/report.ts`, `apps/web/src/app/api/report/route.ts`, `docs/prompts/faers-safety-report-v2.md` |
 | Human-in-loop history | `apps/web/src/lib/intakeEvidenceHistory.ts`, `apps/web/src/lib/analysisHistory.ts`, `apps/web/src/lib/reportHistory.ts` |
-| Deployment safety | `vercel.json`, `render.yaml`, `scripts/check-deployment-readiness.mjs`, `scripts/audit-portfolio-goal.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
+| Deployment safety | `vercel.json`, `render.yaml`, `/api/health`, `scripts/check-deployment-readiness.mjs`, `scripts/audit-portfolio-goal.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
 
 ## Interview Demo Script
 

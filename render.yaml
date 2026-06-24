@@ -6,7 +6,7 @@ services:
     autoDeploy: true
     buildCommand: npm install && npm run build
     startCommand: npm run start
-    healthCheckPath: /
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 20

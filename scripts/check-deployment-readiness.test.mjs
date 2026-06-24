@@ -205,7 +205,7 @@ describe("deployment readiness checks", () => {
       "    runtime: node",
       "    buildCommand: npm install && npm run build",
       "    startCommand: npm run start",
-      "    healthCheckPath: /",
+      "    healthCheckPath: /api/health",
       "    envVars:",
       "      - key: OPENFDA_API_KEY",
       "        sync: false",
@@ -220,7 +220,7 @@ describe("deployment readiness checks", () => {
       "render.yaml must define a Node web service.",
       "render.yaml must build with npm install && npm run build.",
       "render.yaml must start with npm run start.",
-      "render.yaml must expose / as the health check path.",
+      "render.yaml must expose /api/health as the health check path.",
       "render.yaml must document OPENFDA_API_KEY, OPENAI_API_KEY, and DEEPSEEK_API_KEY as environment variables.",
     ]);
   });

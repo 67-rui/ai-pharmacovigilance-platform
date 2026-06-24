@@ -42,6 +42,7 @@ const REQUIRED_FILES = [
   "scripts/smoke-test-local-api.mjs",
   "scripts/smoke-test-live-demo.mjs",
   "scripts/audit-portfolio-goal.mjs",
+  "apps/web/src/app/api/health/route.ts",
 ];
 const SECRET_PATTERNS = [
   {
@@ -158,8 +159,8 @@ export function checkRenderBlueprint(text) {
     findings.push("render.yaml must start with npm run start.");
   }
 
-  if (!text.includes("healthCheckPath: /")) {
-    findings.push("render.yaml must expose / as the health check path.");
+  if (!text.includes("healthCheckPath: /api/health")) {
+    findings.push("render.yaml must expose /api/health as the health check path.");
   }
 
   if (

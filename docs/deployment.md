@@ -148,7 +148,7 @@ Quick API checks:
 npm run smoke:api -- http://localhost:3001
 ```
 
-This checks the homepage plus the FAERS, signal, comparison, structured report, and medication-intake API routes.
+This checks the homepage, `/api/health`, and the FAERS, signal, comparison, structured report, and medication-intake API routes.
 
 If another project already uses port `3000`, keep this project on `3001` to avoid confusing 404 responses from the wrong Next.js app.
 
@@ -205,7 +205,7 @@ The deployment readiness check verifies:
 - Required npm scripts exist.
 - `apps/web/.env.example` keeps provider API keys blank while documenting public-demo rate-limit variables.
 - The portfolio-goal audit can prove the local repository still contains evidence for the drug-name, medication-label, FAERS, signal, comparison, AI report, schema validation, human confirmation, safety-boundary, and demo-verification requirements.
-- The Render Blueprint runs the built-in Next.js API app without committing provider secrets.
+- The Render Blueprint runs the built-in Next.js API app without committing provider secrets and uses `/api/health` for platform health checks.
 - Obvious OpenAI/DeepSeek-style API keys and GitHub tokens are not present in common public-facing repository files.
 
 A full CI gate should also run unit tests, Playwright smoke tests, lint, build, and `npm audit --audit-level=moderate`.

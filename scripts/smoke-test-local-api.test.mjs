@@ -36,6 +36,7 @@ describe("local API smoke-test helpers", () => {
 
     expect(urls).toEqual({
       homeUrl: "http://localhost:3001/",
+      healthUrl: "http://localhost:3001/api/health",
       faersUrl:
         "http://localhost:3001/api/faers?drug=metformin+hydrochloride",
       signalUrl:
@@ -54,6 +55,23 @@ describe("local API smoke-test helpers", () => {
 
       if (String(url).endsWith("/")) {
         return { ok: true, status: 200 };
+      }
+
+      if (String(url).includes("/api/health")) {
+        return jsonResponse({
+          status: "ok",
+          providers: {
+            openfda: "public",
+            report: "template",
+            medicationIntake: "fallback",
+          },
+          apiRoutes: ["/api/faers", "/api/report", "/api/intake/medication"],
+          safetyBoundaries: [
+            "schema validation",
+            "human confirmation before label-derived FAERS launch",
+            "FAERS cannot establish incidence or causality",
+          ],
+        });
       }
 
       if (String(url).includes("/api/faers")) {
@@ -144,6 +162,7 @@ describe("local API smoke-test helpers", () => {
 
     expect(seenUrls).toEqual([
       "HEAD http://localhost:3001/",
+      "GET http://localhost:3001/api/health",
       "GET http://localhost:3001/api/faers?drug=metformin",
       "GET http://localhost:3001/api/signal?drug=metformin&event=NAUSEA",
       "GET http://localhost:3001/api/compare?primary=metformin&comparator=warfarin&event=NAUSEA",
@@ -155,6 +174,7 @@ describe("local API smoke-test helpers", () => {
       drug: "metformin",
       event: "NAUSEA",
       comparator: "warfarin",
+      healthStatus: "ok",
       totalReports: 1234,
       signalLabel: "signal-watch",
       comparisonRows: 2,
@@ -176,10 +196,46 @@ describe("local API smoke-test helpers", () => {
             return { ok: true, status: 200 };
           }
 
+          if (String(url).includes("/api/health")) {
+            return jsonResponse({
+              status: "ok",
+              providers: {
+                openfda: "public",
+                report: "template",
+                medicationIntake: "fallback",
+              },
+              apiRoutes: ["/api/faers", "/api/report", "/api/intake/medication"],
+              safetyBoundaries: [
+                "schema validation",
+                "human confirmation before label-derived FAERS launch",
+                "FAERS cannot establish incidence or causality",
+              ],
+            });
+          }
+
           return jsonResponse({ drug: "metformin", totalReports: 0 });
         },
         log: () => {},
       }),
     ).rejects.toThrow("FAERS payload must include a positive totalReports");
+  });
+
+  test("rejects health payloads that omit responsible-AI safety boundaries", async () => {
+    await expect(
+      runApiSmoke({
+        baseUrl: "http://localhost:3001",
+        drug: "metformin",
+        event: "NAUSEA",
+        comparator: "warfarin",
+        fetchImpl: async (url) => {
+          if (String(url).endsWith("/")) {
+            return { ok: true, status: 200 };
+          }
+
+          return jsonResponse({ status: "ok", safetyBoundaries: [] });
+        },
+        log: () => {},
+      }),
+    ).rejects.toThrow("Health payload must include schema validation boundary");
   });
 });

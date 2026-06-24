@@ -61,6 +61,7 @@ export function buildApiSmokeUrls(baseUrl, drug, event, comparator = DEFAULT_COM
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
 
   const homeUrl = new URL("/", normalizedBaseUrl);
+  const healthUrl = new URL("/api/health", normalizedBaseUrl);
   const faersUrl = new URL("/api/faers", normalizedBaseUrl);
   faersUrl.searchParams.set("drug", drug);
 
@@ -78,6 +79,7 @@ export function buildApiSmokeUrls(baseUrl, drug, event, comparator = DEFAULT_COM
 
   return {
     homeUrl: homeUrl.toString(),
+    healthUrl: healthUrl.toString(),
     faersUrl: faersUrl.toString(),
     signalUrl: signalUrl.toString(),
     compareUrl: compareUrl.toString(),
@@ -134,6 +136,36 @@ function assertIntakePayload(payload) {
   }
 }
 
+function assertHealthPayload(payload) {
+  if (payload?.status !== "ok") {
+    throw new Error("Health payload must report status ok.");
+  }
+
+  if (!Array.isArray(payload?.safetyBoundaries)) {
+    throw new Error("Health payload must include safetyBoundaries.");
+  }
+
+  if (!payload.safetyBoundaries.includes("schema validation")) {
+    throw new Error("Health payload must include schema validation boundary.");
+  }
+
+  if (
+    !payload.safetyBoundaries.includes(
+      "human confirmation before label-derived FAERS launch",
+    )
+  ) {
+    throw new Error("Health payload must include human confirmation boundary.");
+  }
+
+  if (
+    !payload.safetyBoundaries.includes(
+      "FAERS cannot establish incidence or causality",
+    )
+  ) {
+    throw new Error("Health payload must include FAERS limitation boundary.");
+  }
+}
+
 export async function runApiSmoke({
   baseUrl,
   drug,
@@ -150,6 +182,12 @@ export async function runApiSmoke({
 
   log(`Checking homepage: ${urls.homeUrl}`);
   await assertOk(await fetchImpl(urls.homeUrl, { method: "HEAD" }), "Homepage");
+
+  log(`Checking health API: ${urls.healthUrl}`);
+  const healthResponse = await fetchImpl(urls.healthUrl);
+  await assertOk(healthResponse, "Health API");
+  const healthPayload = await healthResponse.json();
+  assertHealthPayload(healthPayload);
 
   log(`Checking FAERS API: ${urls.faersUrl}`);
   const faersResponse = await fetchImpl(urls.faersUrl);
@@ -200,6 +238,7 @@ export async function runApiSmoke({
     drug,
     event,
     comparator,
+    healthStatus: healthPayload.status,
     totalReports: faersPayload.totalReports,
     signalLabel: signalPayload.interpretation.label,
     comparisonRows: comparisonPayload.rows.length,
