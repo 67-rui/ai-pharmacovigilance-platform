@@ -167,7 +167,7 @@ The result is schema-validated before rendering and includes:
 - Human-confirmation requirement
 - Extraction limitations
 
-Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
+The UI exposes provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
 
 The intake prompt is versioned in [docs/prompts/medication-label-intake-v1.md](docs/prompts/medication-label-intake-v1.md).
 

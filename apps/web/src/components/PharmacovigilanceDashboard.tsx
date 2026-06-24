@@ -1056,9 +1056,22 @@ function MedicationIntakePanel({
                 <span className="rounded-md bg-blue-100 px-2 py-1 text-blue-800">
                   {intakeResult.confidence} confidence
                 </span>
+                <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-700">
+                  Schema validated
+                </span>
+                {intakeResult.promptVersion ? (
+                  <span className="rounded-md bg-emerald-100 px-2 py-1 text-emerald-800">
+                    {intakeResult.promptVersion}
+                  </span>
+                ) : null}
                 <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-800">
                   Human confirmation
                 </span>
+                {intakeResult.warning ? (
+                  <span className="rounded-md bg-rose-100 px-2 py-1 text-rose-800">
+                    Fallback warning
+                  </span>
+                ) : null}
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -1106,6 +1119,28 @@ function MedicationIntakePanel({
                   <div className="mt-2 text-sm leading-6 text-slate-700">
                     {intakeResult.riskKeywords.join(", ") || "Not detected"}
                   </div>
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                {intakeResult.warning ? (
+                  <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                      Provider warning
+                    </div>
+                    <div className="mt-1">{intakeResult.warning}</div>
+                  </div>
+                ) : null}
+
+                <div className="rounded-md border border-slate-200 bg-white p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Extraction limitations
+                  </div>
+                  <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                    {intakeResult.limitations.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
 

@@ -105,6 +105,7 @@ Priority backlog:
 - Done: Add deterministic local fallback when `DEEPSEEK_API_KEY` is missing or the provider fails.
 - Done: Add zod schema validation for extracted medication candidates, active ingredients, strengths, safety keywords, and limitations.
 - Done: Require human confirmation before routing extracted candidates into FAERS analysis.
+- Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
 - P1: Add browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
 - P1: Add saved intake evidence records with image metadata and confirmed drug name.
 

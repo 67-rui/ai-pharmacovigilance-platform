@@ -63,6 +63,7 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 
 - Model outputs are parsed as JSON and validated with zod schemas.
 - Medication intake cannot directly trigger analysis without human confirmation.
+- The intake UI exposes provider mode, prompt version, schema validation status, fallback warnings, and extraction limitations.
 - FAERS reports are framed as signal-triage evidence, not incidence or causal risk.
 - Reports include guardrails against causal claims, incidence claims, and medical advice.
 - Provider failures fall back to deterministic local output rather than breaking the workflow.
@@ -107,4 +108,3 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 - FAERS data cannot establish incidence, prevalence, true risk, or causality.
 - The next high-value improvement is browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
 - Additional workflow completeness could come from saved intake evidence, saved reports, and PDF export.
-

@@ -61,6 +61,8 @@ export type MedicationIntakeResult = {
   confidence: "low" | "medium" | "high";
   needsHumanConfirmation: boolean;
   extractedText: string;
+  promptVersion?: string;
+  warning?: string;
   evidence: {
     fileName?: string;
     sourceType: "ocr-text" | "image-metadata";
