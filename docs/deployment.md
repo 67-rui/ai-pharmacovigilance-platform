@@ -43,12 +43,32 @@ Browser OCR, Enhanced OCR preprocessing, and OCR quality scoring run locally in 
 
 ## Vercel Deployment
 
-1. Import the GitHub repository into Vercel.
+The repository includes `vercel.json` so the important project settings travel with the code:
+
+- Framework: `nextjs`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Dev command: `npm run dev`
+- Node runtime: `>=20` from `package.json`
+
+GitHub import path:
+
+1. Import `67-rui/ai-pharmacovigilance-platform` into Vercel.
 2. Set the project root to the repository root.
-3. Use the default npm install command.
-4. Use `npm run build` as the build command.
-5. Configure optional environment variables in Vercel Project Settings.
-6. Deploy from `main`.
+3. Confirm Vercel picks up `vercel.json`.
+4. Configure optional environment variables in Vercel Project Settings.
+5. Deploy from `main`.
+
+CLI path after logging in:
+
+```bash
+npx vercel login
+npx vercel link
+npx vercel env add OPENFDA_API_KEY production
+npx vercel --prod
+```
+
+`OPENFDA_API_KEY` is optional but recommended for a public demo. Leave `OPENAI_API_KEY` and `DEEPSEEK_API_KEY` unset if you want the deterministic fallback modes to stay visible.
 
 The app uses API routes for `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication`, so static-only hosting is not sufficient.
 
