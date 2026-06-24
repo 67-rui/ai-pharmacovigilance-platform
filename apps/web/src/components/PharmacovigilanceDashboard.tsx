@@ -41,6 +41,12 @@ import { ChartPanel } from "./ChartPanel";
 import { EmptyChart } from "./EmptyChart";
 import { MetricCard } from "./MetricCard";
 import {
+  REPORT_HISTORY_STORAGE_KEY,
+  addReportHistoryEntry,
+  buildReportHistoryEntry,
+  type ReportHistoryEntry,
+} from "@/lib/reportHistory";
+import {
   buildShareableAnalysisSearch,
   parseShareableAnalysisParams,
 } from "@/lib/shareableAnalysis";
@@ -111,6 +117,28 @@ function downloadCsv(
 
 function slug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function formatSavedAt(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function readReportHistory() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const value = window.localStorage.getItem(REPORT_HISTORY_STORAGE_KEY);
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as ReportHistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 function analysisCsvRows(analysis: FaersAnalysis) {
@@ -1218,6 +1246,7 @@ export function PharmacovigilanceDashboard() {
   const [ranking, setRanking] = useState<SignalRanking | null>(null);
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
+  const [reportHistory, setReportHistory] = useState<ReportHistoryEntry[]>([]);
   const [intakeText, setIntakeText] = useState("");
   const [intakeImageFile, setIntakeImageFile] = useState<File | null>(null);
   const [intakeFileName, setIntakeFileName] = useState<string | undefined>();
@@ -1247,6 +1276,12 @@ export function PharmacovigilanceDashboard() {
     () => (analysis ? firstValue(analysis.topReactions) : "Not loaded"),
     [analysis],
   );
+
+  useEffect(() => {
+    window.setTimeout(() => {
+      setReportHistory(readReportHistory());
+    }, 0);
+  }, []);
 
   useEffect(() => {
     const sharedAnalysis = parseShareableAnalysisParams(window.location.search);
@@ -1320,6 +1355,26 @@ export function PharmacovigilanceDashboard() {
     if (window.location.search === nextSearch) return;
 
     window.history.replaceState(null, "", `${window.location.pathname}${nextSearch}`);
+  }
+
+  function saveReportHistory(
+    nextAnalysis: FaersAnalysis,
+    nextReport: ReportResponse,
+    options?: { runWorkflow?: boolean },
+  ) {
+    const entry = buildReportHistoryEntry(nextAnalysis, nextReport, {
+      savedAt: new Date().toISOString(),
+      workflowUrl: buildShareableAnalysisSearch(nextAnalysis.drug, options),
+    });
+
+    setReportHistory((current) => {
+      const nextEntries = addReportHistoryEntry(current, entry);
+      window.localStorage.setItem(
+        REPORT_HISTORY_STORAGE_KEY,
+        JSON.stringify(nextEntries),
+      );
+      return nextEntries;
+    });
   }
 
   async function runAnalysis(
@@ -1402,6 +1457,7 @@ export function PharmacovigilanceDashboard() {
       if (requestId !== reportRequestId.current) return;
 
       setReport(payload);
+      saveReportHistory(analysis, payload);
     } catch (error) {
       if (requestId !== reportRequestId.current) return;
       setError(error instanceof Error ? error.message : "Unexpected error.");
@@ -1536,6 +1592,7 @@ export function PharmacovigilanceDashboard() {
         throw new Error(reportPayload.error ?? "Unable to generate report.");
       }
       setReport(reportPayload);
+      saveReportHistory(nextAnalysis, reportPayload, { runWorkflow: true });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
@@ -1752,6 +1809,63 @@ export function PharmacovigilanceDashboard() {
             <AlertTriangle size={18} className="mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
+        ) : null}
+
+        {reportHistory.length ? (
+          <section className="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                  Saved reviewer history
+                </div>
+                <h2 className="text-base font-semibold text-slate-950">
+                  Recent AI safety reports
+                </h2>
+              </div>
+              <div className="text-xs leading-5 text-slate-500">
+                Stored locally in this browser
+              </div>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {reportHistory.slice(0, 4).map((item) => (
+                <article
+                  key={item.id}
+                  className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-950">
+                        {item.drug}
+                      </div>
+                      <div className="mt-1 text-xs leading-5 text-slate-500">
+                        {formatSavedAt(item.savedAt)} · {item.mode} · {item.promptVersion}
+                      </div>
+                    </div>
+                    <a
+                      href={item.workflowUrl}
+                      className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+                    >
+                      <ExternalLink size={13} />
+                      Open
+                    </a>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold text-slate-700">Top reaction:</span>{" "}
+                      {item.topReaction}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Reports:</span>{" "}
+                      {formatNumber(item.totalReports)}
+                    </div>
+                  </div>
+                  <div className="mt-2 line-clamp-2 text-sm leading-6 text-slate-700">
+                    {item.reportTitle}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
         ) : null}
 
         <MedicationIntakePanel
