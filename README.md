@@ -17,7 +17,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Filter signal rankings by interpretation, minimum report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
-- Run browser-side OCR on medication label images, then extract structured medication intake fields with DeepSeek API fallback support.
+- Run Standard/Enhanced browser OCR on medication label images with quality scoring, then extract structured medication intake fields with DeepSeek API fallback support.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown/PDF reports.
@@ -183,7 +183,12 @@ This is a reporting-share comparison, not a clinical risk comparison.
 
 ### Medication Image Intake
 
-The intake panel accepts an evidence image, runs browser-side OCR with Tesseract.js, and keeps the OCR text editable before extraction. The API supports two modes:
+The intake panel accepts an evidence image, runs browser-side OCR with Tesseract.js, and keeps the OCR text editable before extraction. OCR supports two browser-side modes:
+
+- `Standard`: direct OCR for clear label photos.
+- `Enhanced`: client-side grayscale, contrast, and upscaling preprocessing before OCR for low-quality label photos.
+
+The medication-intake API supports two extraction modes:
 
 - `deepseek`: optional DeepSeek chat completions extraction when `DEEPSEEK_API_KEY` is available.
 - `fallback`: deterministic local extraction when no DeepSeek key is configured or the provider call fails.
@@ -196,11 +201,12 @@ The result is schema-validated before rendering and includes:
 - Dosage form
 - Safety-relevant label keywords
 - Confidence label
+- OCR quality score, detected signals, and warnings
 - Human-confirmation requirement
 - Extraction limitations
 - Local confirmed-evidence history with image metadata, provider mode, confidence, and confirmed drug name
 
-The UI exposes browser OCR progress, provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard and saved to local confirmed-evidence history. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
+The UI exposes browser OCR mode, progress, quality score, provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard and saved to local confirmed-evidence history. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
 
 The intake prompt is versioned in [docs/prompts/medication-label-intake-v1.md](docs/prompts/medication-label-intake-v1.md).
 
@@ -257,6 +263,7 @@ Quality guardrails:
 - Vitest
 - openFDA Drug Adverse Event API
 - Tesseract.js browser-side OCR
+- Browser-side enhanced OCR preprocessing and quality scoring
 - DeepSeek chat completions-compatible medication intake endpoint
 - OpenAI Responses API-compatible report endpoint
 

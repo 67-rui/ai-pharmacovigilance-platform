@@ -113,7 +113,7 @@ Priority backlog:
 - Done: Trigger the full reviewer workflow after confirming a medication-label candidate.
 - Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
 - Done: Add saved intake evidence records with image metadata and confirmed drug name.
-- P1: Add a dedicated OCR provider option for low-quality images ([#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2)).
+- Done: Add a dedicated Enhanced OCR option and quality scoring for low-quality images ([#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2)).
 
 Acceptance criteria:
 
@@ -260,7 +260,7 @@ Each meaningful feature should include:
 ## Following Actions
 
 1. Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
-2. Add a dedicated OCR provider option for low-quality images ([#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2)).
-3. Add multi-drug fixtures and error-path tests ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+2. Add multi-drug fixtures and error-path tests ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+3. Add analysis history and cache invalidation strategy ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 4. Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.

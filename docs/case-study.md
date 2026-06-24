@@ -71,9 +71,9 @@ The dashboard includes a `Run full workflow` action after FAERS analysis. It sel
 ## Responsible AI Controls
 
 - Model outputs are parsed as JSON and validated with zod schemas.
-- OCR text is editable before any model extraction step.
+- OCR text is editable before any model extraction step, with Standard and Enhanced OCR modes plus quality warnings.
 - Medication intake cannot trigger analysis or report generation without human confirmation.
-- The intake UI exposes provider mode, prompt version, schema validation status, fallback warnings, and extraction limitations.
+- The intake UI exposes OCR mode, OCR quality, provider mode, prompt version, schema validation status, fallback warnings, and extraction limitations.
 - FAERS reports are framed as signal-triage evidence, not incidence or causal risk.
 - Reports include guardrails against causal claims, incidence claims, and medical advice.
 - Provider failures fall back to deterministic local output rather than breaking the workflow.
@@ -118,7 +118,7 @@ See [resume-interview-guide.md](resume-interview-guide.md) for role-specific res
 
 ## Limitations And Next Steps
 
-- Browser OCR quality depends on image clarity, orientation, and label typography.
+- Browser OCR quality still depends on image clarity, orientation, and label typography, although Enhanced OCR preprocessing and quality scoring reduce silent failures.
 - FAERS data cannot establish incidence, prevalence, true risk, or causality.
-- A dedicated OCR provider could improve recognition quality for low-resolution or complex labels.
+- A future external vision provider could improve recognition quality for very low-resolution or complex labels.
 - Additional workflow completeness could come from a public demo, authenticated review history, and richer export auditing.

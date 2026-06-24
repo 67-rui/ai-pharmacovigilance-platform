@@ -47,6 +47,10 @@ import {
   buildIntakeEvidenceHistoryEntry,
   type IntakeEvidenceHistoryEntry,
 } from "@/lib/intakeEvidenceHistory";
+import {
+  assessOcrTextQuality,
+  type OcrQualityAssessment,
+} from "@/lib/ocrQuality";
 import { buildPdfReportSections } from "@/lib/pdfReport";
 import {
   REPORT_HISTORY_STORAGE_KEY,
@@ -77,6 +81,23 @@ const examples = ["metformin", "atorvastatin", "ibuprofen", "warfarin"];
 const reportToneEntries = Object.entries(REPORT_TONE_OPTIONS) as Array<
   [ReportTone, (typeof REPORT_TONE_OPTIONS)[ReportTone]]
 >;
+type OcrMode = "standard" | "enhanced";
+const ocrModeOptions: Array<{
+  value: OcrMode;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "standard",
+    label: "Standard",
+    description: "Direct browser OCR for clear labels.",
+  },
+  {
+    value: "enhanced",
+    label: "Enhanced",
+    description: "Preprocesses low-quality images before OCR.",
+  },
+];
 
 function formatNumber(value: number) {
   return value.toLocaleString();
@@ -96,6 +117,56 @@ function downloadBlob(filename: string, blob: Blob) {
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function loadImageFromFile(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    const url = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Unable to load the selected image for OCR."));
+    };
+    image.src = url;
+  });
+}
+
+async function prepareEnhancedOcrImage(file: File) {
+  const image = await loadImageFromFile(file);
+  const scale = Math.min(2, 2600 / image.naturalWidth, 2600 / image.naturalHeight);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Unable to prepare enhanced OCR image.");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.filter = "grayscale(1) contrast(1.45) brightness(1.08)";
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  return new Promise<File>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Unable to create enhanced OCR image."));
+        return;
+      }
+
+      resolve(new File([blob], file.name.replace(/\.[^.]+$/, "-enhanced.png"), {
+        type: "image/png",
+      }));
+    }, "image/png");
+  });
 }
 
 function toMarkdownFile(drug: string, report: string) {
@@ -1184,8 +1255,11 @@ type MedicationIntakePanelProps = {
   isOcrLoading: boolean;
   ocrProgress: number | null;
   ocrError: string | null;
+  ocrMode: OcrMode;
+  ocrQuality: OcrQualityAssessment | null;
   onImageChange: (file: File | null) => void;
   onTextChange: (value: string) => void;
+  onOcrModeChange: (mode: OcrMode) => void;
   onRunOcr: () => void;
   onRunIntake: () => void;
   onConfirmDrug: (drug: string) => void;
@@ -1199,13 +1273,22 @@ function MedicationIntakePanel({
   isOcrLoading,
   ocrProgress,
   ocrError,
+  ocrMode,
+  ocrQuality,
   onImageChange,
   onTextChange,
+  onOcrModeChange,
   onRunOcr,
   onRunIntake,
   onConfirmDrug,
 }: MedicationIntakePanelProps) {
   const primaryDrug = intakeResult?.drugCandidates[0];
+  const qualityBadgeClass =
+    ocrQuality?.quality === "good"
+      ? "bg-emerald-100 text-emerald-800"
+      : ocrQuality?.quality === "fair"
+        ? "bg-amber-100 text-amber-800"
+        : "bg-rose-100 text-rose-800";
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -1244,6 +1327,24 @@ function MedicationIntakePanel({
                 className="mt-2 block w-full text-sm text-slate-700 file:mr-3 file:h-9 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:text-sm file:font-semibold file:text-white"
               />
             </label>
+            <div className="inline-flex h-10 overflow-hidden rounded-md border border-slate-300 bg-white text-sm font-semibold">
+              {ocrModeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  title={option.description}
+                  onClick={() => onOcrModeChange(option.value)}
+                  className={`px-3 transition ${
+                    ocrMode === option.value
+                      ? "bg-emerald-700 text-white"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                  aria-pressed={ocrMode === option.value}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               onClick={onRunOcr}
@@ -1255,10 +1356,10 @@ function MedicationIntakePanel({
             </button>
           </div>
 
-          {isOcrLoading || ocrProgress !== null || ocrError ? (
+          {isOcrLoading || ocrProgress !== null || ocrError || ocrQuality ? (
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
               <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <span>Browser OCR</span>
+                <span>Browser OCR · {ocrMode}</span>
                 <span>{ocrProgress !== null ? `${Math.round(ocrProgress)}%` : "Ready"}</span>
               </div>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
@@ -1274,6 +1375,44 @@ function MedicationIntakePanel({
                   OCR runs locally in the browser and fills the label text field for review.
                 </div>
               )}
+              {ocrQuality ? (
+                <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      OCR quality
+                    </div>
+                    <div className={`rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wide ${qualityBadgeClass}`}>
+                      {ocrQuality.quality} · {ocrQuality.score}/100
+                    </div>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className="h-full rounded-full bg-blue-700 transition-all"
+                      style={{ width: `${ocrQuality.score}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {ocrQuality.signals.map((signal) => (
+                      <span
+                        key={signal}
+                        className="rounded-md bg-slate-100 px-2 py-1 text-slate-700"
+                      >
+                        {signal}
+                      </span>
+                    ))}
+                  </div>
+                  {ocrQuality.warnings.length ? (
+                    <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-950">
+                      {ocrQuality.warnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <div className="mt-2 text-sm leading-6 text-slate-600">
+                    {ocrQuality.recommendedNextStep}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
@@ -1443,6 +1582,8 @@ export function PharmacovigilanceDashboard() {
   const [intakeResult, setIntakeResult] = useState<MedicationIntakeResult | null>(
     null,
   );
+  const [ocrMode, setOcrMode] = useState<OcrMode>("standard");
+  const [ocrQuality, setOcrQuality] = useState<OcrQualityAssessment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [isSignalLoading, setIsSignalLoading] = useState(false);
@@ -1503,6 +1644,7 @@ export function PharmacovigilanceDashboard() {
     setIntakeImagePreviewUrl(file ? URL.createObjectURL(file) : "");
     setOcrProgress(null);
     setOcrError(null);
+    setOcrQuality(null);
   }
 
   async function runBrowserOcr() {
@@ -1515,7 +1657,11 @@ export function PharmacovigilanceDashboard() {
 
     try {
       const { recognize } = await import("tesseract.js");
-      const result = await recognize(intakeImageFile, "eng", {
+      const imageForOcr =
+        ocrMode === "enhanced"
+          ? await prepareEnhancedOcrImage(intakeImageFile)
+          : intakeImageFile;
+      const result = await recognize(imageForOcr, "eng", {
         logger: (message) => {
           if (message.status === "recognizing text") {
             setOcrProgress(Math.round(message.progress * 100));
@@ -1531,6 +1677,7 @@ export function PharmacovigilanceDashboard() {
       intakeRequestId.current += 1;
       setIntakeResult(null);
       setIntakeText(text);
+      setOcrQuality(assessOcrTextQuality(text));
       setOcrProgress(100);
     } catch (error) {
       setOcrError(error instanceof Error ? error.message : "Unable to run OCR.");
@@ -2091,12 +2238,16 @@ export function PharmacovigilanceDashboard() {
           isOcrLoading={isOcrLoading}
           ocrProgress={ocrProgress}
           ocrError={ocrError}
+          ocrMode={ocrMode}
+          ocrQuality={ocrQuality}
           onImageChange={handleIntakeImageChange}
           onTextChange={(value) => {
             intakeRequestId.current += 1;
             setIntakeResult(null);
             setIntakeText(value);
+            setOcrQuality(value.trim() ? assessOcrTextQuality(value) : null);
           }}
+          onOcrModeChange={setOcrMode}
           onRunOcr={() => void runBrowserOcr()}
           onRunIntake={() => void runMedicationIntake()}
           onConfirmDrug={confirmIntakeDrug}

@@ -10,7 +10,7 @@ Built an AI pharmacovigilance workspace that turns a drug name or medication-lab
 
 ### AI / ML Engineering
 
-- Built an AI-assisted pharmacovigilance workflow that combines OCR medication-label intake, optional DeepSeek extraction, openFDA FAERS querying, PRR/ROR signal metrics, and schema-validated OpenAI/template safety reports.
+- Built an AI-assisted pharmacovigilance workflow that combines enhanced OCR medication-label intake, OCR quality scoring, optional DeepSeek extraction, openFDA FAERS querying, PRR/ROR signal metrics, and schema-validated OpenAI/template safety reports.
 - Designed responsible-AI guardrails for a healthcare-adjacent product, including zod schema validation, prompt versioning, fallback modes, human confirmation before analysis, and explicit FAERS no-causality/no-incidence limitations.
 - Implemented a reproducible full reviewer workflow that automatically runs FAERS analysis, signal ranking, drug-vs-drug comparison, and structured report generation from a drug name or confirmed label candidate.
 
@@ -72,7 +72,7 @@ The AI report route supports OpenAI when configured and template mode otherwise.
 ### Technical Tradeoffs
 
 - Aggregate FAERS queries keep the dashboard responsive, but they do not support patient-level causality review.
-- Browser-side OCR avoids server-side file handling, but recognition quality depends on image clarity.
+- Browser-side Standard/Enhanced OCR avoids server-side file handling, but recognition quality still depends on image clarity and requires human review before analysis.
 - Template fallback keeps the portfolio demo usable without paid AI keys, but live provider mode can produce richer narrative summaries.
 - LocalStorage history is enough for a portfolio workflow, but a production system would need authenticated persistence and audit trails.
 
