@@ -540,7 +540,10 @@ function SignalPanel({
     : "";
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section
+      data-testid="signal-analysis"
+      className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+    >
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
@@ -754,7 +757,10 @@ function SignalRankingPanel({
     : [];
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section
+      data-testid="signal-ranking"
+      className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+    >
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
@@ -940,7 +946,10 @@ function ComparisonPanel({
   onExportComparisonCsv: () => void;
 }) {
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section
+      data-testid="drug-comparison"
+      className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+    >
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
@@ -1067,7 +1076,10 @@ function ComparisonPanel({
 
 function SourceQueryPanel({ analysis }: { analysis: FaersAnalysis }) {
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section
+      data-testid="source-provenance"
+      className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+    >
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
@@ -2162,7 +2174,10 @@ export function PharmacovigilanceDashboard() {
           </section>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div
+          data-testid="dashboard-overview"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+        >
           <MetricCard
             label="Matched reports"
             value={analysis ? formatNumber(analysis.totalReports) : "-"}
@@ -2278,7 +2293,10 @@ export function PharmacovigilanceDashboard() {
                 </ul>
               </div>
 
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <div
+                data-testid="ai-report"
+                className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+              >
                 <div className="mb-4 flex min-h-10 items-center justify-between gap-3">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">

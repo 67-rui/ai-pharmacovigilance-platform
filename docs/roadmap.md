@@ -181,10 +181,10 @@ Goal: Make the project easy for recruiters and interviewers to understand in und
 
 Priority backlog:
 
-- P0: Add screenshots to README.
 - P0: Add a concise architecture diagram.
 - P0: Deploy a public demo with safe rate limits.
 - P1: Add a short demo video or GIF.
+- Done: Add refreshed README product screenshots and `npm run screenshots`.
 - Done: Add deployment-ready environment documentation in `docs/deployment.md`.
 - Done: Add browser-side PDF report export.
 - Done: Add a technical case study page in `docs/case-study.md`.
@@ -254,7 +254,7 @@ Each meaningful feature should include:
 1. Done: Add JSON schema validation for report responses.
 2. Done: Add drug-vs-drug comparison for user-selected products.
 3. Done: Add CSV export for chart data and signal tables.
-4. Add README walkthrough with screenshots.
+4. Done: Add README walkthrough with screenshots.
 5. Done: Add API route tests with mocked openFDA responses.
 
 ## Following Actions
@@ -262,5 +262,5 @@ Each meaningful feature should include:
 1. Add a dedicated OCR provider option for low-quality images.
 2. Done: Add Playwright smoke tests for dashboard loading and report generation.
 3. Deploy a public demo with safe rate limits.
-4. Add README walkthrough with fresh screenshots.
+4. Add final resume bullets and interview talking points.
 5. Done: Add a case study page for portfolio storytelling.

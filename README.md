@@ -36,9 +36,15 @@ This project turns a drug name into adverse event patterns, disproportionality s
 7. Refine the selected MedDRA preferred term or comparator drug when needed.
 8. Copy the URL to reopen the selected drug analysis, or use a `?workflow=full` link to rerun the full reviewer pass.
 9. Reopen recent saved reviewer reports from the local history panel.
-10. Export Markdown or CSV artifacts.
+10. Export Markdown, PDF, or CSV artifacts.
 
 ## Product Screens
+
+Regenerate these deterministic mocked-workflow screenshots with:
+
+```bash
+npm run screenshots
+```
 
 ### Dashboard Overview
 
@@ -81,6 +87,7 @@ flowchart LR
 
   UI --> CSV["CSV Export"]
   UI --> MD["Markdown Report Export"]
+  UI --> PDF["PDF Report Export"]
 ```
 
 ## Core Features
