@@ -84,6 +84,8 @@ import type {
 
 const pieColors = ["#0f766e", "#be123c", "#2563eb", "#64748b"];
 const examples = ["metformin", "atorvastatin", "ibuprofen", "warfarin"];
+const sampleMedicationLabelText =
+  "Metformin hydrochloride tablets 500 mg. Adverse reactions include nausea and diarrhea. Contraindications: severe renal impairment. Warnings: lactic acidosis risk, renal impairment, and drug interactions.";
 const reportToneEntries = Object.entries(REPORT_TONE_OPTIONS) as Array<
   [ReportTone, (typeof REPORT_TONE_OPTIONS)[ReportTone]]
 >;
@@ -1302,6 +1304,7 @@ type MedicationIntakePanelProps = {
   onOcrModeChange: (mode: OcrMode) => void;
   onRunOcr: () => void;
   onRunIntake: () => void;
+  onUseSampleLabel: () => void;
   onConfirmDrug: (drug: string) => void;
 };
 
@@ -1320,6 +1323,7 @@ function MedicationIntakePanel({
   onOcrModeChange,
   onRunOcr,
   onRunIntake,
+  onUseSampleLabel,
   onConfirmDrug,
 }: MedicationIntakePanelProps) {
   const primaryDrug = intakeResult?.drugCandidates[0];
@@ -1474,17 +1478,31 @@ function MedicationIntakePanel({
         </div>
 
         <div className="space-y-3">
-          <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              OCR / label text
-            </span>
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label
+                htmlFor="medication-label-text"
+                className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                OCR / label text
+              </label>
+              <button
+                type="button"
+                onClick={onUseSampleLabel}
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+              >
+                <FileText size={13} />
+                Use sample label
+              </button>
+            </div>
             <textarea
+              id="medication-label-text"
               value={intakeText}
               onChange={(event) => onTextChange(event.target.value)}
               className="mt-2 min-h-52 w-full resize-y rounded-md border border-slate-300 bg-white p-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
               placeholder="Metformin hydrochloride tablets 500 mg. Adverse reactions..."
             />
-          </label>
+          </div>
 
           {intakeResult ? (
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -1691,6 +1709,14 @@ export function PharmacovigilanceDashboard() {
     setOcrProgress(null);
     setOcrError(null);
     setOcrQuality(null);
+  }
+
+  function useSampleMedicationLabel() {
+    intakeRequestId.current += 1;
+    setIntakeResult(null);
+    setConfirmedIntakeResult(null);
+    setIntakeText(sampleMedicationLabelText);
+    setOcrQuality(assessOcrTextQuality(sampleMedicationLabelText));
   }
 
   async function runBrowserOcr() {
@@ -2381,6 +2407,7 @@ export function PharmacovigilanceDashboard() {
           onOcrModeChange={setOcrMode}
           onRunOcr={() => void runBrowserOcr()}
           onRunIntake={() => void runMedicationIntake()}
+          onUseSampleLabel={useSampleMedicationLabel}
           onConfirmDrug={confirmIntakeDrug}
         />
 

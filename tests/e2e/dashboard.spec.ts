@@ -250,11 +250,10 @@ test("requires human confirmation before label evidence launches the full workfl
 
   await page.goto("/");
 
-  await page
-    .getByLabel("OCR / label text")
-    .fill(
-      "Metformin hydrochloride tablets 500 mg. Adverse reactions include nausea and diarrhea. Contraindications: severe renal impairment.",
-    );
+  await page.getByRole("button", { name: "Use sample label" }).click();
+  await expect(page.getByLabel("OCR / label text")).toHaveValue(
+    /Metformin hydrochloride tablets 500 mg/,
+  );
   await page.getByRole("button", { name: "DeepSeek intake" }).click();
 
   await expect(page.getByText("medium confidence")).toBeVisible();

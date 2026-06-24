@@ -28,7 +28,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 ## Demo Workflow
 
 1. Enter a drug name, such as `metformin`, `warfarin`, `atorvastatin`, or `ibuprofen`.
-2. Optionally upload a medication label image, run browser OCR, and review/edit the extracted label text.
+2. Optionally upload a medication label image, run browser OCR, or click `Use sample label`, then review/edit the extracted label text.
 3. Run DeepSeek medication intake, then confirm the extracted drug candidate to launch FAERS analysis and the full reviewer workflow.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
 5. If starting from a typed drug name, click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
