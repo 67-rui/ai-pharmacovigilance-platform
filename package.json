@@ -19,6 +19,7 @@
     "demo:video": "node scripts/capture-demo-video.mjs",
     "smoke:api": "node scripts/smoke-test-local-api.mjs",
     "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+    "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
     "tunnel:local": "npx localtunnel --port 3001",
     "check:deploy": "node scripts/check-deployment-readiness.mjs"
   },

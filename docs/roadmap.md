@@ -167,6 +167,7 @@ Priority backlog:
 - Done: Add test fixtures for at least four drugs ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
 - Done: Add error handling tests for no-result drugs and rate-limit responses ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
 - Done: Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
+- Done: Add a portfolio-goal audit script that verifies evidence for drug-name entry, medication-label evidence, FAERS querying, signal analysis, comparison, structured AI reports, schema validation, human confirmation, and safety boundaries.
 
 Acceptance criteria:
 

@@ -25,6 +25,7 @@ describe("deployment readiness checks", () => {
           start: "npm --workspace apps/web run start --",
           "smoke:api": "node scripts/smoke-test-local-api.mjs",
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+          "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
           "tunnel:local": "npx localtunnel --port 3001",
         },
       }),
@@ -33,6 +34,7 @@ describe("deployment readiness checks", () => {
     const missingScripts = checkPackageScripts({ scripts: { test: "vitest run" } });
     expect(missingScripts).toContain("Missing package script: start");
     expect(missingScripts).toContain("Missing package script: smoke:api");
+    expect(missingScripts).toContain("Missing package script: audit:portfolio");
     expect(missingScripts).toContain("Missing package script: tunnel:local");
 
     const malformedStart = checkPackageScripts({
@@ -44,6 +46,7 @@ describe("deployment readiness checks", () => {
         start: "npm --workspace apps/web run start",
         "smoke:api": "node scripts/smoke-test-local-api.mjs",
         "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+        "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
         "tunnel:local": "npx localtunnel --port 3001",
       },
     });
@@ -145,6 +148,35 @@ describe("deployment readiness checks", () => {
       const findings = checkDeploymentReadiness(rootDir);
 
       expect(findings).toContain("Missing required file: render.yaml");
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test("requires the portfolio goal audit script", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "pv-goal-audit-"));
+
+    try {
+      writeFileSync(
+        join(rootDir, "package.json"),
+        JSON.stringify({
+          scripts: {
+            test: "vitest run apps/web/src scripts",
+            "test:e2e": "playwright test",
+            lint: "npm --workspace apps/web run lint",
+            build: "npm --workspace apps/web run build",
+            start: "npm --workspace apps/web run start --",
+            "smoke:api": "node scripts/smoke-test-local-api.mjs",
+            "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+            "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
+            "tunnel:local": "npx localtunnel --port 3001",
+          },
+        }),
+      );
+
+      expect(checkDeploymentReadiness(rootDir)).toContain(
+        "Missing required file: scripts/audit-portfolio-goal.mjs",
+      );
     } finally {
       rmSync(rootDir, { recursive: true, force: true });
     }

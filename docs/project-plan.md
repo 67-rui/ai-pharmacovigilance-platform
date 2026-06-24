@@ -43,6 +43,7 @@ Run these before presenting or deploying the project:
 
 ```bash
 npm run check:deploy
+npm run audit:portfolio
 npm run test
 npm run test:e2e
 npm run lint

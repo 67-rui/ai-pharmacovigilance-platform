@@ -17,7 +17,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Require human confirmation | Medication intake cannot launch FAERS analysis until a candidate is explicitly confirmed. | Verified by Playwright test for label-evidence confirmation. |
 | Show safety boundaries | README, UI copy, reports, exports, and sample report state FAERS no-causality/no-incidence limitations. | Verified in docs, sample report, report tests, and generated report quality checklist. |
 | Export reviewer artifacts | Markdown, PDF, and CSV export paths support attaching outputs to portfolio materials. | Verified by PDF report tests and e2e report export control checks. |
-| Package as portfolio proof | README screenshots, demo video, case study, sample report, resume guide, deployment guide, and this matrix. | Verified in repository docs; public live demo link still pending. |
+| Package as portfolio proof | README screenshots, demo video, case study, sample report, resume guide, deployment guide, this matrix, and `npm run audit:portfolio`. | Verified in repository docs and by the portfolio-goal audit; public live demo link still pending. |
 
 ## High-Value Files
 
@@ -31,7 +31,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Medication intake | `apps/web/src/lib/medicationIntake.ts`, `apps/web/src/lib/ocrQuality.ts`, `apps/web/src/app/api/intake/medication/route.ts` |
 | Structured reports | `apps/web/src/lib/report.ts`, `apps/web/src/app/api/report/route.ts`, `docs/prompts/faers-safety-report-v2.md` |
 | Human-in-loop history | `apps/web/src/lib/intakeEvidenceHistory.ts`, `apps/web/src/lib/analysisHistory.ts`, `apps/web/src/lib/reportHistory.ts` |
-| Deployment safety | `vercel.json`, `render.yaml`, `scripts/check-deployment-readiness.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
+| Deployment safety | `vercel.json`, `render.yaml`, `scripts/check-deployment-readiness.mjs`, `scripts/audit-portfolio-goal.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
 
 ## Interview Demo Script
 

@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
+import { auditPortfolioGoal } from "./audit-portfolio-goal.mjs";
 
 const REQUIRED_SCRIPTS = [
   "test",
@@ -12,6 +13,7 @@ const REQUIRED_SCRIPTS = [
   "start",
   "smoke:api",
   "smoke:demo",
+  "audit:portfolio",
   "tunnel:local",
 ];
 const BLANK_PROVIDER_KEYS = [
@@ -39,6 +41,7 @@ const REQUIRED_FILES = [
   "render.yaml",
   "scripts/smoke-test-local-api.mjs",
   "scripts/smoke-test-live-demo.mjs",
+  "scripts/audit-portfolio-goal.mjs",
 ];
 const SECRET_PATTERNS = [
   {
@@ -263,6 +266,10 @@ export function checkDeploymentReadiness(rootDir = process.cwd()) {
 
   if (existsSync(join(rootDir, "docs/sample-report.md"))) {
     findings.push(...checkSampleReport(readText(rootDir, "docs/sample-report.md")));
+  }
+
+  if (existsSync(join(rootDir, "scripts/audit-portfolio-goal.mjs"))) {
+    findings.push(...auditPortfolioGoal(rootDir));
   }
 
   findings.push(...scanForPlaintextSecrets(buildSecretScanFiles(rootDir)));

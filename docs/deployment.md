@@ -196,13 +196,16 @@ Run the deployment readiness check locally or in CI before deploying:
 
 ```bash
 npm run check:deploy
+npm run audit:portfolio
 ```
 
 The deployment readiness check verifies:
 
-- Required deployment files are present, including `vercel.json`, `docs/deployment.md`, and the live-demo smoke script.
+- Required deployment files are present, including `vercel.json`, `render.yaml`, `docs/deployment.md`, the portfolio-goal audit script, and the live-demo smoke script.
 - Required npm scripts exist.
 - `apps/web/.env.example` keeps provider API keys blank while documenting public-demo rate-limit variables.
+- The portfolio-goal audit can prove the local repository still contains evidence for the drug-name, medication-label, FAERS, signal, comparison, AI report, schema validation, human confirmation, safety-boundary, and demo-verification requirements.
+- The Render Blueprint runs the built-in Next.js API app without committing provider secrets.
 - Obvious OpenAI/DeepSeek-style API keys and GitHub tokens are not present in common public-facing repository files.
 
 A full CI gate should also run unit tests, Playwright smoke tests, lint, build, and `npm audit --audit-level=moderate`.

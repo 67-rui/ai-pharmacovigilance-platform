@@ -380,6 +380,7 @@ npm run tunnel:local
 
 ```bash
 npm run check:deploy
+npm run audit:portfolio
 npm run test
 npm run test:e2e
 npm run smoke:api -- http://localhost:3001
@@ -390,7 +391,8 @@ npm run build
 
 Current tests cover:
 
-- Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, and obvious plaintext API key patterns
+- Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, deployment blueprints, portfolio-goal evidence, and obvious plaintext API key patterns
+- Portfolio goal audit for drug-name entry, medication-label evidence, FAERS querying, signal analysis, drug comparison, AI structured reports, schema validation, human confirmation, safety boundaries, and demo verification
 - Local API smoke checks for the homepage, FAERS, signal, comparison, structured report, and medication-intake endpoints
 - openFDA query construction
 - FAERS analysis API route validation, four-drug aggregate fixtures, no-result handling, and upstream rate-limit errors
