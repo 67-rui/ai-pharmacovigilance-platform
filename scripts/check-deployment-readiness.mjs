@@ -14,6 +14,7 @@ const REQUIRED_SCRIPTS = [
   "smoke:api",
   "smoke:demo",
   "audit:portfolio",
+  "verify:portfolio",
   "tunnel:local",
 ];
 const BLANK_PROVIDER_KEYS = [
@@ -42,6 +43,7 @@ const REQUIRED_FILES = [
   "scripts/smoke-test-local-api.mjs",
   "scripts/smoke-test-live-demo.mjs",
   "scripts/audit-portfolio-goal.mjs",
+  "scripts/verify-portfolio-gate.mjs",
   "apps/web/src/app/api/health/route.ts",
 ];
 const SECRET_PATTERNS = [

@@ -27,6 +27,7 @@ describe("deployment readiness checks", () => {
           "smoke:api": "node scripts/smoke-test-local-api.mjs",
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
           "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
+          "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
           "tunnel:local": "npx localtunnel --port 3001",
         },
       }),
@@ -36,6 +37,7 @@ describe("deployment readiness checks", () => {
     expect(missingScripts).toContain("Missing package script: start");
     expect(missingScripts).toContain("Missing package script: smoke:api");
     expect(missingScripts).toContain("Missing package script: audit:portfolio");
+    expect(missingScripts).toContain("Missing package script: verify:portfolio");
     expect(missingScripts).toContain("Missing package script: tunnel:local");
 
     const malformedStart = checkPackageScripts({
@@ -48,6 +50,7 @@ describe("deployment readiness checks", () => {
         "smoke:api": "node scripts/smoke-test-local-api.mjs",
         "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
         "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
+        "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
         "tunnel:local": "npx localtunnel --port 3001",
       },
     });
@@ -147,6 +150,7 @@ describe("deployment readiness checks", () => {
             start: "npm --workspace apps/web run start --",
             "smoke:api": "node scripts/smoke-test-local-api.mjs",
             "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+            "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
             "tunnel:local": "npx localtunnel --port 3001",
           },
         }),
@@ -185,6 +189,7 @@ describe("deployment readiness checks", () => {
             "smoke:api": "node scripts/smoke-test-local-api.mjs",
             "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
             "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
+            "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
             "tunnel:local": "npx localtunnel --port 3001",
           },
         }),

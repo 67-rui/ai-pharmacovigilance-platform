@@ -389,6 +389,12 @@ npm run lint
 npm run build
 ```
 
+For a single local pre-deploy gate that runs readiness checks, unit tests, lint, build, Playwright E2E, starts the app on port `3001`, and runs both local smoke scripts:
+
+```bash
+npm run verify:portfolio
+```
+
 Current tests cover:
 
 - Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, deployment blueprints, portfolio-goal evidence, and obvious plaintext API key patterns

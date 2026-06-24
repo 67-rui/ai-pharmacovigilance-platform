@@ -199,6 +199,14 @@ npm run check:deploy
 npm run audit:portfolio
 ```
 
+For a complete local portfolio verification pass before publishing, run:
+
+```bash
+npm run verify:portfolio
+```
+
+This command runs readiness checks, unit tests, lint, build, Playwright E2E, starts the app on port `3001`, waits for `/api/health`, then runs `smoke:api` and mocked `smoke:demo`.
+
 The deployment readiness check verifies:
 
 - Required deployment files are present, including `vercel.json`, `render.yaml`, `docs/deployment.md`, the portfolio-goal audit script, and the live-demo smoke script.
