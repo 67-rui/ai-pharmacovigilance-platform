@@ -103,7 +103,7 @@ flowchart LR
 
 ## Core Features
 
-For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md). For resume wording and interview talking points, see [docs/resume-interview-guide.md](docs/resume-interview-guide.md).
+For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md). For a requirement-by-requirement proof map, see [docs/portfolio-evidence-matrix.md](docs/portfolio-evidence-matrix.md). For resume wording and interview talking points, see [docs/resume-interview-guide.md](docs/resume-interview-guide.md).
 
 For a concrete reviewer artifact, see the [sample pharmacovigilance report](docs/sample-report.md). It shows a metformin workflow with schema validation, source provenance, PRR/ROR signal metrics, drug comparison, human-confirmation boundaries, and FAERS limitations.
 

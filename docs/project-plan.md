@@ -31,6 +31,7 @@ The workspace now covers the main reviewer journey:
 
 - [README.md](../README.md): product overview, screenshots, architecture, verification commands, and resume bullet.
 - [case-study.md](case-study.md): portfolio narrative and system walkthrough.
+- [portfolio-evidence-matrix.md](portfolio-evidence-matrix.md): requirement-to-evidence map for code, tests, docs, and remaining deployment proof.
 - [sample-report.md](sample-report.md): static reviewer artifact for metformin.
 - [resume-interview-guide.md](resume-interview-guide.md): role-specific resume bullets and interview answers.
 - [deployment.md](deployment.md): Vercel setup, public-demo rate limits, smoke test, and safety notes.
