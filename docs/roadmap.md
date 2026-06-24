@@ -108,13 +108,14 @@ Priority backlog:
 - Done: Add deterministic local fallback when `DEEPSEEK_API_KEY` is missing or the provider fails.
 - Done: Add zod schema validation for extracted medication candidates, active ingredients, strengths, safety keywords, and limitations.
 - Done: Require human confirmation before routing extracted candidates into FAERS analysis.
+- Done: Trigger the full reviewer workflow after confirming a medication-label candidate.
 - Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
 - P1: Add a dedicated OCR provider option for low-quality images.
 - P1: Add saved intake evidence records with image metadata and confirmed drug name.
 
 Acceptance criteria:
 
-- Users can upload a medication label image, run browser OCR or edit label text manually, extract structured fields, and confirm a drug candidate.
+- Users can upload a medication label image, run browser OCR or edit label text manually, extract structured fields, and confirm a drug candidate to run FAERS analysis, signal metrics, ranking, comparison, and structured report generation.
 - The app does not claim direct clinical decision support or autonomous medication identification.
 - Intake remains usable without DeepSeek through deterministic fallback.
 

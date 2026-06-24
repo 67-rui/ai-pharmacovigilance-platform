@@ -1194,7 +1194,7 @@ function MedicationIntakePanel({
                   className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
                 >
                   <CheckCircle2 size={16} />
-                  Confirm and analyze
+                  Confirm and run workflow
                 </button>
               ) : null}
             </div>
@@ -1298,7 +1298,7 @@ export function PharmacovigilanceDashboard() {
     }
   }
 
-  async function runAnalysis(nextDrug = drug) {
+  async function runAnalysis(nextDrug = drug, options?: { runWorkflow?: boolean }) {
     const requestId = analysisRequestId.current + 1;
     analysisRequestId.current = requestId;
     reportRequestId.current += 1;
@@ -1328,10 +1328,13 @@ export function PharmacovigilanceDashboard() {
       if (requestId !== analysisRequestId.current) return;
 
       setAnalysis(payload);
-      setComparatorDrug(payload.drug.toLowerCase() === "warfarin" ? "metformin" : "warfarin");
+      const nextComparatorDrug = payload.drug.toLowerCase() === "warfarin" ? "metformin" : "warfarin";
+      setComparatorDrug(nextComparatorDrug);
       const defaultEvent = payload.topReactions?.[0]?.label ?? "";
       setSelectedEvent(defaultEvent);
-      if (defaultEvent) {
+      if (options?.runWorkflow) {
+        void runWorkflowForAnalysis(payload, nextComparatorDrug);
+      } else if (defaultEvent) {
         void runSignal(payload.drug, defaultEvent);
       }
     } catch (error) {
@@ -1418,12 +1421,19 @@ export function PharmacovigilanceDashboard() {
   function confirmIntakeDrug(nextDrug: string) {
     if (!nextDrug || nextDrug === "Needs human review") return;
     setDrug(nextDrug);
-    void runAnalysis(nextDrug);
+    void runAnalysis(nextDrug, { runWorkflow: true });
   }
 
   async function runFullWorkflow() {
     if (!analysis) return;
-    const plan = buildWorkflowRequestPlan(analysis, comparatorDrug);
+    await runWorkflowForAnalysis(analysis, comparatorDrug);
+  }
+
+  async function runWorkflowForAnalysis(
+    nextAnalysis: FaersAnalysis,
+    nextComparatorDrug = comparatorDrug,
+  ) {
+    const plan = buildWorkflowRequestPlan(nextAnalysis, nextComparatorDrug);
     setIsWorkflowLoading(true);
     setIsReporting(true);
     setIsSignalLoading(plan.canRunSignal);
@@ -1438,20 +1448,20 @@ export function PharmacovigilanceDashboard() {
       const requests = {
         signal: plan.canRunSignal
           ? fetch(
-              `/api/signal?drug=${encodeURIComponent(analysis.drug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
+              `/api/signal?drug=${encodeURIComponent(nextAnalysis.drug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
             )
           : Promise.resolve(null),
         ranking: plan.canRunRanking
           ? fetch(
               `/api/rankings?${new URLSearchParams([
-                ["drug", analysis.drug],
+                ["drug", nextAnalysis.drug],
                 ...plan.rankingEvents.map((event) => ["event", event] as [string, string]),
               ]).toString()}`,
             )
           : Promise.resolve(null),
         comparison: plan.canRunComparison
           ? fetch(
-              `/api/compare?primary=${encodeURIComponent(analysis.drug)}&comparator=${encodeURIComponent(plan.comparatorDrug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
+              `/api/compare?primary=${encodeURIComponent(nextAnalysis.drug)}&comparator=${encodeURIComponent(plan.comparatorDrug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
             )
           : Promise.resolve(null),
         report: fetch("/api/report", {
@@ -1459,7 +1469,7 @@ export function PharmacovigilanceDashboard() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ analysis }),
+          body: JSON.stringify({ analysis: nextAnalysis }),
         }),
       };
 

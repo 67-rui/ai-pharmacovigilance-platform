@@ -26,9 +26,9 @@ This project turns a drug name into adverse event patterns, disproportionality s
 
 1. Enter a drug name, such as `metformin`, `warfarin`, `atorvastatin`, or `ibuprofen`.
 2. Optionally upload a medication label image, run browser OCR, and review/edit the extracted label text.
-3. Run DeepSeek medication intake, then confirm the extracted drug candidate to route it into FAERS analysis.
+3. Run DeepSeek medication intake, then confirm the extracted drug candidate to launch FAERS analysis and the full reviewer workflow.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
-5. Click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
+5. If starting from a typed drug name, click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
 6. Inspect the source provenance panel to understand exactly how openFDA was queried.
 7. Refine the selected MedDRA preferred term or comparator drug when needed.
 8. Export Markdown or CSV artifacts.
@@ -139,14 +139,14 @@ This gives reviewers a prioritized triage table across multiple candidate events
 
 ### Full Reviewer Workflow
 
-After a FAERS analysis loads, `Run full workflow` derives a default workflow plan from the current analysis:
+After a FAERS analysis loads, `Run full workflow` derives a default workflow plan from the current analysis. Confirming a medication-label candidate runs the same workflow automatically after the FAERS payload returns:
 
 - The top reported MedDRA preferred term becomes the default signal event.
 - The top six reported events are used for signal ranking.
 - A comparator drug is selected from the current comparator field, with a safe fallback when it matches the primary drug.
 - Signal metrics, signal ranking, drug comparison, and structured report generation are triggered together.
 
-This turns a drug name or confirmed medication-label candidate into a more complete reviewer workspace with fewer manual clicks.
+This turns a drug name or confirmed medication-label candidate into a more complete reviewer workspace with fewer manual clicks. The medication-label path still requires human confirmation before any FAERS query or AI report generation starts.
 
 ### Drug Comparison
 

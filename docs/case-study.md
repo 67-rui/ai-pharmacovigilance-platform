@@ -66,13 +66,13 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 
 ### Full Reviewer Workflow
 
-The dashboard includes a `Run full workflow` action after FAERS analysis. It selects the top reported MedDRA preferred term as the default signal event, ranks the top reported events, compares the selected drug against a comparator, and generates the structured AI report in one reviewer-oriented pass.
+The dashboard includes a `Run full workflow` action after FAERS analysis. It selects the top reported MedDRA preferred term as the default signal event, ranks the top reported events, compares the selected drug against a comparator, and generates the structured AI report in one reviewer-oriented pass. When the user starts from medication-label evidence, the human confirmation button launches the same full workflow after the confirmed drug's FAERS payload returns.
 
 ## Responsible AI Controls
 
 - Model outputs are parsed as JSON and validated with zod schemas.
 - OCR text is editable before any model extraction step.
-- Medication intake cannot directly trigger analysis without human confirmation.
+- Medication intake cannot trigger analysis or report generation without human confirmation.
 - The intake UI exposes provider mode, prompt version, schema validation status, fallback warnings, and extraction limitations.
 - FAERS reports are framed as signal-triage evidence, not incidence or causal risk.
 - Reports include guardrails against causal claims, incidence claims, and medical advice.
@@ -102,9 +102,9 @@ The dashboard includes a `Run full workflow` action after FAERS analysis. It sel
 
 2. Run browser OCR if using an image, review/edit the label text, then run DeepSeek medication intake.
 3. Review the schema-validated extraction.
-4. Confirm `Metformin` to launch FAERS analysis.
+4. Confirm `Metformin` to launch FAERS analysis, PRR/ROR signal metrics, signal ranking, comparison, and structured report output.
 5. Inspect adverse reaction charts, seriousness distribution, outcomes, demographics, and year trend.
-6. Click `Run full workflow` to compute PRR/ROR, signal ranking, comparison, and structured report output.
+6. Use `Run full workflow` again only if you change the comparator or want to refresh the reviewer pass.
 7. Review the source provenance panel to see the exact openFDA query URLs.
 8. Inspect guardrails, structured report sections, and Markdown export.
 
