@@ -383,7 +383,7 @@ npm run build
 Current tests cover:
 
 - Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, and obvious plaintext API key patterns
-- Local API smoke checks for the homepage, FAERS endpoint, and signal endpoint
+- Local API smoke checks for the homepage, FAERS, signal, comparison, structured report, and medication-intake endpoints
 - openFDA query construction
 - FAERS analysis API route validation, four-drug aggregate fixtures, no-result handling, and upstream rate-limit errors
 - MedDRA event query construction

@@ -106,6 +106,8 @@ Quick API checks:
 npm run smoke:api -- http://localhost:3001
 ```
 
+This checks the homepage plus the FAERS, signal, comparison, structured report, and medication-intake API routes.
+
 If another project already uses port `3000`, keep this project on `3001` to avoid confusing 404 responses from the wrong Next.js app.
 
 ## Temporary Public Demo
