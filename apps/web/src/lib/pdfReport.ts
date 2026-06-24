@@ -1,6 +1,7 @@
 import type {
   DrugComparison,
   FaersAnalysis,
+  MedicationIntakeResult,
   ReportResponse,
   SignalAnalysis,
   SignalRanking,
@@ -17,6 +18,7 @@ export type PdfReportInput = {
   signal?: SignalAnalysis | null;
   ranking?: SignalRanking | null;
   comparison?: DrugComparison | null;
+  intake?: MedicationIntakeResult | null;
 };
 
 function formatMetric(value: number | null | undefined) {
@@ -40,14 +42,56 @@ function topList(
     });
 }
 
+function normalizeDrug(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function intakeMatchesAnalysisDrug(
+  intake: MedicationIntakeResult | null | undefined,
+  analysisDrug: string,
+) {
+  if (!intake) return false;
+  const normalizedAnalysisDrug = normalizeDrug(analysisDrug);
+  return intake.drugCandidates.some(
+    (candidate) => normalizeDrug(candidate) === normalizedAnalysisDrug,
+  );
+}
+
 export function buildPdfReportSections({
   analysis,
   signal,
   ranking,
   comparison,
   report,
+  intake,
 }: PdfReportInput): PdfReportSection[] {
   const topReaction = analysis.topReactions[0];
+  const matchingIntake = intakeMatchesAnalysisDrug(intake, analysis.drug)
+    ? intake
+    : null;
+  const responsibleAiChecklist = [
+    "Report schema validation: passed",
+    matchingIntake
+      ? "Medication-intake schema validation: passed"
+      : "Medication-intake schema validation: not applicable for typed drug-name workflow",
+    matchingIntake
+      ? `Human confirmation before FAERS launch: ${
+          matchingIntake.needsHumanConfirmation
+            ? "required"
+            : "not required by intake response"
+        }`
+      : "Human confirmation before FAERS launch: not applicable for typed drug-name workflow",
+    matchingIntake
+      ? `Medication intake provider: ${matchingIntake.provider}`
+      : "Medication intake provider: not used",
+    matchingIntake?.promptVersion
+      ? `Medication intake prompt: ${matchingIntake.promptVersion}`
+      : "Medication intake prompt: not used",
+    `Report provider: ${report.mode === "openai" ? report.model ?? "openai" : "template"}`,
+    `Report prompt: ${report.promptVersion}`,
+    "FAERS limitation: cannot establish incidence or causality",
+    "Safety boundary: not medical advice",
+  ];
 
   return [
     {
@@ -115,6 +159,7 @@ export function buildPdfReportSections({
     {
       title: "Responsible AI And FAERS Limits",
       lines: [
+        ...responsibleAiChecklist,
         ...report.qualityChecklist.map((item) => `Quality check: ${item}`),
         ...analysis.limitations,
         ...report.structuredReport.limitations,

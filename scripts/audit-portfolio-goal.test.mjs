@@ -73,6 +73,16 @@ function writeCompletePortfolioFixture(rootDir) {
   );
   writeFixture(
     rootDir,
+    "apps/web/src/lib/pdfReport.ts",
+    [
+      "Report schema validation: passed",
+      "Medication-intake schema validation",
+      "Human confirmation before FAERS launch",
+      "FAERS limitation: cannot establish incidence or causality",
+    ].join("\n"),
+  );
+  writeFixture(
+    rootDir,
     "apps/web/src/lib/medicationIntake.ts",
     "medicationIntakeSchema z.object parseMedicationIntake needsHumanConfirmation: true",
   );
@@ -114,6 +124,25 @@ describe("portfolio goal audit", () => {
 
       expect(auditPortfolioGoal(rootDir)).toContain(
         "Missing portfolio evidence for AI structured report: apps/web/src/app/api/report/route.ts must include parseStructuredReport, zod, safeParse.",
+      );
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test("reports missing responsible-AI export checklist evidence", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "portfolio-goal-export-fail-"));
+
+    try {
+      writeCompletePortfolioFixture(rootDir);
+      writeFixture(
+        rootDir,
+        "apps/web/src/lib/pdfReport.ts",
+        "PDF report exists but lacks the responsible-AI export checklist.",
+      );
+
+      expect(auditPortfolioGoal(rootDir)).toContain(
+        "Missing portfolio evidence for responsible-AI safety boundaries: apps/web/src/lib/pdfReport.ts must include Report schema validation: passed, Medication-intake schema validation, Human confirmation before FAERS launch, FAERS limitation: cannot establish incidence or causality.",
       );
     } finally {
       rmSync(rootDir, { recursive: true, force: true });

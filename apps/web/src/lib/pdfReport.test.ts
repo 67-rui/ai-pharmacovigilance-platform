@@ -3,6 +3,7 @@ import { buildPdfReportSections } from "./pdfReport";
 import type {
   DrugComparison,
   FaersAnalysis,
+  MedicationIntakeResult,
   ReportResponse,
   SignalAnalysis,
   SignalRanking,
@@ -131,6 +132,26 @@ const report: ReportResponse = {
   },
 };
 
+const intake: MedicationIntakeResult = {
+  provider: "fallback",
+  drugCandidates: ["Metformin"],
+  activeIngredients: ["Metformin hydrochloride"],
+  strengths: ["500 mg"],
+  dosageForm: "tablet",
+  riskKeywords: ["warning"],
+  confidence: "medium",
+  needsHumanConfirmation: true,
+  extractedText: "Metformin hydrochloride tablets 500 mg warnings",
+  promptVersion: "medication-label-intake-v1",
+  evidence: {
+    fileName: "metformin-label.png",
+    sourceType: "ocr-text",
+  },
+  limitations: [
+    "Medication extraction must be confirmed by a human before FAERS analysis.",
+  ],
+};
+
 describe("PDF report sections", () => {
   it("builds reviewer-ready sections with analysis, signal, ranking, comparison, and AI report context", () => {
     const sections = buildPdfReportSections({
@@ -139,6 +160,7 @@ describe("PDF report sections", () => {
       ranking,
       comparison,
       report,
+      intake,
     });
 
     expect(sections.map((section) => section.title)).toEqual([
@@ -157,6 +179,31 @@ describe("PDF report sections", () => {
     expect(sections[5].lines.join(" ")).toContain("cannot establish");
   });
 
+  it("adds a responsible-AI checklist with schema, confirmation, provider, and FAERS boundaries", () => {
+    const sections = buildPdfReportSections({
+      analysis,
+      signal,
+      ranking,
+      comparison,
+      report,
+      intake,
+    });
+
+    const responsibleAi = sections.find(
+      (section) => section.title === "Responsible AI And FAERS Limits",
+    );
+    const text = responsibleAi?.lines.join(" ");
+
+    expect(text).toContain("Report schema validation: passed");
+    expect(text).toContain("Medication-intake schema validation: passed");
+    expect(text).toContain("Human confirmation before FAERS launch: required");
+    expect(text).toContain("Medication intake provider: fallback");
+    expect(text).toContain("Medication intake prompt: medication-label-intake-v1");
+    expect(text).toContain("Report provider: template");
+    expect(text).toContain("Report prompt: faers-safety-report-v2");
+    expect(text).toContain("FAERS limitation: cannot establish incidence or causality");
+  });
+
   it("keeps optional advanced sections explicit when they are not available", () => {
     const sections = buildPdfReportSections({ analysis, report });
 
@@ -166,5 +213,25 @@ describe("PDF report sections", () => {
     expect(
       sections.find((section) => section.title === "Drug Comparison")?.lines,
     ).toEqual(["No drug-vs-drug comparison has been run for this report."]);
+  });
+
+  it("does not attach stale medication-intake evidence to a different drug report", () => {
+    const sections = buildPdfReportSections({
+      analysis: {
+        ...analysis,
+        drug: "warfarin",
+      },
+      report,
+      intake,
+    });
+
+    const responsibleAi = sections.find(
+      (section) => section.title === "Responsible AI And FAERS Limits",
+    );
+    const text = responsibleAi?.lines.join(" ");
+
+    expect(text).toContain("Medication-intake schema validation: not applicable");
+    expect(text).toContain("Medication intake provider: not used");
+    expect(text).not.toContain("Medication intake provider: fallback");
   });
 });

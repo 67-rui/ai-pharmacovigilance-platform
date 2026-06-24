@@ -189,6 +189,7 @@ function toPdfFile(
   signal: SignalAnalysis | null,
   ranking: SignalRanking | null,
   comparison: DrugComparison | null,
+  intake: MedicationIntakeResult | null,
 ) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const margin = 48;
@@ -224,7 +225,7 @@ function toPdfFile(
   addText("AI-assisted reviewer artifact with FAERS and responsible-AI guardrails.", 10);
   y += 10;
 
-  buildPdfReportSections({ analysis, signal, ranking, comparison, report }).forEach(
+  buildPdfReportSections({ analysis, signal, ranking, comparison, report, intake }).forEach(
     (section) => {
       addPageIfNeeded(36);
       addText(section.title, 12, "bold");
@@ -1624,6 +1625,8 @@ export function PharmacovigilanceDashboard() {
   const [intakeResult, setIntakeResult] = useState<MedicationIntakeResult | null>(
     null,
   );
+  const [confirmedIntakeResult, setConfirmedIntakeResult] =
+    useState<MedicationIntakeResult | null>(null);
   const [ocrMode, setOcrMode] = useState<OcrMode>("standard");
   const [ocrQuality, setOcrQuality] = useState<OcrQualityAssessment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -1778,6 +1781,8 @@ export function PharmacovigilanceDashboard() {
 
   function saveIntakeEvidenceHistory(nextDrug: string) {
     if (!intakeResult) return;
+
+    setConfirmedIntakeResult(intakeResult);
 
     const entry = buildIntakeEvidenceHistoryEntry(intakeResult, {
       confirmedDrug: nextDrug,
@@ -2162,7 +2167,7 @@ export function PharmacovigilanceDashboard() {
 
   function exportReportPdf() {
     if (!analysis || !report) return;
-    toPdfFile(analysis, report, signal, ranking, comparison);
+    toPdfFile(analysis, report, signal, ranking, comparison, confirmedIntakeResult);
   }
 
   function submitForm(event: FormEvent<HTMLFormElement>) {

@@ -409,7 +409,7 @@ Current tests cover:
 - Saved reviewer history entry generation, deduplication, and size limits
 - Saved intake evidence history entry generation, deduplication, and size limits
 - AI report tone modes and schema-preserving report generation
-- PDF report section generation for reviewer-ready exports
+- PDF report section generation for reviewer-ready exports with responsible-AI checklist lines for schema validation, provider mode, human confirmation, and FAERS limitations
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
 - Public demo rate limiting for FAERS, signal ranking, report generation, and medication intake routes

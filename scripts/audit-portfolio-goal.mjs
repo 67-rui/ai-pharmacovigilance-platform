@@ -113,6 +113,15 @@ export const REQUIRED_PORTFOLIO_EVIDENCE = [
           "FAERS limitations are stated explicitly.",
         ],
       },
+      {
+        filePath: "apps/web/src/lib/pdfReport.ts",
+        terms: [
+          "Report schema validation: passed",
+          "Medication-intake schema validation",
+          "Human confirmation before FAERS launch",
+          "FAERS limitation: cannot establish incidence or causality",
+        ],
+      },
     ],
   },
   {
