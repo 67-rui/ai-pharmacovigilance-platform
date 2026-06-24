@@ -185,6 +185,7 @@ Priority backlog:
 - P0: Add a concise architecture diagram.
 - P0: Deploy a public demo with safe rate limits.
 - P1: Add a short demo video or GIF.
+- Done: Add deployment-ready environment documentation in `docs/deployment.md`.
 - Done: Add a technical case study page in `docs/case-study.md`.
 - P1: Add resume bullets and interview talking points.
 - P2: Add GitHub issues for each roadmap item.
@@ -253,12 +254,12 @@ Each meaningful feature should include:
 2. Done: Add drug-vs-drug comparison for user-selected products.
 3. Done: Add CSV export for chart data and signal tables.
 4. Add README walkthrough with screenshots.
-5. Add API route tests with mocked openFDA responses.
+5. Done: Add API route tests with mocked openFDA responses.
 
 ## Following Actions
 
-1. Add deployment-ready environment documentation.
-2. Add a dedicated OCR provider option for low-quality images.
-3. Add PDF report export.
-4. Add Playwright smoke tests for dashboard loading and report generation.
+1. Add a dedicated OCR provider option for low-quality images.
+2. Add PDF report export.
+3. Add Playwright smoke tests for dashboard loading and report generation.
+4. Deploy a public demo with safe rate limits.
 5. Done: Add a case study page for portfolio storytelling.

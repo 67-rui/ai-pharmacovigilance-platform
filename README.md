@@ -309,6 +309,8 @@ DEEPSEEK_MODEL=deepseek-chat
 
 `OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key.
 
+See [docs/deployment.md](docs/deployment.md) for deployment steps, safe demo configuration, fallback behavior, and post-deploy smoke tests.
+
 ## Verification
 
 ```bash
@@ -357,7 +359,6 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 Near-term priorities:
 
 - Add a concise product walkthrough.
-- Add mocked API route tests.
 - Add PDF report export.
 
 ## Resume Bullet
