@@ -127,6 +127,10 @@ export function checkReadmeDeploymentLinks(text) {
     findings.push("README.md is missing a link to docs/sample-report.md.");
   }
 
+  if (!text.includes("/api/health")) {
+    findings.push("README.md must document that live smoke covers /api/health.");
+  }
+
   if (!text.includes("/?label=sample")) {
     findings.push("README.md must document that live smoke covers /?label=sample.");
   }
@@ -136,6 +140,12 @@ export function checkReadmeDeploymentLinks(text) {
 
 export function checkDeploymentGuide(text) {
   const findings = [];
+
+  if (!text.includes("/api/health")) {
+    findings.push(
+      "docs/deployment.md must document that live smoke covers /api/health.",
+    );
+  }
 
   if (!text.includes("/?label=sample")) {
     findings.push(

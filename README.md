@@ -432,7 +432,7 @@ After deploying a public demo, run the live smoke script against the deployed UR
 DEMO_URL=https://your-project.vercel.app npm run smoke:demo
 ```
 
-The live smoke script does not mock API routes by default. It checks the homepage, `/?drug=metformin&workflow=full`, schema-validated report output, source provenance, and the `/?label=sample` medication-label confirmation path. Use `--mock` only for local self-checks of the script and browser selectors.
+The live smoke script does not mock API routes by default. It checks `/api/health`, the homepage, `/?drug=metformin&workflow=full`, schema-validated report output, source provenance, and the `/?label=sample` medication-label confirmation path. Use `--mock` only for local self-checks of the script and browser selectors.
 
 ## Data And Safety Boundaries
 

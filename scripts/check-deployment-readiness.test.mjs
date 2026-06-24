@@ -111,6 +111,7 @@ describe("deployment readiness checks", () => {
       "[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)",
       "Review the sample report at docs/sample-report.md.",
       "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
+      "The live smoke script checks `/api/health`.",
       "The live smoke script checks `/?label=sample`.",
     ].join("\n");
 
@@ -119,6 +120,7 @@ describe("deployment readiness checks", () => {
       "README.md is missing a Deploy with Vercel link.",
       "README.md is missing the deployed demo smoke-test command.",
       "README.md is missing a link to docs/sample-report.md.",
+      "README.md must document that live smoke covers /api/health.",
       "README.md must document that live smoke covers /?label=sample.",
     ]);
   });
@@ -126,11 +128,12 @@ describe("deployment readiness checks", () => {
   test("requires deployment guide smoke coverage for sample-label URLs", () => {
     const guide = [
       "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
-      "The smoke script opens Chrome and checks `/?drug=metformin&workflow=full`, `/?label=sample`, and `--mock` local self-checks.",
+      "The smoke script opens Chrome and checks `/api/health`, `/?drug=metformin&workflow=full`, `/?label=sample`, and `--mock` local self-checks.",
     ].join("\n");
 
     expect(checkDeploymentGuide(guide)).toEqual([]);
     expect(checkDeploymentGuide("DEMO_URL=https://your-project.vercel.app npm run smoke:demo")).toEqual([
+      "docs/deployment.md must document that live smoke covers /api/health.",
       "docs/deployment.md must document that live smoke covers /?label=sample.",
     ]);
   });
@@ -161,6 +164,7 @@ describe("deployment readiness checks", () => {
           "[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)",
           "Review the sample report at docs/sample-report.md.",
           "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
+          "The live smoke script checks `/api/health`.",
           "The live smoke script checks `/?label=sample`.",
         ].join("\n"),
       );

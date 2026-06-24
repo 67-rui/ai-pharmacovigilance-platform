@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  assertLiveHealthPayload,
   buildSmokeUrls,
   resolveSmokeOptions,
 } from "./smoke-test-live-demo.mjs";
@@ -29,10 +30,30 @@ describe("live demo smoke-test CLI helpers", () => {
 
   test("builds a reproducible full-workflow URL from the base URL", () => {
     expect(buildSmokeUrls("https://demo.example.com", "metformin")).toEqual({
+      healthUrl: "https://demo.example.com/api/health",
       homeUrl: "https://demo.example.com/",
       labelSampleUrl: "https://demo.example.com/?label=sample",
       workflowUrl: "https://demo.example.com/?drug=metformin&workflow=full",
     });
+  });
+
+  test("requires health payloads to expose responsible-AI safety boundaries", () => {
+    expect(() =>
+      assertLiveHealthPayload({
+        status: "ok",
+        safetyBoundaries: [
+          "schema validation",
+          "human confirmation before label-derived FAERS launch",
+          "FAERS cannot establish incidence or causality",
+        ],
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertLiveHealthPayload({
+        status: "ok",
+        safetyBoundaries: [],
+      }),
+    ).toThrow("Live health payload must include schema validation boundary");
   });
 
   test("requires a target demo URL", () => {

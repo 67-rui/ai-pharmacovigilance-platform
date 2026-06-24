@@ -182,7 +182,7 @@ After deployment, verify the public URL with the automated smoke script:
 DEMO_URL=https://your-project.vercel.app npm run smoke:demo
 ```
 
-The smoke script opens Chrome with Playwright and checks the homepage, `/?drug=metformin&workflow=full`, and the `/?label=sample` medication label-text confirmation path. It uses live API routes by default. For a local self-check of the smoke script itself, run against a local dev server with mocked API responses:
+The smoke script opens Chrome with Playwright and checks `/api/health`, the homepage, `/?drug=metformin&workflow=full`, and the `/?label=sample` medication label-text confirmation path. It uses live API routes by default. For a local self-check of the smoke script itself, run against a local dev server with mocked API responses:
 
 ```bash
 npm run smoke:demo -- http://localhost:3001 --mock

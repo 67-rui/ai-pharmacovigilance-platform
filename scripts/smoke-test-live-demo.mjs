@@ -271,6 +271,7 @@ export function resolveSmokeOptions(argv = process.argv.slice(2), env = process.
 }
 
 export function buildSmokeUrls(baseUrl, drug = DEFAULT_DRUG) {
+  const healthUrl = new URL("/api/health", `${baseUrl}/`);
   const homeUrl = new URL("/", `${baseUrl}/`);
   const labelSampleUrl = new URL("/", `${baseUrl}/`);
   const workflowUrl = new URL("/", `${baseUrl}/`);
@@ -279,10 +280,51 @@ export function buildSmokeUrls(baseUrl, drug = DEFAULT_DRUG) {
   workflowUrl.searchParams.set("workflow", "full");
 
   return {
+    healthUrl: healthUrl.toString(),
     homeUrl: homeUrl.toString(),
     labelSampleUrl: labelSampleUrl.toString(),
     workflowUrl: workflowUrl.toString(),
   };
+}
+
+export function assertLiveHealthPayload(payload) {
+  if (payload?.status !== "ok") {
+    throw new Error("Live health payload must report status ok.");
+  }
+
+  if (!Array.isArray(payload?.safetyBoundaries)) {
+    throw new Error("Live health payload must include safetyBoundaries.");
+  }
+
+  if (!payload.safetyBoundaries.includes("schema validation")) {
+    throw new Error("Live health payload must include schema validation boundary.");
+  }
+
+  if (
+    !payload.safetyBoundaries.includes(
+      "human confirmation before label-derived FAERS launch",
+    )
+  ) {
+    throw new Error("Live health payload must include human confirmation boundary.");
+  }
+
+  if (
+    !payload.safetyBoundaries.includes(
+      "FAERS cannot establish incidence or causality",
+    )
+  ) {
+    throw new Error("Live health payload must include FAERS limitation boundary.");
+  }
+}
+
+async function verifyHealthApi(healthUrl) {
+  const response = await fetch(healthUrl);
+
+  if (!response.ok) {
+    throw new Error(`Health API returned HTTP ${response.status}.`);
+  }
+
+  assertLiveHealthPayload(await response.json());
 }
 
 async function installMockApiRoutes(page) {
@@ -386,7 +428,7 @@ async function newSmokePage(browser, options) {
 }
 
 export async function runLiveDemoSmoke(options) {
-  const { homeUrl, labelSampleUrl, workflowUrl } = buildSmokeUrls(
+  const { healthUrl, homeUrl, labelSampleUrl, workflowUrl } = buildSmokeUrls(
     options.baseUrl,
     options.drug,
   );
@@ -398,6 +440,9 @@ export async function runLiveDemoSmoke(options) {
   try {
     console.log(`Smoke target: ${options.baseUrl}`);
     console.log(`API mode: ${options.mockApis ? "mocked" : "live"}`);
+
+    await verifyHealthApi(healthUrl);
+    console.log("PASS health API safety boundaries");
 
     let page = await newSmokePage(browser, options);
     await verifyHomeLoads(page, homeUrl, options.timeoutMs);
