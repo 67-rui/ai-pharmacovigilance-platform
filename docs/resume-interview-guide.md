@@ -79,7 +79,7 @@ The AI report route supports OpenAI when configured and template mode otherwise.
 ### Testing Story
 
 - Unit tests cover query construction, signal math, signal ranking filters, structured report generation, medication intake parsing, API fallback behavior, and history helpers.
-- The Playwright smoke test mocks API responses and verifies the shareable full-workflow path: `/?drug=metformin&workflow=full`.
+- Playwright smoke tests mock API responses and verify both the shareable full-workflow path `/?drug=metformin&workflow=full` and the label-evidence path from editable OCR text to human-confirmed workflow launch.
 - Screenshot generation uses the same mocked-workflow style so README assets are deterministic and do not depend on live API drift.
 
 ## Likely Interview Questions
@@ -101,7 +101,7 @@ OCR and model extraction can misread drug names, strengths, or context. In this 
 - Deploy a public demo with safe rate limits and no required paid AI keys.
 - Add a stronger OCR provider for low-quality medication images.
 - Add authenticated saved reviews and audit trails.
-- Add broader Playwright coverage for intake confirmation and export downloads.
+- Add broader Playwright coverage for export downloads and provider-error states.
 - Add a concise demo video or GIF for recruiters.
 
 ## Portfolio Keywords

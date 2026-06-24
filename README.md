@@ -349,7 +349,7 @@ Current tests cover:
 
 These unit tests do not make live openFDA requests.
 
-The Playwright smoke test uses mocked API responses to verify that `/?drug=metformin&workflow=full` loads the dashboard, runs the full reviewer workflow, renders schema-validated report content, and exposes Markdown/PDF export controls. The local config uses the system Chrome channel; on a new machine or CI runner without Chrome, install a Playwright browser with `npx playwright install chromium` and adjust the channel if needed.
+The Playwright smoke tests use mocked API responses to verify that `/?drug=metformin&workflow=full` loads the dashboard, runs the full reviewer workflow, renders schema-validated report content, and exposes Markdown/PDF export controls. They also verify the label-evidence path: editable OCR text, schema-validated medication intake, human confirmation, and confirmed-drug workflow launch. The local config uses the system Chrome channel; on a new machine or CI runner without Chrome, install a Playwright browser with `npx playwright install chromium` and adjust the channel if needed.
 
 ## Data And Safety Boundaries
 

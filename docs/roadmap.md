@@ -160,7 +160,7 @@ Priority backlog:
 
 - Done: Add unit tests for openFDA query builders and PRR/ROR calculations.
 - Done: Add API route tests with mocked openFDA responses.
-- P1: Add Playwright smoke tests for dashboard loading and report generation.
+- Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.
 - P1: Add test fixtures for at least four drugs.
 - P1: Add error handling tests for no-result drugs and rate-limit responses.
 - P2: Add observability notes for API latency and failure rates.
@@ -263,4 +263,4 @@ Each meaningful feature should include:
 2. Add a dedicated OCR provider option for low-quality images.
 3. Add GitHub issues for remaining roadmap items.
 4. Add a short demo video or GIF.
-5. Done: Add Playwright smoke tests for dashboard loading and report generation.
+5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.

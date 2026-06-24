@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const analysisFixture = {
   drug: "metformin",
@@ -160,9 +160,28 @@ const reportFixture = {
   warning: "OPENAI_API_KEY is not configured; generated a local template report.",
 };
 
-test("loads a shareable full workflow and exposes report export controls", async ({
-  page,
-}) => {
+const intakeFixture = {
+  provider: "fallback",
+  drugCandidates: ["Metformin"],
+  activeIngredients: ["Metformin hydrochloride"],
+  strengths: ["500 mg"],
+  dosageForm: "tablet",
+  riskKeywords: ["adverse reactions", "renal impairment"],
+  confidence: "medium",
+  needsHumanConfirmation: true,
+  extractedText:
+    "Metformin hydrochloride tablets 500 mg. Adverse reactions include nausea and diarrhea. Contraindications: severe renal impairment.",
+  promptVersion: "medication-label-intake-v1",
+  warning: "DEEPSEEK_API_KEY is not configured; used local fallback extraction.",
+  evidence: {
+    sourceType: "ocr-text",
+  },
+  limitations: [
+    "This intake result depends on OCR or user-provided label text and may miss or misread fields.",
+  ],
+};
+
+async function mockReviewerWorkflowApis(page: Page) {
   await page.route("**/api/faers?**", async (route) => {
     await route.fulfill({ json: analysisFixture });
   });
@@ -178,6 +197,12 @@ test("loads a shareable full workflow and exposes report export controls", async
   await page.route("**/api/report", async (route) => {
     await route.fulfill({ json: reportFixture });
   });
+}
+
+test("loads a shareable full workflow and exposes report export controls", async ({
+  page,
+}) => {
+  await mockReviewerWorkflowApis(page);
 
   await page.goto("/?drug=metformin&workflow=full");
 
@@ -192,5 +217,37 @@ test("loads a shareable full workflow and exposes report export controls", async
   await expect(page.getByText("No causal claims from FAERS report counts.")).toBeVisible();
   await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByRole("button", { name: "MD" })).toBeVisible();
+  await expect(page.getByText("metformin has the higher event reporting share")).toBeVisible();
+});
+
+test("requires human confirmation before label evidence launches the full workflow", async ({
+  page,
+}) => {
+  await mockReviewerWorkflowApis(page);
+  await page.route("**/api/intake/medication", async (route) => {
+    await route.fulfill({ json: intakeFixture });
+  });
+
+  await page.goto("/");
+
+  await page
+    .getByLabel("OCR / label text")
+    .fill(
+      "Metformin hydrochloride tablets 500 mg. Adverse reactions include nausea and diarrhea. Contraindications: severe renal impairment.",
+    );
+  await page.getByRole("button", { name: "DeepSeek intake" }).click();
+
+  await expect(page.getByText("medium confidence")).toBeVisible();
+  await expect(page.getByText("Schema validated")).toBeVisible();
+  await expect(page.getByText("Human confirmation")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Metformin$/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Confirm and run workflow" }).click();
+
+  await expect(
+    page.getByText("metformin has 3,210 suspect-drug FAERS matches."),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pharmacovigilance report" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByText("metformin has the higher event reporting share")).toBeVisible();
 });
