@@ -161,8 +161,8 @@ Priority backlog:
 - Done: Add unit tests for openFDA query builders and PRR/ROR calculations.
 - Done: Add API route tests with mocked openFDA responses.
 - Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.
-- P1: Add test fixtures for at least four drugs ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
-- P1: Add error handling tests for no-result drugs and rate-limit responses ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+- Done: Add test fixtures for at least four drugs ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+- Done: Add error handling tests for no-result drugs and rate-limit responses ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
 - P2: Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
 
 Acceptance criteria:
@@ -260,7 +260,7 @@ Each meaningful feature should include:
 ## Following Actions
 
 1. Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
-2. Add multi-drug fixtures and error-path tests ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+2. Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
 3. Add analysis history and cache invalidation strategy ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 4. Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.

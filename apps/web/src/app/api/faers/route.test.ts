@@ -1,72 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 import type { FaersAnalysis } from "@/lib/types";
+import {
+  createOpenFdaFixtureFetch,
+  createOpenFdaNoResultFetch,
+  createOpenFdaRateLimitFetch,
+  faersDrugFixtures,
+} from "../../../test-utils/openFdaFixtures";
 
 const originalFetch = global.fetch;
-
-function responseJson(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function mockOpenFdaFetch() {
-  global.fetch = vi.fn(async (input) => {
-    const url = new URL(String(input));
-    const count = url.searchParams.get("count");
-
-    if (!count) {
-      return responseJson({ meta: { results: { total: 3210 } }, results: [{}] });
-    }
-
-    if (count === "patient.reaction.reactionmeddrapt.exact") {
-      return responseJson({
-        results: [
-          { term: "NAUSEA", count: 120 },
-          { term: "DIARRHOEA", count: 80 },
-        ],
-      });
-    }
-
-    if (count === "serious") {
-      return responseJson({
-        results: [
-          { term: "1", count: 700 },
-          { term: "2", count: 2510 },
-        ],
-      });
-    }
-
-    if (count === "seriousnesshospitalization") {
-      return responseJson({ results: [{ term: "1", count: 44 }] });
-    }
-
-    if (count === "patient.patientsex") {
-      return responseJson({
-        results: [
-          { term: "2", count: 1800 },
-          { term: "1", count: 1000 },
-        ],
-      });
-    }
-
-    if (count === "patient.patientonsetage") {
-      return responseJson({
-        results: [
-          { term: "66", count: 90 },
-          { term: "42", count: 30 },
-        ],
-      });
-    }
-
-    if (count === "patient.drug.drugcharacterization") {
-      return responseJson({ results: [{ term: "1", count: 3210 }] });
-    }
-
-    return responseJson({ results: [] });
-  }) as typeof fetch;
-}
 
 describe("GET /api/faers", () => {
   afterEach(() => {
@@ -84,7 +26,7 @@ describe("GET /api/faers", () => {
   });
 
   it("returns a FAERS analysis from mocked openFDA aggregate responses", async () => {
-    mockOpenFdaFetch();
+    global.fetch = vi.fn(createOpenFdaFixtureFetch(faersDrugFixtures.metformin)) as typeof fetch;
 
     const response = await GET(
       new Request("http://localhost/api/faers?drug=Metformin"),
@@ -112,8 +54,43 @@ describe("GET /api/faers", () => {
     expect(payload.limitations.join(" ")).toContain("cannot establish incidence");
   });
 
+  it.each([
+    ["metformin", faersDrugFixtures.metformin],
+    ["atorvastatin", faersDrugFixtures.atorvastatin],
+    ["ibuprofen", faersDrugFixtures.ibuprofen],
+    ["warfarin", faersDrugFixtures.warfarin],
+  ])("returns fixture-backed FAERS analysis for %s", async (drug, fixture) => {
+    global.fetch = vi.fn(createOpenFdaFixtureFetch(fixture)) as typeof fetch;
+
+    const response = await GET(
+      new Request(`http://localhost/api/faers?drug=${drug}`),
+    );
+
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as FaersAnalysis;
+
+    expect(payload.drug.toLowerCase()).toBe(drug);
+    expect(payload.totalReports).toBe(fixture.totalReports);
+    expect(payload.topReactions[0]).toEqual(fixture.topReactions[0]);
+    expect(payload.seriousness.length).toBeGreaterThan(0);
+    expect(payload.yearTrend.length).toBeGreaterThan(0);
+    expect(payload.source.search).toContain("patient.drug.drugcharacterization:1");
+  });
+
+  it("returns 404 when openFDA has no reports for the drug", async () => {
+    global.fetch = vi.fn(createOpenFdaNoResultFetch()) as typeof fetch;
+
+    const response = await GET(
+      new Request("http://localhost/api/faers?drug=notarealdrug"),
+    );
+
+    expect(response.status).toBe(404);
+    const payload = (await response.json()) as { error: string };
+    expect(payload.error).toContain("No FAERS reports found");
+  });
+
   it("returns 502 when openFDA returns an upstream error", async () => {
-    global.fetch = vi.fn(async () => responseJson({ error: "rate limit" }, 429)) as typeof fetch;
+    global.fetch = vi.fn(createOpenFdaRateLimitFetch()) as typeof fetch;
 
     const response = await GET(
       new Request("http://localhost/api/faers?drug=metformin"),

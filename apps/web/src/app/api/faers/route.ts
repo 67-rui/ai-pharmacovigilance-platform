@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { analyzeFaersDrug } from "../../../lib/openfda";
+import { NoFaersResultsError, analyzeFaersDrug } from "../../../lib/openfda";
 
 const querySchema = z.object({
   drug: z.string().trim().min(2).max(80),
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       {
         error: message,
       },
-      { status: 502 },
+      { status: error instanceof NoFaersResultsError ? 404 : 502 },
     );
   }
 }

@@ -337,7 +337,7 @@ npm run build
 Current tests cover:
 
 - openFDA query construction
-- FAERS analysis API route validation, mocked aggregate responses, and upstream error handling
+- FAERS analysis API route validation, four-drug aggregate fixtures, no-result handling, and upstream rate-limit errors
 - MedDRA event query construction
 - PRR/ROR calculations
 - ROR confidence interval behavior

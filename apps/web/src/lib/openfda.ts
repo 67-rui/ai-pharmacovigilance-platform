@@ -2,6 +2,13 @@ import type { ChartDatum, FaersAnalysis } from "./types";
 
 const EVENT_ENDPOINT = "https://api.fda.gov/drug/event.json";
 
+export class NoFaersResultsError extends Error {
+  constructor(drug: string) {
+    super(`No FAERS reports found for "${drug}".`);
+    this.name = "NoFaersResultsError";
+  }
+}
+
 type OpenFdaCountResult = {
   term?: string | number;
   time?: string | number;
@@ -340,6 +347,10 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
     countField(search, "patient.drug.drugcharacterization", 4),
     getYearTrend(search),
   ]);
+
+  if (totalReports === 0) {
+    throw new NoFaersResultsError(normalizedDrug);
+  }
 
   const sexDistribution = mapLabels(sexCounts, sexLabels).sort(
     (a, b) => b.value - a.value,

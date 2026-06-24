@@ -85,6 +85,7 @@ After deploying, run this checklist in the browser:
 ## Troubleshooting
 
 - **openFDA 429 or intermittent failures:** configure `OPENFDA_API_KEY` or retry later.
+- **No FAERS reports found:** try a generic or brand name that exists in FAERS; the app returns a 404 rather than rendering an empty analysis as evidence.
 - **Report returns template mode:** `OPENAI_API_KEY` is missing or the provider response failed schema validation.
 - **Medication intake returns fallback mode:** `DEEPSEEK_API_KEY` is missing or the provider response failed schema validation.
 - **OCR is poor on low-quality images:** switch the intake panel to Enhanced OCR, crop the label, or paste corrected label text manually before running intake.

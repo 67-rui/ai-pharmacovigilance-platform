@@ -78,7 +78,7 @@ The AI report route supports OpenAI when configured and template mode otherwise.
 
 ### Testing Story
 
-- Unit tests cover query construction, signal math, signal ranking filters, structured report generation, medication intake parsing, API fallback behavior, and history helpers.
+- Unit tests cover query construction, four-drug FAERS fixtures, no-result and rate-limit error paths, signal math, signal ranking filters, structured report generation, medication intake parsing, API fallback behavior, and history helpers.
 - Playwright smoke tests mock API responses and verify both the shareable full-workflow path `/?drug=metformin&workflow=full` and the label-evidence path from editable OCR text to human-confirmed workflow launch.
 - Screenshot generation uses the same mocked-workflow style so README assets are deterministic and do not depend on live API drift.
 
