@@ -93,7 +93,7 @@ export const REQUIRED_PORTFOLIO_EVIDENCE = [
       },
       {
         filePath: "apps/web/src/components/PharmacovigilanceDashboard.tsx",
-        terms: ["Human confirmation"],
+        terms: ["Human confirmation", "Responsible AI checklist"],
       },
     ],
   },

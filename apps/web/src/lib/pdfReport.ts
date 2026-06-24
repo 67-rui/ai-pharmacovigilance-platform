@@ -46,7 +46,7 @@ function normalizeDrug(value: string) {
   return value.trim().toLowerCase();
 }
 
-function intakeMatchesAnalysisDrug(
+export function intakeMatchesAnalysisDrug(
   intake: MedicationIntakeResult | null | undefined,
   analysisDrug: string,
 ) {
@@ -57,19 +57,20 @@ function intakeMatchesAnalysisDrug(
   );
 }
 
-export function buildPdfReportSections({
+export function buildResponsibleAiChecklist({
   analysis,
-  signal,
-  ranking,
-  comparison,
   report,
   intake,
-}: PdfReportInput): PdfReportSection[] {
-  const topReaction = analysis.topReactions[0];
+}: {
+  analysis: FaersAnalysis;
+  report: ReportResponse;
+  intake?: MedicationIntakeResult | null;
+}) {
   const matchingIntake = intakeMatchesAnalysisDrug(intake, analysis.drug)
     ? intake
     : null;
-  const responsibleAiChecklist = [
+
+  return [
     "Report schema validation: passed",
     matchingIntake
       ? "Medication-intake schema validation: passed"
@@ -92,6 +93,22 @@ export function buildPdfReportSections({
     "FAERS limitation: cannot establish incidence or causality",
     "Safety boundary: not medical advice",
   ];
+}
+
+export function buildPdfReportSections({
+  analysis,
+  signal,
+  ranking,
+  comparison,
+  report,
+  intake,
+}: PdfReportInput): PdfReportSection[] {
+  const topReaction = analysis.topReactions[0];
+  const responsibleAiChecklist = buildResponsibleAiChecklist({
+    analysis,
+    report,
+    intake,
+  });
 
   return [
     {

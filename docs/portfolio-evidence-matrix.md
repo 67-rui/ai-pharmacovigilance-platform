@@ -16,7 +16,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Enforce schema validation | `src/lib/report.ts` and `src/lib/medicationIntake.ts` validate structured AI outputs with zod before rendering. | Verified by report and medication-intake schema tests. |
 | Require human confirmation | Medication intake cannot launch FAERS analysis until a candidate is explicitly confirmed. | Verified by Playwright test for label-evidence confirmation. |
 | Show safety boundaries | README, UI copy, reports, exports, and sample report state FAERS no-causality/no-incidence limitations. | Verified in docs, sample report, report tests, and generated report quality checklist. |
-| Export reviewer artifacts | Markdown, PDF, and CSV export paths support attaching outputs to portfolio materials; PDF exports include a responsible-AI checklist for schema validation, provider mode, human confirmation, and FAERS limits. | Verified by PDF report tests and e2e report export control checks. |
+| Export reviewer artifacts | Markdown, PDF, and CSV export paths support attaching outputs to portfolio materials; the UI and PDF exports include a responsible-AI checklist for schema validation, provider mode, human confirmation, and FAERS limits. | Verified by PDF report tests and e2e report export control checks. |
 | Package as portfolio proof | README screenshots, demo video, case study, sample report, resume guide, deployment guide, this matrix, and `npm run audit:portfolio`. | Verified in repository docs and by the portfolio-goal audit; public live demo link still pending. |
 
 ## High-Value Files

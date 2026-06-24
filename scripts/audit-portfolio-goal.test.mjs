@@ -89,7 +89,7 @@ function writeCompletePortfolioFixture(rootDir) {
   writeFixture(
     rootDir,
     "apps/web/src/components/PharmacovigilanceDashboard.tsx",
-    "Human confirmation, Run full workflow, schema validation status, and FAERS limitations are visible.",
+    "Human confirmation, Responsible AI checklist, Run full workflow, schema validation status, and FAERS limitations are visible.",
   );
   writeFixture(
     rootDir,

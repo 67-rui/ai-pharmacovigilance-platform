@@ -219,6 +219,16 @@ test("loads a shareable full workflow and exposes report export controls", async
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Pharmacovigilance report" })).toBeVisible();
   await expect(page.getByText("Schema validated")).toBeVisible();
+  await expect(page.getByText("Responsible AI checklist")).toBeVisible();
+  await expect(page.getByText("Report schema validation: passed")).toBeVisible();
+  await expect(
+    page.getByText(
+      "Medication-intake schema validation: not applicable for typed drug-name workflow",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText("FAERS limitation: cannot establish incidence or causality"),
+  ).toBeVisible();
   await expect(page.getByText("No causal claims from FAERS report counts.")).toBeVisible();
   await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByRole("button", { name: "MD" })).toBeVisible();
@@ -258,6 +268,11 @@ test("requires human confirmation before label evidence launches the full workfl
     page.getByText("metformin has 3,210 suspect-drug FAERS matches."),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Pharmacovigilance report" })).toBeVisible();
+  await expect(page.getByText("Medication-intake schema validation: passed")).toBeVisible();
+  await expect(
+    page.getByText("Human confirmation before FAERS launch: required"),
+  ).toBeVisible();
+  await expect(page.getByText("Medication intake provider: fallback")).toBeVisible();
   await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByText("metformin has the higher event reporting share")).toBeVisible();
 });

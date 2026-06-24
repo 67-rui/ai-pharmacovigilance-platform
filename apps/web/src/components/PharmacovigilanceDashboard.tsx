@@ -57,7 +57,7 @@ import {
   assessOcrTextQuality,
   type OcrQualityAssessment,
 } from "@/lib/ocrQuality";
-import { buildPdfReportSections } from "@/lib/pdfReport";
+import { buildPdfReportSections, buildResponsibleAiChecklist } from "@/lib/pdfReport";
 import {
   REPORT_HISTORY_STORAGE_KEY,
   addReportHistoryEntry,
@@ -2637,6 +2637,20 @@ export function PharmacovigilanceDashboard() {
                       </div>
                       <ul className="mt-2 grid gap-2 text-sm leading-5 text-slate-700 md:grid-cols-2">
                         {report.qualityChecklist.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                        Responsible AI checklist
+                      </div>
+                      <ul className="mt-2 grid gap-2 text-sm leading-5 text-emerald-950 md:grid-cols-2">
+                        {buildResponsibleAiChecklist({
+                          analysis,
+                          report,
+                          intake: confirmedIntakeResult,
+                        }).map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
