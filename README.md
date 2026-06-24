@@ -15,6 +15,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Enter custom MedDRA preferred terms for user-defined drug-event signal checks.
 - Run a full reviewer workflow that automatically computes default signal metrics, signal ranking, drug comparison, and structured AI report output after FAERS analysis.
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
+- Filter signal rankings by interpretation, minimum report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
 - Run browser-side OCR on medication label images, then extract structured medication intake fields with DeepSeek API fallback support.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
@@ -140,6 +141,8 @@ The ranking panel computes PRR and ROR for the top reported MedDRA preferred ter
 - ROR
 
 This gives reviewers a prioritized triage table across multiple candidate events. It is still a reporting-signal workflow, not a clinical risk ranking.
+
+Reviewers can filter the ranking table by interpretation class, minimum drug-event reports, minimum PRR, and minimum ROR to focus on stronger signal candidates.
 
 ### Full Reviewer Workflow
 
@@ -323,6 +326,7 @@ Current tests cover:
 - ROR confidence interval behavior
 - Signal classification thresholds
 - Signal ranking sort order
+- Signal ranking filters for interpretation, report volume, PRR, and ROR
 - Signal ranking API route behavior
 - Full workflow request planning
 - Shareable analysis URL parsing and full-workflow query generation

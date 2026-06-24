@@ -1,5 +1,14 @@
 import type { SignalAnalysis, SignalRanking } from "./types";
 
+type SignalRankingRow = SignalRanking["rows"][number];
+
+export type SignalRankingFilters = {
+  interpretation?: SignalAnalysis["interpretation"]["label"] | "all";
+  minReports?: number;
+  minPrr?: number;
+  minRor?: number;
+};
+
 const interpretationRank: Record<SignalAnalysis["interpretation"]["label"], number> = {
   "signal-elevated": 3,
   "signal-watch": 2,
@@ -52,4 +61,33 @@ export function buildSignalRanking(
       "The ranking is a reviewer prioritization aid, not a regulatory decision rule.",
     ],
   };
+}
+
+export function filterSignalRankingRows(
+  rows: SignalRankingRow[],
+  filters: SignalRankingFilters,
+) {
+  return rows.filter((row) => {
+    if (
+      filters.interpretation &&
+      filters.interpretation !== "all" &&
+      row.interpretationLabel !== filters.interpretation
+    ) {
+      return false;
+    }
+
+    if (filters.minReports !== undefined && row.eventReports < filters.minReports) {
+      return false;
+    }
+
+    if (filters.minPrr !== undefined && (row.prr ?? -Infinity) < filters.minPrr) {
+      return false;
+    }
+
+    if (filters.minRor !== undefined && (row.ror ?? -Infinity) < filters.minRor) {
+      return false;
+    }
+
+    return true;
+  });
 }

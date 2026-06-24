@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSignalRanking } from "./ranking";
+import { buildSignalRanking, filterSignalRankingRows } from "./ranking";
 import type { SignalAnalysis } from "./types";
 
 function signal(
@@ -57,5 +57,22 @@ describe("buildSignalRanking", () => {
       ror: 3.2,
       interpretationLabel: "signal-elevated",
     });
+  });
+
+  it("filters ranked rows by interpretation and minimum signal metrics", () => {
+    const ranking = buildSignalRanking("metformin", [
+      signal("HEADACHE", 80, 1.2, 1.4, "signal-watch"),
+      signal("LACTIC ACIDOSIS", 12, 4.5, 5.1, "signal-elevated"),
+      signal("NAUSEA", 200, 2.8, 3.2, "signal-elevated"),
+    ]);
+
+    expect(
+      filterSignalRankingRows(ranking.rows, {
+        interpretation: "signal-elevated",
+        minReports: 20,
+        minPrr: 2,
+        minRor: 3,
+      }).map((row) => row.event),
+    ).toEqual(["NAUSEA"]);
   });
 });

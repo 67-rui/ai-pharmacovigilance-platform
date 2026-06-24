@@ -56,12 +56,13 @@ Priority backlog:
 - Done: Add drug-vs-drug comparison for same-class or user-selected drugs.
 - Done: Add a basic signal ranking table across top reactions using report volume, PRR, and ROR.
 - Done: Add a full reviewer workflow action that triggers signal metrics, ranking, comparison, and structured report generation from the current FAERS analysis.
-- P2: Add filters for seriousness, frequency, PRR, and ROR in the ranking table.
+- Done: Add filters for interpretation class, report frequency, PRR, and ROR in the ranking table.
 
 Acceptance criteria:
 
 - Users can select a drug and event, then see report counts for drug-event, drug-other-events, other-drugs-event, and other-drugs-other-events.
 - Users can run the main reviewer workflow from a loaded FAERS analysis without clicking each advanced panel individually.
+- Users can filter ranked signal candidates by interpretation class, report count, PRR, and ROR.
 - The UI explains that disproportionality suggests reporting signal strength, not causal risk.
 - At least one curated example demonstrates a meaningful signal interpretation.
 
@@ -256,8 +257,8 @@ Each meaningful feature should include:
 
 ## Following Actions
 
-1. Add ranking filters for seriousness, frequency, PRR, and ROR.
-2. Add deployment-ready environment documentation.
-3. Add a dedicated OCR provider option for low-quality images.
-4. Add PDF report export.
+1. Add deployment-ready environment documentation.
+2. Add a dedicated OCR provider option for low-quality images.
+3. Add PDF report export.
+4. Add Playwright smoke tests for dashboard loading and report generation.
 5. Done: Add a case study page for portfolio storytelling.

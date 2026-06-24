@@ -53,6 +53,7 @@ import {
   type ReportHistoryEntry,
 } from "@/lib/reportHistory";
 import { REPORT_TONE_OPTIONS } from "@/lib/report";
+import { filterSignalRankingRows } from "@/lib/ranking";
 import {
   buildShareableAnalysisSearch,
   parseShareableAnalysisParams,
@@ -456,6 +457,11 @@ function metricText(value: number | null) {
   return value === null ? "N/A" : value.toLocaleString();
 }
 
+function numberFilterValue(value: string) {
+  const numberValue = Number(value);
+  return value.trim() && Number.isFinite(numberValue) ? numberValue : undefined;
+}
+
 function SignalPanel({
   analysis,
   selectedEvent,
@@ -677,6 +683,20 @@ function SignalRankingPanel({
   onExportRankingCsv: () => void;
 }) {
   const candidateCount = Math.min(analysis.topReactions.length, 6);
+  const [interpretationFilter, setInterpretationFilter] = useState("all");
+  const [minReportsFilter, setMinReportsFilter] = useState("");
+  const [minPrrFilter, setMinPrrFilter] = useState("");
+  const [minRorFilter, setMinRorFilter] = useState("");
+  const filteredRows = ranking
+    ? filterSignalRankingRows(ranking.rows, {
+        interpretation: interpretationFilter as
+          | SignalAnalysis["interpretation"]["label"]
+          | "all",
+        minReports: numberFilterValue(minReportsFilter),
+        minPrr: numberFilterValue(minPrrFilter),
+        minRor: numberFilterValue(minRorFilter),
+      })
+    : [];
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -714,6 +734,74 @@ function SignalRankingPanel({
 
       {ranking ? (
         <div className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Ranking filters
+                </div>
+                <div className="text-sm text-slate-600">
+                  Showing {filteredRows.length} of {ranking.rows.length} candidate events
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-4">
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Interpretation
+                </span>
+                <select
+                  value={interpretationFilter}
+                  onChange={(event) => setInterpretationFilter(event.target.value)}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                >
+                  <option value="all">All</option>
+                  <option value="signal-elevated">Elevated</option>
+                  <option value="signal-watch">Watch</option>
+                  <option value="insufficient-data">Insufficient</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Min reports
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={minReportsFilter}
+                  onChange={(event) => setMinReportsFilter(event.target.value)}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Min PRR
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={minPrrFilter}
+                  onChange={(event) => setMinPrrFilter(event.target.value)}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Min ROR
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={minRorFilter}
+                  onChange={(event) => setMinRorFilter(event.target.value)}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="overflow-auto rounded-lg border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -728,7 +816,7 @@ function SignalRankingPanel({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white text-slate-700">
-                {ranking.rows.map((row, index) => (
+                {filteredRows.map((row, index) => (
                   <tr key={row.event}>
                     <td className="px-3 py-3 font-mono">{index + 1}</td>
                     <td className="px-3 py-3 font-semibold text-slate-950">
@@ -750,6 +838,12 @@ function SignalRankingPanel({
               </tbody>
             </table>
           </div>
+
+          {filteredRows.length === 0 ? (
+            <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
+              No signal candidates match the current filters.
+            </div>
+          ) : null}
 
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
             <div className="font-semibold">Ranking boundary</div>
