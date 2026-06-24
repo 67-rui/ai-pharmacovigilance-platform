@@ -15,6 +15,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Enter custom MedDRA preferred terms for user-defined drug-event signal checks.
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
+- Extract structured medication intake fields from OCR or label text with DeepSeek API fallback support.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown reports.
@@ -23,12 +24,14 @@ This project turns a drug name into adverse event patterns, disproportionality s
 ## Demo Workflow
 
 1. Enter a drug name, such as `metformin`, `warfarin`, `atorvastatin`, or `ibuprofen`.
-2. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
-3. Inspect the source provenance panel to understand exactly how openFDA was queried.
-4. Select or type a MedDRA preferred term, then compute PRR/ROR signal metrics.
-5. Rank the top reported MedDRA terms to prioritize signal-review candidates.
-6. Compare the selected drug against another drug for the same event.
-7. Generate a safety summary and export Markdown or CSV artifacts.
+2. Optionally upload a medication label image and paste OCR/label text for DeepSeek medication intake.
+3. Confirm the extracted drug candidate to route it into FAERS analysis.
+4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
+5. Inspect the source provenance panel to understand exactly how openFDA was queried.
+6. Select or type a MedDRA preferred term, then compute PRR/ROR signal metrics.
+7. Rank the top reported MedDRA terms to prioritize signal-review candidates.
+8. Compare the selected drug against another drug for the same event.
+9. Generate a safety summary and export Markdown or CSV artifacts.
 
 ## Product Screens
 
@@ -60,8 +63,11 @@ flowchart LR
   UI --> FaersAPI["/api/faers"]
   UI --> SignalAPI["/api/signal"]
   UI --> CompareAPI["/api/compare"]
+  UI --> IntakeAPI["/api/intake/medication"]
   UI --> ReportAPI["/api/report"]
 
+  IntakeAPI --> DeepSeek["DeepSeek API (optional)"]
+  IntakeAPI --> IntakeFallback["Local Intake Fallback"]
   FaersAPI --> OpenFDA["openFDA Drug Event API"]
   SignalAPI --> OpenFDA
   CompareAPI --> SignalAPI
@@ -141,6 +147,26 @@ The comparison panel evaluates two drugs against the same MedDRA event and shows
 
 This is a reporting-share comparison, not a clinical risk comparison.
 
+### Medication Image Intake
+
+The intake panel accepts an evidence image for preview plus OCR or label text. The API supports two modes:
+
+- `deepseek`: optional DeepSeek chat completions extraction when `DEEPSEEK_API_KEY` is available.
+- `fallback`: deterministic local extraction when no DeepSeek key is configured or the provider call fails.
+
+The result is schema-validated before rendering and includes:
+
+- Drug candidates
+- Active ingredients
+- Strengths
+- Dosage form
+- Safety-relevant label keywords
+- Confidence label
+- Human-confirmation requirement
+- Extraction limitations
+
+Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
+
 ### AI Report Generation
 
 The report API supports two modes:
@@ -175,6 +201,7 @@ Quality guardrails:
 | `GET /api/signal?drug=metformin&event=NAUSEA` | Returns PRR/ROR signal metrics for a drug-event pair. |
 | `GET /api/rankings?drug=metformin&event=NAUSEA&event=DIARRHOEA` | Ranks multiple candidate events by signal metrics. |
 | `GET /api/compare?primary=metformin&comparator=warfarin&event=NAUSEA` | Compares event reporting share across two drugs. |
+| `POST /api/intake/medication` | Extracts medication candidates and label fields from OCR or label text. |
 | `POST /api/report` | Generates a safety summary from a FAERS analysis payload. |
 
 ## Tech Stack
@@ -186,6 +213,7 @@ Quality guardrails:
 - zod
 - Vitest
 - openFDA Drug Adverse Event API
+- DeepSeek chat completions-compatible medication intake endpoint
 - OpenAI Responses API-compatible report endpoint
 
 ## Project Structure
@@ -197,9 +225,11 @@ ai-pharmacovigilance-platform/
     src/app/api/signal/route.ts
     src/app/api/rankings/route.ts
     src/app/api/compare/route.ts
+    src/app/api/intake/medication/route.ts
     src/app/api/report/route.ts
     src/components/PharmacovigilanceDashboard.tsx
     src/lib/openfda.ts
+    src/lib/medicationIntake.ts
     src/lib/report.ts
     src/lib/signal.ts
     src/lib/comparison.ts
@@ -233,9 +263,11 @@ Copy `.env.example` to `apps/web/.env.local` if you want API keys:
 OPENFDA_API_KEY=
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.5
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-chat
 ```
 
-`OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report.
+`OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction.
 
 ## Verification
 
@@ -254,6 +286,8 @@ Current tests cover:
 - Signal classification thresholds
 - Signal ranking sort order
 - Signal ranking API route behavior
+- Medication intake schema parsing and fallback extraction
+- Medication intake API fallback and mocked DeepSeek responses
 
 These unit tests do not make live openFDA requests.
 
@@ -266,6 +300,8 @@ FAERS reports are useful for post-market signal detection, but they have importa
 - A reported association does not prove that a drug caused an event.
 - Drug comparisons in this app compare reporting share, not clinical risk.
 - All AI output is framed as reviewer support, not medical advice.
+- Medication intake must be confirmed by a human before FAERS analysis.
+- OCR or label text extraction may miss, distort, or omit medication fields.
 
 ## Roadmap
 
@@ -273,7 +309,7 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 
 Near-term priorities:
 
-- Add JSON schema validation for report responses.
+- Add browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
 - Add a concise product walkthrough.
 - Add mocked API route tests.
 - Add PDF report export.
@@ -281,4 +317,4 @@ Near-term priorities:
 
 ## Resume Bullet
 
-Built an AI-powered pharmacovigilance dashboard using openFDA FAERS data to analyze adverse event patterns, rank PRR/ROR signal candidates, compare drug-event reporting shares, and generate prompt-versioned safety summaries with explicit FAERS limitations and reviewer guardrails.
+Built an AI-powered pharmacovigilance dashboard using openFDA FAERS data to analyze adverse event patterns, rank PRR/ROR signal candidates, compare drug-event reporting shares, extract medication label fields with DeepSeek-backed schema validation, and generate prompt-versioned safety summaries with explicit FAERS limitations and reviewer guardrails.

@@ -11,12 +11,16 @@ import {
 import {
   Activity,
   AlertTriangle,
+  CheckCircle2,
   Database,
   Download,
   ExternalLink,
   FileText,
+  Image as ImageIcon,
+  Pill,
   RefreshCw,
   Search,
+  Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -39,6 +43,7 @@ import type {
   ChartDatum,
   DrugComparison,
   FaersAnalysis,
+  MedicationIntakeResult,
   ReportResponse,
   SignalAnalysis,
   SignalRanking,
@@ -952,6 +957,176 @@ function SourceQueryPanel({ analysis }: { analysis: FaersAnalysis }) {
   );
 }
 
+type MedicationIntakePanelProps = {
+  imagePreviewUrl: string;
+  intakeText: string;
+  intakeResult: MedicationIntakeResult | null;
+  isIntakeLoading: boolean;
+  onImageChange: (file: File | null) => void;
+  onTextChange: (value: string) => void;
+  onRunIntake: () => void;
+  onConfirmDrug: (drug: string) => void;
+};
+
+function MedicationIntakePanel({
+  imagePreviewUrl,
+  intakeText,
+  intakeResult,
+  isIntakeLoading,
+  onImageChange,
+  onTextChange,
+  onRunIntake,
+  onConfirmDrug,
+}: MedicationIntakePanelProps) {
+  const primaryDrug = intakeResult?.drugCandidates[0];
+
+  return (
+    <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            <ImageIcon size={15} />
+            Medication image intake
+          </div>
+          <h2 className="mt-1 text-base font-semibold text-slate-950">
+            Label-to-FAERS intake
+          </h2>
+        </div>
+        <button
+          type="button"
+          onClick={onRunIntake}
+          disabled={isIntakeLoading || intakeText.trim().length < 8}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        >
+          <LoadingActionIcon isLoading={isIntakeLoading} Icon={Sparkles} />
+          DeepSeek intake
+        </button>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="space-y-3">
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Evidence image
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => onImageChange(event.target.files?.[0] ?? null)}
+              className="mt-2 block w-full text-sm text-slate-700 file:mr-3 file:h-9 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:text-sm file:font-semibold file:text-white"
+            />
+          </label>
+
+          <div className="flex min-h-52 items-center justify-center overflow-hidden rounded-md border border-dashed border-slate-300 bg-slate-50">
+            {imagePreviewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imagePreviewUrl}
+                alt="Medication evidence preview"
+                className="max-h-72 w-full object-contain"
+              />
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <ImageIcon size={17} />
+                No image selected
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              OCR / label text
+            </span>
+            <textarea
+              value={intakeText}
+              onChange={(event) => onTextChange(event.target.value)}
+              className="mt-2 min-h-52 w-full resize-y rounded-md border border-slate-300 bg-white p-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              placeholder="Metformin hydrochloride tablets 500 mg. Adverse reactions..."
+            />
+          </label>
+
+          {intakeResult ? (
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-3 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
+                <span className="rounded-md bg-emerald-100 px-2 py-1 text-emerald-800">
+                  {intakeResult.provider}
+                </span>
+                <span className="rounded-md bg-blue-100 px-2 py-1 text-blue-800">
+                  {intakeResult.confidence} confidence
+                </span>
+                <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-800">
+                  Human confirmation
+                </span>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Drug candidates
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {intakeResult.drugCandidates.map((candidate) => (
+                      <button
+                        key={candidate}
+                        type="button"
+                        onClick={() => onConfirmDrug(candidate)}
+                        className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-emerald-700 bg-white px-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50"
+                      >
+                        <Pill size={14} />
+                        {candidate}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Strengths
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-slate-700">
+                    {intakeResult.strengths.join(", ") || "Not detected"}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Active ingredients
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-slate-700">
+                    {intakeResult.activeIngredients.join(", ") || "Not detected"}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Risk keywords
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-slate-700">
+                    {intakeResult.riskKeywords.join(", ") || "Not detected"}
+                  </div>
+                </div>
+              </div>
+
+              {primaryDrug ? (
+                <button
+                  type="button"
+                  onClick={() => onConfirmDrug(primaryDrug)}
+                  className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                >
+                  <CheckCircle2 size={16} />
+                  Confirm and analyze
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function PharmacovigilanceDashboard() {
   const [drug, setDrug] = useState("metformin");
   const [analysis, setAnalysis] = useState<FaersAnalysis | null>(null);
@@ -961,22 +1136,47 @@ export function PharmacovigilanceDashboard() {
   const [ranking, setRanking] = useState<SignalRanking | null>(null);
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
+  const [intakeText, setIntakeText] = useState("");
+  const [intakeFileName, setIntakeFileName] = useState<string | undefined>();
+  const [intakeImagePreviewUrl, setIntakeImagePreviewUrl] = useState("");
+  const [intakeResult, setIntakeResult] = useState<MedicationIntakeResult | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [isSignalLoading, setIsSignalLoading] = useState(false);
   const [isRankingLoading, setIsRankingLoading] = useState(false);
   const [isComparisonLoading, setIsComparisonLoading] = useState(false);
+  const [isIntakeLoading, setIsIntakeLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const analysisRequestId = useRef(0);
   const reportRequestId = useRef(0);
   const signalRequestId = useRef(0);
   const rankingRequestId = useRef(0);
   const comparisonRequestId = useRef(0);
+  const intakeRequestId = useRef(0);
 
   const topReaction = useMemo(
     () => (analysis ? firstValue(analysis.topReactions) : "Not loaded"),
     [analysis],
   );
+
+  useEffect(() => {
+    return () => {
+      if (intakeImagePreviewUrl) {
+        URL.revokeObjectURL(intakeImagePreviewUrl);
+      }
+    };
+  }, [intakeImagePreviewUrl]);
+
+  function handleIntakeImageChange(file: File | null) {
+    if (intakeImagePreviewUrl) {
+      URL.revokeObjectURL(intakeImagePreviewUrl);
+    }
+
+    setIntakeFileName(file?.name);
+    setIntakeImagePreviewUrl(file ? URL.createObjectURL(file) : "");
+  }
 
   async function runAnalysis(nextDrug = drug) {
     const requestId = analysisRequestId.current + 1;
@@ -1055,6 +1255,49 @@ export function PharmacovigilanceDashboard() {
         setIsReporting(false);
       }
     }
+  }
+
+  async function runMedicationIntake() {
+    const requestId = intakeRequestId.current + 1;
+    intakeRequestId.current = requestId;
+    setIsIntakeLoading(true);
+    setError(null);
+    setIntakeResult(null);
+
+    try {
+      const response = await fetch("/api/intake/medication", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ocrText: intakeText,
+          fileName: intakeFileName,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Unable to extract medication intake.");
+      }
+
+      if (requestId !== intakeRequestId.current) return;
+
+      setIntakeResult(payload);
+    } catch (error) {
+      if (requestId !== intakeRequestId.current) return;
+      setError(error instanceof Error ? error.message : "Unexpected error.");
+    } finally {
+      if (requestId === intakeRequestId.current) {
+        setIsIntakeLoading(false);
+      }
+    }
+  }
+
+  function confirmIntakeDrug(nextDrug: string) {
+    if (!nextDrug || nextDrug === "Needs human review") return;
+    setDrug(nextDrug);
+    void runAnalysis(nextDrug);
   }
 
   async function runComparison() {
@@ -1263,6 +1506,21 @@ export function PharmacovigilanceDashboard() {
             <span>{error}</span>
           </div>
         ) : null}
+
+        <MedicationIntakePanel
+          imagePreviewUrl={intakeImagePreviewUrl}
+          intakeText={intakeText}
+          intakeResult={intakeResult}
+          isIntakeLoading={isIntakeLoading}
+          onImageChange={handleIntakeImageChange}
+          onTextChange={(value) => {
+            intakeRequestId.current += 1;
+            setIntakeResult(null);
+            setIntakeText(value);
+          }}
+          onRunIntake={() => void runMedicationIntake()}
+          onConfirmDrug={confirmIntakeDrug}
+        />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard

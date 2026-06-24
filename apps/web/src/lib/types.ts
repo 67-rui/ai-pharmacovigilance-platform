@@ -51,6 +51,23 @@ export type StructuredReport = {
   qualityChecks: string[];
 };
 
+export type MedicationIntakeResult = {
+  provider: "deepseek" | "fallback";
+  drugCandidates: string[];
+  activeIngredients: string[];
+  strengths: string[];
+  dosageForm?: string;
+  riskKeywords: string[];
+  confidence: "low" | "medium" | "high";
+  needsHumanConfirmation: boolean;
+  extractedText: string;
+  evidence: {
+    fileName?: string;
+    sourceType: "ocr-text" | "image-metadata";
+  };
+  limitations: string[];
+};
+
 export type SignalAnalysis = {
   drug: string;
   event: string;

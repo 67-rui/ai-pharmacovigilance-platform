@@ -11,6 +11,7 @@ The project should demonstrate:
 - Real-world public health data integration.
 - Pharmacovigilance analytics beyond simple charting.
 - AI-generated summaries with explicit limitations and source grounding.
+- Multimodal medication intake that turns label evidence into confirmed FAERS queries.
 - A usable dashboard that looks like an internal drug safety tool.
 - Engineering maturity: tests, persistence, deployment, documentation, and reproducible examples.
 
@@ -90,6 +91,32 @@ Acceptance criteria:
 Resume value:
 
 Shows responsible AI use in a regulated healthcare-adjacent context.
+
+## Stage 2.5: Medication Image Intake
+
+Status: in progress.
+
+Goal: Add a portfolio-ready multimodal intake path from medication label evidence to confirmed FAERS analysis.
+
+Priority backlog:
+
+- Done: Add medication label image preview and OCR/label text intake UI.
+- Done: Add DeepSeek API-backed medication field extraction.
+- Done: Add deterministic local fallback when `DEEPSEEK_API_KEY` is missing or the provider fails.
+- Done: Add zod schema validation for extracted medication candidates, active ingredients, strengths, safety keywords, and limitations.
+- Done: Require human confirmation before routing extracted candidates into FAERS analysis.
+- P1: Add browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
+- P1: Add saved intake evidence records with image metadata and confirmed drug name.
+
+Acceptance criteria:
+
+- Users can upload a medication label image, paste OCR/label text, extract structured fields, and confirm a drug candidate.
+- The app does not claim direct clinical decision support or autonomous medication identification.
+- Intake remains usable without DeepSeek through deterministic fallback.
+
+Resume value:
+
+Demonstrates API-backed multimodal AI workflow design, schema validation, human-in-the-loop review, and pharmacovigilance system integration.
 
 ## Stage 3: Persistence And Export
 
