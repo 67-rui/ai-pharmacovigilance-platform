@@ -4,6 +4,7 @@ import {
   checkEnvExample,
   checkPackageScripts,
   checkReadmeDeploymentLinks,
+  checkSampleReport,
   scanForPlaintextSecrets,
 } from "./check-deployment-readiness.mjs";
 
@@ -76,6 +77,7 @@ describe("deployment readiness checks", () => {
   test("requires README deployment links for portfolio reviewers", () => {
     const readme = [
       "[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)",
+      "Review the sample report at docs/sample-report.md.",
       "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
     ].join("\n");
 
@@ -83,6 +85,31 @@ describe("deployment readiness checks", () => {
     expect(checkReadmeDeploymentLinks("No deployment links here.")).toEqual([
       "README.md is missing a Deploy with Vercel link.",
       "README.md is missing the deployed demo smoke-test command.",
+      "README.md is missing a link to docs/sample-report.md.",
+    ]);
+  });
+
+  test("requires a portfolio sample report with safety guardrails", () => {
+    const sampleReport = [
+      "# Sample Pharmacovigilance Reviewer Report",
+      "Schema validated: yes",
+      "Prompt version: faers-safety-report-v2",
+      "FAERS reports cannot establish incidence, prevalence, clinical risk, or causality.",
+      "Human confirmation is required before medication-label evidence launches analysis.",
+      "PRR: 2.10",
+      "ROR: 2.20",
+      "Source provenance",
+    ].join("\n");
+
+    expect(checkSampleReport(sampleReport)).toEqual([]);
+    expect(checkSampleReport("Thin report")).toEqual([
+      "docs/sample-report.md must include the sample report title.",
+      "docs/sample-report.md must include schema validation status.",
+      "docs/sample-report.md must include prompt versioning.",
+      "docs/sample-report.md must include FAERS no-causality/no-incidence limitations.",
+      "docs/sample-report.md must include the human-confirmation boundary.",
+      "docs/sample-report.md must include PRR/ROR signal metrics.",
+      "docs/sample-report.md must include source provenance.",
     ]);
   });
 });

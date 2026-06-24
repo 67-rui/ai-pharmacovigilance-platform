@@ -25,6 +25,7 @@ const REQUIRED_ENV_KEYS = [
 const REQUIRED_FILES = [
   "README.md",
   "docs/deployment.md",
+  "docs/sample-report.md",
   "vercel.json",
   "scripts/smoke-test-live-demo.mjs",
 ];
@@ -94,6 +95,46 @@ export function checkReadmeDeploymentLinks(text) {
     findings.push("README.md is missing the deployed demo smoke-test command.");
   }
 
+  if (!text.includes("docs/sample-report.md")) {
+    findings.push("README.md is missing a link to docs/sample-report.md.");
+  }
+
+  return findings;
+}
+
+export function checkSampleReport(text) {
+  const findings = [];
+
+  if (!text.includes("# Sample Pharmacovigilance Reviewer Report")) {
+    findings.push("docs/sample-report.md must include the sample report title.");
+  }
+
+  if (!/schema validated(?:\s*:|\s*\|\s*)\s*yes/i.test(text)) {
+    findings.push("docs/sample-report.md must include schema validation status.");
+  }
+
+  if (!text.includes("faers-safety-report-v2")) {
+    findings.push("docs/sample-report.md must include prompt versioning.");
+  }
+
+  if (!text.includes("cannot establish incidence") || !text.includes("causality")) {
+    findings.push(
+      "docs/sample-report.md must include FAERS no-causality/no-incidence limitations.",
+    );
+  }
+
+  if (!text.includes("Human confirmation")) {
+    findings.push("docs/sample-report.md must include the human-confirmation boundary.");
+  }
+
+  if (!text.includes("PRR") || !text.includes("ROR")) {
+    findings.push("docs/sample-report.md must include PRR/ROR signal metrics.");
+  }
+
+  if (!text.includes("Source provenance")) {
+    findings.push("docs/sample-report.md must include source provenance.");
+  }
+
   return findings;
 }
 
@@ -159,6 +200,10 @@ export function checkDeploymentReadiness(rootDir = process.cwd()) {
 
   if (existsSync(join(rootDir, "README.md"))) {
     findings.push(...checkReadmeDeploymentLinks(readText(rootDir, "README.md")));
+  }
+
+  if (existsSync(join(rootDir, "docs/sample-report.md"))) {
+    findings.push(...checkSampleReport(readText(rootDir, "docs/sample-report.md")));
   }
 
   findings.push(...scanForPlaintextSecrets(buildSecretScanFiles(rootDir)));

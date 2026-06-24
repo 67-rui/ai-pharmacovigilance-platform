@@ -84,13 +84,14 @@ Priority backlog:
 - Done: Add report quality checklist: no causal claims, no incidence claims, mentions FAERS limitations, includes reviewer next steps.
 - Done: Add side-by-side raw statistics and AI narrative.
 - Done: Add report tone modes: pharmacist review, regulatory briefing, portfolio summary.
+- Done: Add a static sample pharmacovigilance report artifact in `docs/sample-report.md`.
 
 Acceptance criteria:
 
 - Reports remain useful without `OPENAI_API_KEY` through local template mode.
 - Reports generated with OpenAI include the same required safety boundaries.
 - Users can choose pharmacist review, regulatory briefing, or portfolio summary tone without changing the validated report schema.
-- The README includes a sample report excerpt.
+- The README links to a sample report artifact.
 
 Resume value:
 

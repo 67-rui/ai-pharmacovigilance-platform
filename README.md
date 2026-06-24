@@ -105,6 +105,8 @@ flowchart LR
 
 For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md). For resume wording and interview talking points, see [docs/resume-interview-guide.md](docs/resume-interview-guide.md).
 
+For a concrete reviewer artifact, see the [sample pharmacovigilance report](docs/sample-report.md). It shows a metformin workflow with schema validation, source provenance, PRR/ROR signal metrics, drug comparison, human-confirmation boundaries, and FAERS limitations.
+
 ### FAERS Dashboard
 
 The dashboard builds a suspect-drug search expression and uses aggregate `count` queries instead of large report downloads. This keeps the UI responsive while still showing meaningful signal-triage patterns.
