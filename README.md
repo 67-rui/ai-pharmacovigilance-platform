@@ -359,6 +359,13 @@ PUBLIC_DEMO_INTAKE_RATE_LIMIT=20
 
 The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. Vercel is optional for the core product: the app's built-in Next.js API routes also work locally, and a temporary public link can be created with Cloudflare Tunnel when a permanent deployment is not needed. See [docs/deployment.md](docs/deployment.md) for local built-in API checks, Vercel steps, Cloudflare Tunnel notes, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
 
+For a short-lived public demo without Vercel, run the dev server on `3001` and then start the local tunnel:
+
+```bash
+npm --workspace apps/web run dev -- --port 3001
+npm run tunnel:local
+```
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)
 
 ## Verification

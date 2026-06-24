@@ -127,7 +127,7 @@ cloudflared tunnel --url http://localhost:3001
 Terminal 2, localtunnel fallback through npm:
 
 ```bash
-npx localtunnel --port 3001
+npm run tunnel:local
 ```
 
 Both tools print a temporary public URL. Share that URL only while the local dev server and tunnel process are running.

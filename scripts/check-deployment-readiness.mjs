@@ -11,6 +11,7 @@ const REQUIRED_SCRIPTS = [
   "build",
   "smoke:api",
   "smoke:demo",
+  "tunnel:local",
 ];
 const BLANK_PROVIDER_KEYS = [
   "OPENFDA_API_KEY",

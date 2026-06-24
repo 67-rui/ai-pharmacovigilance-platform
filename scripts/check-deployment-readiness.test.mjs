@@ -19,13 +19,14 @@ describe("deployment readiness checks", () => {
           build: "npm --workspace apps/web run build",
           "smoke:api": "node scripts/smoke-test-local-api.mjs",
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+          "tunnel:local": "npx localtunnel --port 3001",
         },
       }),
     ).toEqual([]);
 
-    expect(checkPackageScripts({ scripts: { test: "vitest run" } })).toContain(
-      "Missing package script: smoke:api",
-    );
+    const missingScripts = checkPackageScripts({ scripts: { test: "vitest run" } });
+    expect(missingScripts).toContain("Missing package script: smoke:api");
+    expect(missingScripts).toContain("Missing package script: tunnel:local");
   });
 
   test("requires optional provider keys to stay blank in env examples", () => {
