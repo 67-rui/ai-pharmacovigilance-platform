@@ -132,13 +132,14 @@ Priority backlog:
 - P0: Save analysis history locally with SQLite or a lightweight JSON store.
 - P0: Add saved reports list with timestamp, drug, top reaction, and total reports.
 - Done: Add CSV export for chart data and signal tables.
+- Done: Add shareable analysis URLs with query parameters.
 - P1: Add PDF report export.
-- P1: Add shareable analysis URLs with query parameters.
 - P2: Add project-level cache invalidation by openFDA `last_updated`.
 
 Acceptance criteria:
 
 - A user can run an analysis, generate a report, leave the page, and reopen the saved report.
+- A user can share a `?drug=` URL for a reproducible analysis or a `?workflow=full` URL for the full reviewer pass.
 - A PDF or Markdown report can be attached to a portfolio, GitHub release, or interview deck.
 
 Resume value:

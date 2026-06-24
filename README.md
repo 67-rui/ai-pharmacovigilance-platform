@@ -20,6 +20,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown reports.
+- Share reproducible analysis links with `?drug=` and full-workflow links with `?workflow=full`.
 - Verify core query-building and signal-metric logic with Vitest.
 
 ## Demo Workflow
@@ -31,7 +32,8 @@ This project turns a drug name into adverse event patterns, disproportionality s
 5. If starting from a typed drug name, click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
 6. Inspect the source provenance panel to understand exactly how openFDA was queried.
 7. Refine the selected MedDRA preferred term or comparator drug when needed.
-8. Export Markdown or CSV artifacts.
+8. Copy the URL to reopen the selected drug analysis, or use a `?workflow=full` link to rerun the full reviewer pass.
+9. Export Markdown or CSV artifacts.
 
 ## Product Screens
 
@@ -147,6 +149,11 @@ After a FAERS analysis loads, `Run full workflow` derives a default workflow pla
 - Signal metrics, signal ranking, drug comparison, and structured report generation are triggered together.
 
 This turns a drug name or confirmed medication-label candidate into a more complete reviewer workspace with fewer manual clicks. The medication-label path still requires human confirmation before any FAERS query or AI report generation starts.
+
+Shareable URLs make the workflow reproducible:
+
+- `/?drug=metformin` opens the dashboard and runs the FAERS analysis for metformin.
+- `/?drug=metformin&workflow=full` runs the FAERS analysis and then triggers the full reviewer workflow.
 
 ### Drug Comparison
 
@@ -306,6 +313,7 @@ Current tests cover:
 - Signal ranking sort order
 - Signal ranking API route behavior
 - Full workflow request planning
+- Shareable analysis URL parsing and full-workflow query generation
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
 

@@ -40,6 +40,10 @@ import {
 import { ChartPanel } from "./ChartPanel";
 import { EmptyChart } from "./EmptyChart";
 import { MetricCard } from "./MetricCard";
+import {
+  buildShareableAnalysisSearch,
+  parseShareableAnalysisParams,
+} from "@/lib/shareableAnalysis";
 import { buildWorkflowRequestPlan } from "@/lib/workflow";
 import type {
   ChartDatum,
@@ -1245,6 +1249,18 @@ export function PharmacovigilanceDashboard() {
   );
 
   useEffect(() => {
+    const sharedAnalysis = parseShareableAnalysisParams(window.location.search);
+
+    if (!sharedAnalysis) return;
+
+    void runAnalysis(sharedAnalysis.drug, {
+      runWorkflow: sharedAnalysis.runWorkflow,
+      syncUrl: false,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (intakeImagePreviewUrl) {
         URL.revokeObjectURL(intakeImagePreviewUrl);
@@ -1298,7 +1314,18 @@ export function PharmacovigilanceDashboard() {
     }
   }
 
-  async function runAnalysis(nextDrug = drug, options?: { runWorkflow?: boolean }) {
+  function syncAnalysisUrl(nextDrug: string, options?: { runWorkflow?: boolean }) {
+    const nextSearch = buildShareableAnalysisSearch(nextDrug, options);
+
+    if (window.location.search === nextSearch) return;
+
+    window.history.replaceState(null, "", `${window.location.pathname}${nextSearch}`);
+  }
+
+  async function runAnalysis(
+    nextDrug = drug,
+    options?: { runWorkflow?: boolean; syncUrl?: boolean },
+  ) {
     const requestId = analysisRequestId.current + 1;
     analysisRequestId.current = requestId;
     reportRequestId.current += 1;
@@ -1327,6 +1354,10 @@ export function PharmacovigilanceDashboard() {
 
       if (requestId !== analysisRequestId.current) return;
 
+      if (options?.syncUrl !== false) {
+        syncAnalysisUrl(payload.drug, { runWorkflow: options?.runWorkflow });
+      }
+      setDrug(payload.drug);
       setAnalysis(payload);
       const nextComparatorDrug = payload.drug.toLowerCase() === "warfarin" ? "metformin" : "warfarin";
       setComparatorDrug(nextComparatorDrug);
@@ -1426,6 +1457,7 @@ export function PharmacovigilanceDashboard() {
 
   async function runFullWorkflow() {
     if (!analysis) return;
+    syncAnalysisUrl(analysis.drug, { runWorkflow: true });
     await runWorkflowForAnalysis(analysis, comparatorDrug);
   }
 
