@@ -40,6 +40,7 @@ const report: ReportResponse = {
   },
   promptVersion: "faers-safety-report-v2",
   qualityChecklist: ["Mentions FAERS limitations"],
+  tone: "pharmacist-review",
 };
 
 describe("report history", () => {

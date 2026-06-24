@@ -38,9 +38,15 @@ export type ReportResponse = {
   structuredReport: StructuredReport;
   promptVersion: string;
   qualityChecklist: string[];
+  tone: ReportTone;
   model?: string;
   warning?: string;
 };
+
+export type ReportTone =
+  | "pharmacist-review"
+  | "regulatory-briefing"
+  | "portfolio-summary";
 
 export type StructuredReport = {
   title: string;

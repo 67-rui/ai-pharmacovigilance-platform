@@ -3,11 +3,13 @@ import { z } from "zod";
 import {
   REPORT_PROMPT_VERSION,
   REPORT_QUALITY_CHECKLIST,
+  REPORT_TONE_OPTIONS,
   buildTemplateStructuredReport,
   parseStructuredReport,
+  reportToneSchema,
   structuredReportToMarkdown,
 } from "../../../lib/report";
-import type { FaersAnalysis, ReportResponse } from "@/lib/types";
+import type { FaersAnalysis, ReportResponse, ReportTone } from "@/lib/types";
 
 const chartDatumSchema = z.object({
   label: z.string(),
@@ -47,12 +49,17 @@ const analysisSchema = z.object({
 
 const bodySchema = z.object({
   analysis: analysisSchema,
+  tone: reportToneSchema.default("pharmacist-review"),
 });
 
-function buildPrompt(analysis: FaersAnalysis) {
+function buildPrompt(analysis: FaersAnalysis, tone: ReportTone) {
+  const toneOption = REPORT_TONE_OPTIONS[tone];
+
   return [
     "You are preparing a pharmacovigilance triage report for a pharmacist or drug safety reviewer.",
     `Prompt version: ${REPORT_PROMPT_VERSION}.`,
+    `Report tone: ${toneOption.label}.`,
+    `Tone instruction: ${toneOption.instruction}`,
     "Use only the JSON statistics below. Do not invent clinical facts or causal claims.",
     "Return strict JSON only. Do not wrap it in Markdown or a code fence.",
     "The JSON object must contain these keys exactly: title, safetySignalOverview, keyPatterns, reviewerFollowUp, limitations, qualityChecks.",
@@ -73,9 +80,10 @@ function parseJsonFromText(text: string) {
 
 function buildTemplateResponse(
   analysis: FaersAnalysis,
+  tone: ReportTone,
   warning?: string,
 ): ReportResponse {
-  const structuredReport = buildTemplateStructuredReport(analysis);
+  const structuredReport = buildTemplateStructuredReport(analysis, tone);
 
   return {
     mode: "template",
@@ -83,6 +91,7 @@ function buildTemplateResponse(
     structuredReport,
     promptVersion: REPORT_PROMPT_VERSION,
     qualityChecklist: REPORT_QUALITY_CHECKLIST,
+    tone,
     warning,
   };
 }
@@ -113,6 +122,7 @@ function extractResponseText(payload: unknown) {
 
 async function generateOpenAiReport(
   analysis: FaersAnalysis,
+  tone: ReportTone,
 ): Promise<ReportResponse> {
   const model = process.env.OPENAI_MODEL || "gpt-5.5";
   const response = await fetch("https://api.openai.com/v1/responses", {
@@ -123,7 +133,7 @@ async function generateOpenAiReport(
     },
     body: JSON.stringify({
       model,
-      input: buildPrompt(analysis),
+      input: buildPrompt(analysis, tone),
       max_output_tokens: 900,
     }),
   });
@@ -146,6 +156,7 @@ async function generateOpenAiReport(
     structuredReport,
     promptVersion: REPORT_PROMPT_VERSION,
     qualityChecklist: REPORT_QUALITY_CHECKLIST,
+    tone,
   };
 }
 
@@ -174,22 +185,24 @@ export async function POST(request: Request) {
   }
 
   const analysis = parsed.data.analysis as FaersAnalysis;
+  const tone = parsed.data.tone;
 
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
       buildTemplateResponse(
         analysis,
+        tone,
         "OPENAI_API_KEY is not configured; generated a local template report.",
       ),
     );
   }
 
   try {
-    return NextResponse.json(await generateOpenAiReport(analysis));
+    return NextResponse.json(await generateOpenAiReport(analysis, tone));
   } catch (error) {
     const warning =
       error instanceof Error ? error.message : "OpenAI report generation failed.";
 
-    return NextResponse.json(buildTemplateResponse(analysis, warning));
+    return NextResponse.json(buildTemplateResponse(analysis, tone, warning));
   }
 }

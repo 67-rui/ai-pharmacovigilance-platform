@@ -202,6 +202,12 @@ The report API supports two modes:
 
 The current report prompt is versioned in [docs/prompts/faers-safety-report-v2.md](docs/prompts/faers-safety-report-v2.md). Report responses include the prompt version, a structured report object, derived Markdown, and a quality checklist.
 
+Reports can be generated in three tone modes while keeping the same schema and safety guardrails:
+
+- `pharmacist-review`: patient-facing medication safety review context.
+- `regulatory-briefing`: concise drug safety documentation and escalation context.
+- `portfolio-summary`: technical portfolio review context for explaining the AI workflow.
+
 Report output is validated with a zod schema before it is rendered. This gives the AI layer an explicit contract:
 
 - `title`
@@ -319,6 +325,7 @@ Current tests cover:
 - Full workflow request planning
 - Shareable analysis URL parsing and full-workflow query generation
 - Saved reviewer history entry generation, deduplication, and size limits
+- AI report tone modes and schema-preserving report generation
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
 

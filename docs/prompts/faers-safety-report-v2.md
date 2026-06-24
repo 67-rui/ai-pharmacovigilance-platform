@@ -29,6 +29,16 @@ The UI renders the validated JSON as these reviewer-facing sections:
 4. Limitations
 5. Report Quality Checklist
 
+## Tone Modes
+
+The API accepts a `tone` field and keeps the same JSON contract for every mode:
+
+- `pharmacist-review`: write for a pharmacist reviewing medication safety evidence and practical follow-up questions.
+- `regulatory-briefing`: write for drug safety documentation, evidence traceability, and escalation considerations.
+- `portfolio-summary`: write for a technical portfolio viewer, emphasizing AI workflow design, reproducibility, and responsible limitations.
+
+Tone changes wording and emphasis only. It must not remove FAERS limitations, schema fields, source grounding, or human-review boundaries.
+
 ## Quality Checklist
 
 - No causal claims from FAERS report counts.

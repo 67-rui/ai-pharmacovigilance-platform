@@ -46,6 +46,7 @@ import {
   buildReportHistoryEntry,
   type ReportHistoryEntry,
 } from "@/lib/reportHistory";
+import { REPORT_TONE_OPTIONS } from "@/lib/report";
 import {
   buildShareableAnalysisSearch,
   parseShareableAnalysisParams,
@@ -57,12 +58,16 @@ import type {
   FaersAnalysis,
   MedicationIntakeResult,
   ReportResponse,
+  ReportTone,
   SignalAnalysis,
   SignalRanking,
 } from "@/lib/types";
 
 const pieColors = ["#0f766e", "#be123c", "#2563eb", "#64748b"];
 const examples = ["metformin", "atorvastatin", "ibuprofen", "warfarin"];
+const reportToneEntries = Object.entries(REPORT_TONE_OPTIONS) as Array<
+  [ReportTone, (typeof REPORT_TONE_OPTIONS)[ReportTone]]
+>;
 
 function formatNumber(value: number) {
   return value.toLocaleString();
@@ -1246,6 +1251,7 @@ export function PharmacovigilanceDashboard() {
   const [ranking, setRanking] = useState<SignalRanking | null>(null);
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
+  const [reportTone, setReportTone] = useState<ReportTone>("pharmacist-review");
   const [reportHistory, setReportHistory] = useState<ReportHistoryEntry[]>([]);
   const [intakeText, setIntakeText] = useState("");
   const [intakeImageFile, setIntakeImageFile] = useState<File | null>(null);
@@ -1446,7 +1452,7 @@ export function PharmacovigilanceDashboard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ analysis }),
+        body: JSON.stringify({ analysis, tone: reportTone }),
       });
       const payload = await response.json();
 
@@ -1557,7 +1563,7 @@ export function PharmacovigilanceDashboard() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ analysis: nextAnalysis }),
+          body: JSON.stringify({ analysis: nextAnalysis, tone: reportTone }),
         }),
       };
 
@@ -1964,15 +1970,34 @@ export function PharmacovigilanceDashboard() {
                       Safety highlights
                     </h2>
                   </div>
-                  <button
-                    type="button"
-                    onClick={generateReport}
-                    disabled={isReporting}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-                  >
-                    <LoadingActionIcon isLoading={isReporting} Icon={FileText} />
-                    Report
-                  </button>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <label className="sr-only" htmlFor="report-tone">
+                      Report tone
+                    </label>
+                    <select
+                      id="report-tone"
+                      value={reportTone}
+                      onChange={(event) =>
+                        setReportTone(event.target.value as ReportTone)
+                      }
+                      className="h-10 rounded-md border border-slate-300 bg-white px-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                    >
+                      {reportToneEntries.map(([value, option]) => (
+                        <option key={value} value={value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={generateReport}
+                      disabled={isReporting}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    >
+                      <LoadingActionIcon isLoading={isReporting} Icon={FileText} />
+                      Report
+                    </button>
+                  </div>
                 </div>
 
                 <ul className="space-y-3 text-sm leading-6 text-slate-700">
@@ -2014,6 +2039,9 @@ export function PharmacovigilanceDashboard() {
                       </span>
                       <span className="rounded-md bg-emerald-100 px-2 py-1 text-emerald-800">
                         {report.promptVersion}
+                      </span>
+                      <span className="rounded-md bg-violet-100 px-2 py-1 text-violet-800">
+                        {REPORT_TONE_OPTIONS[report.tone].label}
                       </span>
                       <span className="rounded-md bg-blue-100 px-2 py-1 text-blue-800">
                         Schema validated

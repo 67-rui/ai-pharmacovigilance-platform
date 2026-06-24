@@ -71,7 +71,7 @@ describe("POST /api/report", () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ analysis }),
+        body: JSON.stringify({ analysis, tone: "portfolio-summary" }),
       }),
     );
 
@@ -79,7 +79,9 @@ describe("POST /api/report", () => {
     const payload = (await response.json()) as ReportResponse;
 
     expect(payload.mode).toBe("template");
-    expect(payload.structuredReport.title).toBe("metformin FAERS Safety Summary");
+    expect(payload.tone).toBe("portfolio-summary");
+    expect(payload.structuredReport.title).toBe("metformin FAERS Portfolio Summary");
+    expect(payload.structuredReport.safetySignalOverview).toContain("technical portfolio viewer");
     expect(payload.structuredReport.safetySignalOverview).toContain("cannot establish");
     expect(payload.structuredReport.keyPatterns).toContain(
       "Most frequently reported reactions: NAUSEA (120).",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildTemplateStructuredReport,
+  reportToneSchema,
   structuredReportSchema,
   structuredReportToMarkdown,
 } from "./report";
@@ -54,10 +55,27 @@ describe("structured pharmacovigilance reports", () => {
       buildTemplateStructuredReport(analysis),
     );
 
-    expect(markdown).toContain("## metformin FAERS Safety Summary");
+    expect(markdown).toContain("## metformin FAERS Pharmacist Review");
     expect(markdown).toContain("### Safety Signal Overview");
     expect(markdown).toContain("### Key Patterns");
     expect(markdown).toContain("### Reviewer Follow-up");
     expect(markdown).toContain("### Limitations");
+  });
+
+  it("supports report tone modes while preserving safety guardrails", () => {
+    expect(reportToneSchema.parse("regulatory-briefing")).toBe(
+      "regulatory-briefing",
+    );
+
+    const report = buildTemplateStructuredReport(
+      analysis,
+      "regulatory-briefing",
+    );
+
+    expect(structuredReportSchema.safeParse(report).success).toBe(true);
+    expect(report.title).toContain("Regulatory Briefing");
+    expect(report.reviewerFollowUp.join(" ")).toContain("documentation");
+    expect(report.limitations.join(" ")).toContain("cannot establish");
+    expect(report.qualityChecks).toContain("No causal claims from FAERS report counts.");
   });
 });
