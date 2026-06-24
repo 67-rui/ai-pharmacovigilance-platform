@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildShareableAnalysisSearch,
+  parseShareableLabelParams,
   parseShareableAnalysisParams,
 } from "./shareableAnalysis";
 
@@ -28,6 +29,18 @@ describe("shareable analysis URLs", () => {
     expect(parseShareableAnalysisParams(search)).toEqual({
       drug: "Metformin",
       runWorkflow: true,
+    });
+  });
+
+  it("parses the sample label evidence shortcut separately from drug analysis", () => {
+    expect(parseShareableLabelParams("?label=sample")).toEqual({
+      sampleLabel: true,
+    });
+    expect(parseShareableLabelParams("?drug=metformin&label=sample")).toEqual({
+      sampleLabel: true,
+    });
+    expect(parseShareableLabelParams("?label=unknown")).toEqual({
+      sampleLabel: false,
     });
   });
 });

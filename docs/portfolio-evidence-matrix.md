@@ -7,7 +7,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Goal requirement | Current evidence | Verification status |
 | --- | --- | --- |
 | Start from a drug name | `/?drug=metformin` shareable URL support and the FAERS search form in `PharmacovigilanceDashboard.tsx`. | Verified locally by mocked Playwright workflow and unit tests. |
-| Start from medication-label evidence | Browser OCR/editable label text, `Use sample label`, `/api/intake/medication`, DeepSeek-compatible extraction, deterministic fallback, and confirmed evidence history. | Verified locally by `tests/e2e/dashboard.spec.ts` label-evidence path and intake route tests. |
+| Start from medication-label evidence | Browser OCR/editable label text, `Use sample label`, `/?label=sample`, `/api/intake/medication`, DeepSeek-compatible extraction, deterministic fallback, and confirmed evidence history. | Verified locally by `tests/e2e/dashboard.spec.ts` label-evidence path, shareable sample-label path, and intake route tests. |
 | Query FAERS data | `/api/faers` calls openFDA aggregate endpoints and returns source provenance, chart-ready aggregates, and freshness metadata. | Verified by mocked API route tests and deployment readiness checks; live public URL still pending. |
 | Run signal analysis | `/api/signal` and `src/lib/signal.ts` compute PRR, ROR, ROR confidence interval, interpretation labels, and 2x2 counts. | Verified by Vitest signal tests. |
 | Rank candidate events | `/api/rankings` and `src/lib/ranking.ts` rank MedDRA preferred terms by interpretation, report count, PRR, and ROR with filters. | Verified by ranking unit tests and route tests. |
@@ -40,7 +40,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 3. Open the signal panel and explain the 2x2 table, PRR, ROR, and ROR confidence interval.
 4. Show the signal ranking filters and drug comparison table.
 5. Open the AI report and point out prompt version, schema validation, quality checks, and FAERS limitations.
-6. Paste medication-label text, run intake, and emphasize that FAERS analysis starts only after candidate confirmation.
+6. Open `/?label=sample` or paste medication-label text, run intake, and emphasize that FAERS analysis starts only after candidate confirmation.
 7. Export the Markdown or PDF report as the reviewer artifact.
 
 ## Completion Status

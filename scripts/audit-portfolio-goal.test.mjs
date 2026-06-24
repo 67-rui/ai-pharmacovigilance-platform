@@ -25,6 +25,7 @@ function writeCompletePortfolioFixture(rootDir) {
       "not medical advice",
       "schema validation",
       "human confirmation",
+      "?label=sample",
       "PRR",
       "ROR",
     ].join("\n"),
@@ -88,6 +89,11 @@ function writeCompletePortfolioFixture(rootDir) {
   );
   writeFixture(
     rootDir,
+    "apps/web/src/lib/shareableAnalysis.ts",
+    "parseShareableAnalysisParams parseShareableLabelParams sampleLabel",
+  );
+  writeFixture(
+    rootDir,
     "apps/web/src/components/PharmacovigilanceDashboard.tsx",
     "Human confirmation, Responsible AI checklist, Use sample label, Run full workflow, schema validation status, and FAERS limitations are visible.",
   );
@@ -143,6 +149,25 @@ describe("portfolio goal audit", () => {
 
       expect(auditPortfolioGoal(rootDir)).toContain(
         "Missing portfolio evidence for responsible-AI safety boundaries: apps/web/src/lib/pdfReport.ts must include Report schema validation: passed, Medication-intake schema validation, Human confirmation before FAERS launch, FAERS limitation: cannot establish incidence or causality.",
+      );
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test("reports missing shareable sample-label evidence entry", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "portfolio-goal-label-entry-fail-"));
+
+    try {
+      writeCompletePortfolioFixture(rootDir);
+      writeFixture(
+        rootDir,
+        "apps/web/src/lib/shareableAnalysis.ts",
+        "parseShareableAnalysisParams handles drug-name links only.",
+      );
+
+      expect(auditPortfolioGoal(rootDir)).toContain(
+        "Missing portfolio evidence for medication-label evidence entry: apps/web/src/lib/shareableAnalysis.ts must include parseShareableLabelParams, sampleLabel.",
       );
     } finally {
       rmSync(rootDir, { recursive: true, force: true });

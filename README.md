@@ -21,14 +21,14 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown/PDF reports.
-- Share reproducible analysis links with `?drug=` and full-workflow links with `?workflow=full`.
+- Share reproducible analysis links with `?drug=`, full-workflow links with `?workflow=full`, and sample medication-label evidence links with `?label=sample`.
 - Save recent FAERS analysis and reviewer report history locally with drug, top reaction, report count, freshness metadata, prompt version, and reopen links.
 - Verify core query-building and signal-metric logic with Vitest.
 
 ## Demo Workflow
 
 1. Enter a drug name, such as `metformin`, `warfarin`, `atorvastatin`, or `ibuprofen`.
-2. Optionally upload a medication label image, run browser OCR, or click `Use sample label`, then review/edit the extracted label text.
+2. Optionally upload a medication label image, run browser OCR, click `Use sample label`, or open `/?label=sample`, then review/edit the extracted label text.
 3. Run DeepSeek medication intake, then confirm the extracted drug candidate to launch FAERS analysis and the full reviewer workflow.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
 5. If starting from a typed drug name, click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.

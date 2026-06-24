@@ -10,6 +10,14 @@ export function parseShareableAnalysisParams(search: string) {
   };
 }
 
+export function parseShareableLabelParams(search: string) {
+  const params = new URLSearchParams(search);
+
+  return {
+    sampleLabel: params.get("label") === "sample",
+  };
+}
+
 export function buildShareableAnalysisSearch(
   drug: string,
   options?: { runWorkflow?: boolean },

@@ -69,6 +69,7 @@ import { filterSignalRankingRows } from "@/lib/ranking";
 import {
   buildShareableAnalysisSearch,
   parseShareableAnalysisParams,
+  parseShareableLabelParams,
 } from "@/lib/shareableAnalysis";
 import { buildWorkflowRequestPlan } from "@/lib/workflow";
 import type {
@@ -1679,7 +1680,12 @@ export function PharmacovigilanceDashboard() {
   }, []);
 
   useEffect(() => {
+    const sharedLabel = parseShareableLabelParams(window.location.search);
     const sharedAnalysis = parseShareableAnalysisParams(window.location.search);
+
+    if (sharedLabel.sampleLabel) {
+      applySampleMedicationLabel();
+    }
 
     if (!sharedAnalysis) return;
 
@@ -1711,7 +1717,7 @@ export function PharmacovigilanceDashboard() {
     setOcrQuality(null);
   }
 
-  function useSampleMedicationLabel() {
+  function applySampleMedicationLabel() {
     intakeRequestId.current += 1;
     setIntakeResult(null);
     setConfirmedIntakeResult(null);
@@ -2407,7 +2413,7 @@ export function PharmacovigilanceDashboard() {
           onOcrModeChange={setOcrMode}
           onRunOcr={() => void runBrowserOcr()}
           onRunIntake={() => void runMedicationIntake()}
-          onUseSampleLabel={useSampleMedicationLabel}
+          onUseSampleLabel={applySampleMedicationLabel}
           onConfirmDrug={confirmIntakeDrug}
         />
 

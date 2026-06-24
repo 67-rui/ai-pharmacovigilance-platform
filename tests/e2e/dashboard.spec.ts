@@ -275,3 +275,37 @@ test("requires human confirmation before label evidence launches the full workfl
   await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByText("metformin has the higher event reporting share")).toBeVisible();
 });
+
+test("preloads sample label evidence from URL without bypassing confirmation", async ({
+  page,
+}) => {
+  await mockReviewerWorkflowApis(page);
+  await page.route("**/api/intake/medication", async (route) => {
+    await route.fulfill({ json: intakeFixture });
+  });
+
+  await page.goto("/?label=sample");
+
+  await expect(page.getByLabel("OCR / label text")).toHaveValue(
+    /Metformin hydrochloride tablets 500 mg/,
+  );
+  await expect(page.getByText("Waiting for first analysis")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Pharmacovigilance report" }),
+  ).toHaveCount(0);
+
+  await page.getByRole("button", { name: "DeepSeek intake" }).click();
+
+  await expect(page.getByText("Human confirmation")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Metformin$/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Confirm and run workflow" }).click();
+
+  await expect(
+    page.getByText("metformin has 3,210 suspect-drug FAERS matches."),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pharmacovigilance report" })).toBeVisible();
+  await expect(
+    page.getByText("Human confirmation before FAERS launch: required"),
+  ).toBeVisible();
+});

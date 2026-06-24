@@ -20,8 +20,16 @@ export const REQUIRED_PORTFOLIO_EVIDENCE = [
     label: "medication-label evidence entry",
     checks: [
       {
+        filePath: "README.md",
+        terms: ["?label=sample"],
+      },
+      {
         filePath: "apps/web/src/app/api/intake/medication/route.ts",
         terms: ["DEEPSEEK_API_KEY", "needsHumanConfirmation", "buildFallbackResponse"],
+      },
+      {
+        filePath: "apps/web/src/lib/shareableAnalysis.ts",
+        terms: ["parseShareableLabelParams", "sampleLabel"],
       },
     ],
   },
