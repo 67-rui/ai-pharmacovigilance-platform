@@ -59,6 +59,10 @@ The repository includes `vercel.json` so the important project settings travel w
 - Dev command: `npm run dev`
 - Node runtime: `>=20` from `package.json`
 
+One-click import path:
+
+[Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)
+
 GitHub import path:
 
 1. Import `67-rui/ai-pharmacovigilance-platform` into Vercel.

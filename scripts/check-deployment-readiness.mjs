@@ -83,6 +83,20 @@ export function checkEnvExample(text) {
   return findings;
 }
 
+export function checkReadmeDeploymentLinks(text) {
+  const findings = [];
+
+  if (!text.includes("https://vercel.com/new/clone?repository-url=")) {
+    findings.push("README.md is missing a Deploy with Vercel link.");
+  }
+
+  if (!text.includes("DEMO_URL=https://your-project.vercel.app npm run smoke:demo")) {
+    findings.push("README.md is missing the deployed demo smoke-test command.");
+  }
+
+  return findings;
+}
+
 export function scanForPlaintextSecrets(files) {
   const findings = [];
 
@@ -141,6 +155,10 @@ export function checkDeploymentReadiness(rootDir = process.cwd()) {
 
   if (existsSync(join(rootDir, "apps/web/.env.example"))) {
     findings.push(...checkEnvExample(readText(rootDir, "apps/web/.env.example")));
+  }
+
+  if (existsSync(join(rootDir, "README.md"))) {
+    findings.push(...checkReadmeDeploymentLinks(readText(rootDir, "README.md")));
   }
 
   findings.push(...scanForPlaintextSecrets(buildSecretScanFiles(rootDir)));

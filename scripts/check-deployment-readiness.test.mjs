@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   checkEnvExample,
   checkPackageScripts,
+  checkReadmeDeploymentLinks,
   scanForPlaintextSecrets,
 } from "./check-deployment-readiness.mjs";
 
@@ -69,6 +70,19 @@ describe("deployment readiness checks", () => {
       ]),
     ).toEqual([
       "Potential plaintext secret in docs/example.md: OpenAI/DeepSeek-style API key",
+    ]);
+  });
+
+  test("requires README deployment links for portfolio reviewers", () => {
+    const readme = [
+      "[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)",
+      "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
+    ].join("\n");
+
+    expect(checkReadmeDeploymentLinks(readme)).toEqual([]);
+    expect(checkReadmeDeploymentLinks("No deployment links here.")).toEqual([
+      "README.md is missing a Deploy with Vercel link.",
+      "README.md is missing the deployed demo smoke-test command.",
     ]);
   });
 });

@@ -345,6 +345,8 @@ PUBLIC_DEMO_INTAKE_RATE_LIMIT=20
 
 The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. See [docs/deployment.md](docs/deployment.md) for deployment steps, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)
+
 ## Verification
 
 ```bash
