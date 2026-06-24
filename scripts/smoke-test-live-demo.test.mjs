@@ -30,6 +30,7 @@ describe("live demo smoke-test CLI helpers", () => {
   test("builds a reproducible full-workflow URL from the base URL", () => {
     expect(buildSmokeUrls("https://demo.example.com", "metformin")).toEqual({
       homeUrl: "https://demo.example.com/",
+      labelSampleUrl: "https://demo.example.com/?label=sample",
       workflowUrl: "https://demo.example.com/?drug=metformin&workflow=full",
     });
   });

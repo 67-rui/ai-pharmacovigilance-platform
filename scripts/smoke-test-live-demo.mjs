@@ -272,12 +272,15 @@ export function resolveSmokeOptions(argv = process.argv.slice(2), env = process.
 
 export function buildSmokeUrls(baseUrl, drug = DEFAULT_DRUG) {
   const homeUrl = new URL("/", `${baseUrl}/`);
+  const labelSampleUrl = new URL("/", `${baseUrl}/`);
   const workflowUrl = new URL("/", `${baseUrl}/`);
+  labelSampleUrl.searchParams.set("label", "sample");
   workflowUrl.searchParams.set("drug", drug);
   workflowUrl.searchParams.set("workflow", "full");
 
   return {
     homeUrl: homeUrl.toString(),
+    labelSampleUrl: labelSampleUrl.toString(),
     workflowUrl: workflowUrl.toString(),
   };
 }
@@ -335,11 +338,18 @@ async function verifyFullWorkflow(page, workflowUrl, timeoutMs) {
   });
 }
 
-async function verifyLabelIntakePath(page, homeUrl, timeoutMs) {
-  await page.goto(homeUrl, { waitUntil: "domcontentloaded", timeout: timeoutMs });
+async function verifyLabelIntakePath(page, labelSampleUrl, timeoutMs) {
+  await page.goto(labelSampleUrl, {
+    waitUntil: "domcontentloaded",
+    timeout: timeoutMs,
+  });
   const labelText = page.getByLabel("OCR / label text");
-  await labelText.click();
-  await labelText.pressSequentially(SAMPLE_LABEL_TEXT);
+  await expect(labelText).toHaveValue(/Metformin hydrochloride tablets 500 mg/, {
+    timeout: 20_000,
+  });
+  await expect(page.getByText("Waiting for first analysis")).toBeVisible({
+    timeout: 20_000,
+  });
 
   const intakeButton = page.getByRole("button", { name: "DeepSeek intake" });
   await expect(intakeButton).toBeEnabled({ timeout: 20_000 });
@@ -376,7 +386,10 @@ async function newSmokePage(browser, options) {
 }
 
 export async function runLiveDemoSmoke(options) {
-  const { homeUrl, workflowUrl } = buildSmokeUrls(options.baseUrl, options.drug);
+  const { homeUrl, labelSampleUrl, workflowUrl } = buildSmokeUrls(
+    options.baseUrl,
+    options.drug,
+  );
   const browser = await chromium.launch({
     channel: "chrome",
     headless: !options.headed,
@@ -397,9 +410,9 @@ export async function runLiveDemoSmoke(options) {
     console.log("PASS shareable full workflow");
 
     page = await newSmokePage(browser, options);
-    await verifyLabelIntakePath(page, homeUrl, options.timeoutMs);
+    await verifyLabelIntakePath(page, labelSampleUrl, options.timeoutMs);
     await page.close();
-    console.log("PASS label evidence confirmation workflow");
+    console.log("PASS shareable sample-label confirmation workflow");
   } finally {
     await browser.close();
   }
