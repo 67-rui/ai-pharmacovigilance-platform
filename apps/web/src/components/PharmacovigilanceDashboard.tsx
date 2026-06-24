@@ -40,6 +40,7 @@ import {
 import { ChartPanel } from "./ChartPanel";
 import { EmptyChart } from "./EmptyChart";
 import { MetricCard } from "./MetricCard";
+import { buildWorkflowRequestPlan } from "@/lib/workflow";
 import type {
   ChartDatum,
   DrugComparison,
@@ -1227,6 +1228,7 @@ export function PharmacovigilanceDashboard() {
   const [isComparisonLoading, setIsComparisonLoading] = useState(false);
   const [isIntakeLoading, setIsIntakeLoading] = useState(false);
   const [isOcrLoading, setIsOcrLoading] = useState(false);
+  const [isWorkflowLoading, setIsWorkflowLoading] = useState(false);
   const [ocrProgress, setOcrProgress] = useState<number | null>(null);
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -1308,6 +1310,7 @@ export function PharmacovigilanceDashboard() {
     setIsSignalLoading(false);
     setIsRankingLoading(false);
     setIsComparisonLoading(false);
+    setIsWorkflowLoading(false);
     setError(null);
     setReport(null);
     setSignal(null);
@@ -1416,6 +1419,90 @@ export function PharmacovigilanceDashboard() {
     if (!nextDrug || nextDrug === "Needs human review") return;
     setDrug(nextDrug);
     void runAnalysis(nextDrug);
+  }
+
+  async function runFullWorkflow() {
+    if (!analysis) return;
+    const plan = buildWorkflowRequestPlan(analysis, comparatorDrug);
+    setIsWorkflowLoading(true);
+    setIsReporting(true);
+    setIsSignalLoading(plan.canRunSignal);
+    setIsRankingLoading(plan.canRunRanking);
+    setIsComparisonLoading(plan.canRunComparison);
+    setError(null);
+
+    try {
+      setSelectedEvent(plan.defaultEvent);
+      setComparatorDrug(plan.comparatorDrug);
+
+      const requests = {
+        signal: plan.canRunSignal
+          ? fetch(
+              `/api/signal?drug=${encodeURIComponent(analysis.drug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
+            )
+          : Promise.resolve(null),
+        ranking: plan.canRunRanking
+          ? fetch(
+              `/api/rankings?${new URLSearchParams([
+                ["drug", analysis.drug],
+                ...plan.rankingEvents.map((event) => ["event", event] as [string, string]),
+              ]).toString()}`,
+            )
+          : Promise.resolve(null),
+        comparison: plan.canRunComparison
+          ? fetch(
+              `/api/compare?primary=${encodeURIComponent(analysis.drug)}&comparator=${encodeURIComponent(plan.comparatorDrug)}&event=${encodeURIComponent(plan.defaultEvent)}`,
+            )
+          : Promise.resolve(null),
+        report: fetch("/api/report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ analysis }),
+        }),
+      };
+
+      const [signalResponse, rankingResponse, comparisonResponse, reportResponse] =
+        await Promise.all([
+          requests.signal,
+          requests.ranking,
+          requests.comparison,
+          requests.report,
+        ]);
+
+      if (signalResponse) {
+        const payload = await signalResponse.json();
+        if (!signalResponse.ok) throw new Error(payload.error ?? "Unable to compute signal metrics.");
+        setSignal(payload);
+      }
+
+      if (rankingResponse) {
+        const payload = await rankingResponse.json();
+        if (!rankingResponse.ok) throw new Error(payload.error ?? "Unable to rank signal candidates.");
+        setRanking(payload);
+      }
+
+      if (comparisonResponse) {
+        const payload = await comparisonResponse.json();
+        if (!comparisonResponse.ok) throw new Error(payload.error ?? "Unable to compare drugs.");
+        setComparison(payload);
+      }
+
+      const reportPayload = await reportResponse.json();
+      if (!reportResponse.ok) {
+        throw new Error(reportPayload.error ?? "Unable to generate report.");
+      }
+      setReport(reportPayload);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unexpected error.");
+    } finally {
+      setIsWorkflowLoading(false);
+      setIsReporting(false);
+      setIsSignalLoading(false);
+      setIsRankingLoading(false);
+      setIsComparisonLoading(false);
+    }
   }
 
   async function runComparison() {
@@ -1669,7 +1756,16 @@ export function PharmacovigilanceDashboard() {
 
         {analysis ? (
           <>
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => void runFullWorkflow()}
+                disabled={isWorkflowLoading}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              >
+                <LoadingActionIcon isLoading={isWorkflowLoading} Icon={Sparkles} />
+                Run full workflow
+              </button>
               <button
                 type="button"
                 onClick={exportAnalysisCsv}

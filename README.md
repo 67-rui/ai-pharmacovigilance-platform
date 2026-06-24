@@ -13,6 +13,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Inspect source provenance, including query assumptions and public openFDA request URLs.
 - Compute PRR and ROR disproportionality metrics with a 2x2 reporting table and ROR 95% confidence interval.
 - Enter custom MedDRA preferred terms for user-defined drug-event signal checks.
+- Run a full reviewer workflow that automatically computes default signal metrics, signal ranking, drug comparison, and structured AI report output after FAERS analysis.
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
 - Run browser-side OCR on medication label images, then extract structured medication intake fields with DeepSeek API fallback support.
@@ -27,11 +28,10 @@ This project turns a drug name into adverse event patterns, disproportionality s
 2. Optionally upload a medication label image, run browser OCR, and review/edit the extracted label text.
 3. Run DeepSeek medication intake, then confirm the extracted drug candidate to route it into FAERS analysis.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
-5. Inspect the source provenance panel to understand exactly how openFDA was queried.
-6. Select or type a MedDRA preferred term, then compute PRR/ROR signal metrics.
-7. Rank the top reported MedDRA terms to prioritize signal-review candidates.
-8. Compare the selected drug against another drug for the same event.
-9. Generate a safety summary and export Markdown or CSV artifacts.
+5. Click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
+6. Inspect the source provenance panel to understand exactly how openFDA was queried.
+7. Refine the selected MedDRA preferred term or comparator drug when needed.
+8. Export Markdown or CSV artifacts.
 
 ## Product Screens
 
@@ -137,6 +137,17 @@ The ranking panel computes PRR and ROR for the top reported MedDRA preferred ter
 
 This gives reviewers a prioritized triage table across multiple candidate events. It is still a reporting-signal workflow, not a clinical risk ranking.
 
+### Full Reviewer Workflow
+
+After a FAERS analysis loads, `Run full workflow` derives a default workflow plan from the current analysis:
+
+- The top reported MedDRA preferred term becomes the default signal event.
+- The top six reported events are used for signal ranking.
+- A comparator drug is selected from the current comparator field, with a safe fallback when it matches the primary drug.
+- Signal metrics, signal ranking, drug comparison, and structured report generation are triggered together.
+
+This turns a drug name or confirmed medication-label candidate into a more complete reviewer workspace with fewer manual clicks.
+
 ### Drug Comparison
 
 The comparison panel evaluates two drugs against the same MedDRA event and shows:
@@ -237,6 +248,7 @@ ai-pharmacovigilance-platform/
     src/lib/medicationIntake.ts
     src/lib/report.ts
     src/lib/signal.ts
+    src/lib/workflow.ts
     src/lib/comparison.ts
     src/lib/*.test.ts
   docs/
@@ -293,6 +305,7 @@ Current tests cover:
 - Signal classification thresholds
 - Signal ranking sort order
 - Signal ranking API route behavior
+- Full workflow request planning
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
 

@@ -55,11 +55,13 @@ Priority backlog:
 - Done: Add event search so reviewers can select a MedDRA preferred term.
 - Done: Add drug-vs-drug comparison for same-class or user-selected drugs.
 - Done: Add a basic signal ranking table across top reactions using report volume, PRR, and ROR.
+- Done: Add a full reviewer workflow action that triggers signal metrics, ranking, comparison, and structured report generation from the current FAERS analysis.
 - P2: Add filters for seriousness, frequency, PRR, and ROR in the ranking table.
 
 Acceptance criteria:
 
 - Users can select a drug and event, then see report counts for drug-event, drug-other-events, other-drugs-event, and other-drugs-other-events.
+- Users can run the main reviewer workflow from a loaded FAERS analysis without clicking each advanced panel individually.
 - The UI explains that disproportionality suggests reporting signal strength, not causal risk.
 - At least one curated example demonstrates a meaningful signal interpretation.
 

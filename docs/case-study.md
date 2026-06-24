@@ -17,7 +17,8 @@ Create a reviewer-ready workspace that supports a realistic pharmacovigilance wo
 3. Explore aggregate adverse event patterns and source query provenance.
 4. Compute PRR/ROR signal metrics and drug-vs-drug reporting-share comparisons.
 5. Generate structured AI safety summaries with explicit FAERS limitations.
-6. Keep every AI-assisted step schema-validated, explainable, and safe for human review.
+6. Provide a full reviewer workflow that automatically runs the main analysis steps after a drug candidate is confirmed.
+7. Keep every AI-assisted step schema-validated, explainable, and safe for human review.
 
 ## System Architecture
 
@@ -31,6 +32,10 @@ flowchart LR
   Confirm --> Faers["openFDA FAERS Queries"]
   DrugInput --> Faers
   Faers --> Dashboard["Dashboard Panels"]
+  Faers --> Workflow["Full Reviewer Workflow"]
+  Workflow --> Signal
+  Workflow --> Compare
+  Workflow --> Report
   Faers --> Signal["PRR / ROR Signal Analysis"]
   Signal --> Compare["Drug Comparison"]
   Dashboard --> Report["AI Structured Report"]
@@ -59,6 +64,10 @@ The output is validated against a zod schema before rendering:
 
 The `/api/report` route generates a structured pharmacovigilance summary from the FAERS analysis payload. It uses OpenAI when configured and deterministic template mode otherwise. Both modes return the same structured report shape and derived Markdown export.
 
+### Full Reviewer Workflow
+
+The dashboard includes a `Run full workflow` action after FAERS analysis. It selects the top reported MedDRA preferred term as the default signal event, ranks the top reported events, compares the selected drug against a comparator, and generates the structured AI report in one reviewer-oriented pass.
+
 ## Responsible AI Controls
 
 - Model outputs are parsed as JSON and validated with zod schemas.
@@ -79,6 +88,7 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 - Drug-vs-drug reporting-share comparison.
 - Browser-side medication label OCR with editable evidence text.
 - DeepSeek-compatible medication label extraction workflow.
+- One-click reviewer workflow for signal metrics, ranking, comparison, and AI report generation.
 - OpenAI-compatible structured report generation workflow.
 - Vitest coverage for core query builders, signal math, rankings, medication intake, and report schema behavior.
 
@@ -94,14 +104,13 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 3. Review the schema-validated extraction.
 4. Confirm `Metformin` to launch FAERS analysis.
 5. Inspect adverse reaction charts, seriousness distribution, outcomes, demographics, and year trend.
-6. Review the source provenance panel to see the exact openFDA query URLs.
-7. Compute PRR/ROR for a selected MedDRA preferred term.
-8. Run drug comparison against another product.
-9. Generate the AI pharmacovigilance report and inspect guardrails, structured sections, and Markdown export.
+6. Click `Run full workflow` to compute PRR/ROR, signal ranking, comparison, and structured report output.
+7. Review the source provenance panel to see the exact openFDA query URLs.
+8. Inspect guardrails, structured report sections, and Markdown export.
 
 ## Resume Bullets
 
-- Built an AI pharmacovigilance workspace that converts drug names or medication-label evidence into FAERS signal triage, PRR/ROR analytics, drug comparison, and schema-validated AI safety reports.
+- Built an AI pharmacovigilance workspace that converts drug names or medication-label evidence into automated FAERS signal triage, PRR/ROR analytics, drug comparison, and schema-validated AI safety reports.
 - Integrated browser-side OCR and DeepSeek-compatible medication label extraction with human confirmation, deterministic fallback, and zod schema validation before routing confirmed drug candidates into FAERS workflows.
 - Implemented responsible AI controls for a healthcare-adjacent product, including prompt versioning, structured output validation, source provenance, explicit FAERS limitations, and no-causality/no-incidence guardrails.
 
