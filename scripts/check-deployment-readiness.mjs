@@ -124,6 +124,22 @@ export function checkReadmeDeploymentLinks(text) {
     findings.push("README.md is missing a link to docs/sample-report.md.");
   }
 
+  if (!text.includes("/?label=sample")) {
+    findings.push("README.md must document that live smoke covers /?label=sample.");
+  }
+
+  return findings;
+}
+
+export function checkDeploymentGuide(text) {
+  const findings = [];
+
+  if (!text.includes("/?label=sample")) {
+    findings.push(
+      "docs/deployment.md must document that live smoke covers /?label=sample.",
+    );
+  }
+
   return findings;
 }
 
@@ -258,6 +274,10 @@ export function checkDeploymentReadiness(rootDir = process.cwd()) {
 
   if (existsSync(join(rootDir, "README.md"))) {
     findings.push(...checkReadmeDeploymentLinks(readText(rootDir, "README.md")));
+  }
+
+  if (existsSync(join(rootDir, "docs/deployment.md"))) {
+    findings.push(...checkDeploymentGuide(readText(rootDir, "docs/deployment.md")));
   }
 
   if (existsSync(join(rootDir, "render.yaml"))) {
