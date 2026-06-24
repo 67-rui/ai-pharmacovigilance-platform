@@ -24,6 +24,7 @@ import {
   ScanText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { jsPDF } from "jspdf";
 import {
   Area,
   AreaChart,
@@ -46,6 +47,7 @@ import {
   buildIntakeEvidenceHistoryEntry,
   type IntakeEvidenceHistoryEntry,
 } from "@/lib/intakeEvidenceHistory";
+import { buildPdfReportSections } from "@/lib/pdfReport";
 import {
   REPORT_HISTORY_STORAGE_KEY,
   addReportHistoryEntry,
@@ -102,6 +104,59 @@ function toMarkdownFile(drug: string, report: string) {
     `${drug.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-faers-report.md`,
     blob,
   );
+}
+
+function toPdfFile(
+  analysis: FaersAnalysis,
+  report: ReportResponse,
+  signal: SignalAnalysis | null,
+  ranking: SignalRanking | null,
+  comparison: DrugComparison | null,
+) {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const margin = 48;
+  const maxWidth = 516;
+  const lineHeight = 14;
+  let y = margin;
+
+  const addPageIfNeeded = (nextHeight = lineHeight) => {
+    if (y + nextHeight > 744) {
+      doc.addPage();
+      y = margin;
+    }
+  };
+
+  const addText = (text: string, size = 10, style: "normal" | "bold" = "normal") => {
+    doc.setFont("helvetica", style);
+    doc.setFontSize(size);
+    const lines = doc.splitTextToSize(text, maxWidth) as string[];
+    lines.forEach((line) => {
+      addPageIfNeeded(lineHeight);
+      doc.text(line, margin, y);
+      y += lineHeight;
+    });
+  };
+
+  doc.setProperties({
+    title: `${analysis.drug} FAERS Pharmacovigilance Report`,
+    subject: "AI-assisted pharmacovigilance reviewer report",
+    creator: "AI Pharmacovigilance Platform",
+  });
+
+  addText(`${analysis.drug} FAERS Pharmacovigilance Report`, 16, "bold");
+  addText("AI-assisted reviewer artifact with FAERS and responsible-AI guardrails.", 10);
+  y += 10;
+
+  buildPdfReportSections({ analysis, signal, ranking, comparison, report }).forEach(
+    (section) => {
+      addPageIfNeeded(36);
+      addText(section.title, 12, "bold");
+      section.lines.forEach((line) => addText(`- ${line}`));
+      y += 8;
+    },
+  );
+
+  doc.save(`${slug(analysis.drug)}-faers-report.pdf`);
 }
 
 function csvValue(value: string | number | null | undefined) {
@@ -1883,6 +1938,11 @@ export function PharmacovigilanceDashboard() {
     );
   }
 
+  function exportReportPdf() {
+    if (!analysis || !report) return;
+    toPdfFile(analysis, report, signal, ranking, comparison);
+  }
+
   function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     void runAnalysis();
@@ -2229,14 +2289,24 @@ export function PharmacovigilanceDashboard() {
                     </h2>
                   </div>
                   {report ? (
-                    <button
-                      type="button"
-                      onClick={() => toMarkdownFile(analysis.drug, report.report)}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
-                    >
-                      <Download size={16} />
-                      MD
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={exportReportPdf}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-emerald-700 px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50"
+                      >
+                        <Download size={16} />
+                        PDF
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toMarkdownFile(analysis.drug, report.report)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+                      >
+                        <Download size={16} />
+                        MD
+                      </button>
+                    </div>
                   ) : null}
                 </div>
 

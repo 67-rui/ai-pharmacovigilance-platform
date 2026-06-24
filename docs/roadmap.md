@@ -186,6 +186,7 @@ Priority backlog:
 - P0: Deploy a public demo with safe rate limits.
 - P1: Add a short demo video or GIF.
 - Done: Add deployment-ready environment documentation in `docs/deployment.md`.
+- Done: Add browser-side PDF report export.
 - Done: Add a technical case study page in `docs/case-study.md`.
 - P1: Add resume bullets and interview talking points.
 - P2: Add GitHub issues for each roadmap item.
@@ -259,7 +260,7 @@ Each meaningful feature should include:
 ## Following Actions
 
 1. Add a dedicated OCR provider option for low-quality images.
-2. Add PDF report export.
-3. Add Playwright smoke tests for dashboard loading and report generation.
-4. Deploy a public demo with safe rate limits.
+2. Add Playwright smoke tests for dashboard loading and report generation.
+3. Deploy a public demo with safe rate limits.
+4. Add README walkthrough with fresh screenshots.
 5. Done: Add a case study page for portfolio storytelling.
