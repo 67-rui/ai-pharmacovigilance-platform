@@ -315,6 +315,7 @@ See [docs/deployment.md](docs/deployment.md) for deployment steps, safe demo con
 
 ```bash
 npm run test
+npm run test:e2e
 npm run lint
 npm run build
 ```
@@ -341,6 +342,8 @@ Current tests cover:
 
 These unit tests do not make live openFDA requests.
 
+The Playwright smoke test uses mocked API responses to verify that `/?drug=metformin&workflow=full` loads the dashboard, runs the full reviewer workflow, renders schema-validated report content, and exposes Markdown/PDF export controls. The local config uses the system Chrome channel; on a new machine or CI runner without Chrome, install a Playwright browser with `npx playwright install chromium` and adjust the channel if needed.
+
 ## Data And Safety Boundaries
 
 FAERS reports are useful for post-market signal detection, but they have important limitations:
@@ -360,7 +363,7 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 Near-term priorities:
 
 - Add a concise product walkthrough.
-- Add Playwright smoke tests for dashboard loading and report generation.
+- Deploy a public demo with safe rate limits.
 
 ## Resume Bullet
 

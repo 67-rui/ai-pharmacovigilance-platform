@@ -260,7 +260,7 @@ Each meaningful feature should include:
 ## Following Actions
 
 1. Add a dedicated OCR provider option for low-quality images.
-2. Add Playwright smoke tests for dashboard loading and report generation.
+2. Done: Add Playwright smoke tests for dashboard loading and report generation.
 3. Deploy a public demo with safe rate limits.
 4. Add README walkthrough with fresh screenshots.
 5. Done: Add a case study page for portfolio storytelling.

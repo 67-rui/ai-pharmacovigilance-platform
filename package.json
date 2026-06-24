@@ -9,9 +9,11 @@
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
-    "test": "vitest run"
+    "test": "vitest run apps/web/src",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "vitest": "^4.1.9"
   }
 }
