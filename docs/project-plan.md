@@ -59,7 +59,7 @@ DEMO_URL=https://your-project.vercel.app npm run smoke:demo
 
 The core local product is implemented and verified. The remaining public-facing milestone is a shareable public access path:
 
-1. Deploy the repository to Vercel, Render, Railway, another Next.js API-compatible host, or expose the local server temporarily with Cloudflare Tunnel.
+1. Deploy the repository to Vercel, use the included Render Blueprint, deploy to Railway or another Next.js API-compatible host, or expose the local server temporarily with Cloudflare Tunnel.
 2. Keep OpenAI and DeepSeek keys optional so fallback modes remain demoable.
 3. Prefer configuring `OPENFDA_API_KEY` for public rate-limit stability.
 4. Run the live smoke test against the public URL when using a permanent deployment.

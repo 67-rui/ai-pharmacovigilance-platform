@@ -31,7 +31,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 | Medication intake | `apps/web/src/lib/medicationIntake.ts`, `apps/web/src/lib/ocrQuality.ts`, `apps/web/src/app/api/intake/medication/route.ts` |
 | Structured reports | `apps/web/src/lib/report.ts`, `apps/web/src/app/api/report/route.ts`, `docs/prompts/faers-safety-report-v2.md` |
 | Human-in-loop history | `apps/web/src/lib/intakeEvidenceHistory.ts`, `apps/web/src/lib/analysisHistory.ts`, `apps/web/src/lib/reportHistory.ts` |
-| Deployment safety | `vercel.json`, `scripts/check-deployment-readiness.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
+| Deployment safety | `vercel.json`, `render.yaml`, `scripts/check-deployment-readiness.mjs`, `scripts/smoke-test-live-demo.mjs`, `docs/deployment.md` |
 
 ## Interview Demo Script
 
@@ -47,7 +47,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 
 Local implementation and verification are complete for the core portfolio workflow. Public portfolio completion still requires:
 
-1. Use a public access path that supports Next.js App Router API routes: Vercel, Render, Railway, another Node host, or a temporary Cloudflare Tunnel for short live reviews.
+1. Use a public access path that supports Next.js App Router API routes: Vercel, the included Render Blueprint, Railway, another Node host, or a temporary Cloudflare Tunnel for short live reviews.
 2. Run `DEMO_URL=https://your-public-url.example npm run smoke:demo` for a permanent deployment.
 3. Add the live demo URL to `README.md`, `docs/deployment.md`, and the GitHub repository homepage.
 4. Close GitHub issue #1 after the deployed smoke test passes.

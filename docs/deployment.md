@@ -84,6 +84,28 @@ npx vercel --prod
 
 The app uses API routes for `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication`, so static-only hosting is not sufficient.
 
+## Render Blueprint Deployment
+
+The repository also includes `render.yaml` for a non-Vercel deployment path that still runs the built-in Next.js API routes.
+
+Recommended Render path:
+
+1. In Render, create a new Blueprint from the GitHub repository.
+2. Confirm the web service uses `runtime: node`.
+3. Confirm the build command is `npm install && npm run build`.
+4. Confirm the start command is `npm run start`.
+5. Leave `OPENAI_API_KEY` and `DEEPSEEK_API_KEY` empty if you want deterministic fallback modes visible.
+6. Add `OPENFDA_API_KEY` if you want more stable public FAERS rate limits.
+7. Deploy from `main`.
+
+Render will provide the public URL after the service is live. Use that URL with:
+
+```bash
+DEMO_URL=https://your-render-service.onrender.com npm run smoke:demo
+```
+
+Render's free web services can sleep after inactivity, so the first request may be slower than Vercel or a paid Node host. That cold start is acceptable for portfolio review as long as the smoke test passes after the service wakes.
+
 ## Generic Node Hosting
 
 Vercel is optional. Render, Railway, Fly.io, a VPS, or another Node host can run the same Next.js frontend and built-in API routes as long as the platform supports a long-running Node process.

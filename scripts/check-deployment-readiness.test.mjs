@@ -1,9 +1,14 @@
 import { describe, expect, test } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
+  checkDeploymentReadiness,
   checkEnvExample,
   checkPackageScripts,
   checkReadmeDeploymentLinks,
+  checkRenderBlueprint,
   checkSampleReport,
   scanForPlaintextSecrets,
 } from "./check-deployment-readiness.mjs";
@@ -107,6 +112,87 @@ describe("deployment readiness checks", () => {
       "README.md is missing the deployed demo smoke-test command.",
       "README.md is missing a link to docs/sample-report.md.",
     ]);
+  });
+
+  test("requires a non-Vercel Node hosting blueprint", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "pv-deploy-"));
+
+    try {
+      writeFileSync(
+        join(rootDir, "package.json"),
+        JSON.stringify({
+          scripts: {
+            test: "vitest run apps/web/src scripts",
+            "test:e2e": "playwright test",
+            lint: "npm --workspace apps/web run lint",
+            build: "npm --workspace apps/web run build",
+            start: "npm --workspace apps/web run start --",
+            "smoke:api": "node scripts/smoke-test-local-api.mjs",
+            "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+            "tunnel:local": "npx localtunnel --port 3001",
+          },
+        }),
+      );
+      writeFileSync(
+        join(rootDir, "README.md"),
+        [
+          "[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)",
+          "Review the sample report at docs/sample-report.md.",
+          "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
+        ].join("\n"),
+      );
+
+      const findings = checkDeploymentReadiness(rootDir);
+
+      expect(findings).toContain("Missing required file: render.yaml");
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test("requires Render blueprint to run the built-in Next.js API app", () => {
+    const renderBlueprint = [
+      "services:",
+      "  - type: web",
+      "    runtime: node",
+      "    buildCommand: npm install && npm run build",
+      "    startCommand: npm run start",
+      "    healthCheckPath: /",
+      "    envVars:",
+      "      - key: OPENFDA_API_KEY",
+      "        sync: false",
+      "      - key: OPENAI_API_KEY",
+      "        sync: false",
+      "      - key: DEEPSEEK_API_KEY",
+      "        sync: false",
+    ].join("\n");
+
+    expect(checkRenderBlueprint(renderBlueprint)).toEqual([]);
+    expect(checkRenderBlueprint("services: []")).toEqual([
+      "render.yaml must define a Node web service.",
+      "render.yaml must build with npm install && npm run build.",
+      "render.yaml must start with npm run start.",
+      "render.yaml must expose / as the health check path.",
+      "render.yaml must document OPENFDA_API_KEY, OPENAI_API_KEY, and DEEPSEEK_API_KEY as environment variables.",
+    ]);
+  });
+
+  test("scans Render blueprint for plaintext provider keys", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "pv-render-secret-"));
+
+    try {
+      writeFileSync(join(rootDir, "README.md"), "");
+      writeFileSync(
+        join(rootDir, "render.yaml"),
+        "envVars:\n  - key: OPENAI_API_KEY\n    value: sk-1234567890abcdef1234567890abcdef\n",
+      );
+
+      expect(checkDeploymentReadiness(rootDir)).toContain(
+        "Potential plaintext secret in render.yaml: OpenAI/DeepSeek-style API key",
+      );
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
   });
 
   test("requires a portfolio sample report with safety guardrails", () => {

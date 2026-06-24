@@ -284,6 +284,7 @@ Quality guardrails:
 
 ```text
 ai-pharmacovigilance-platform/
+  render.yaml
   scripts/
     smoke-test-live-demo.mjs
   apps/web/
@@ -364,7 +365,7 @@ PUBLIC_DEMO_INTAKE_RATE_LIMIT=20
 
 `OPENFDA_API_KEY` is optional but increases openFDA rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key. `PUBLIC_DEMO_*_RATE_LIMIT` values tune the built-in per-IP, per-route fixed-window API limits for public portfolio deployments.
 
-The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. Vercel is optional for the core product: the app's built-in Next.js API routes also work locally, and Render, Railway, Fly.io, a VPS, or another Node host can run the app with `npm run build` followed by `npm run start`. A temporary public link can be created with Cloudflare Tunnel when a permanent deployment is not needed. See [docs/deployment.md](docs/deployment.md) for local built-in API checks, non-Vercel Node hosting, Vercel steps, Cloudflare Tunnel notes, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
+The repository includes `vercel.json` for a Next.js Vercel deployment and `render.yaml` for a Render Blueprint deployment from the repository root. Vercel is optional for the core product: the app's built-in Next.js API routes also work locally, and Render, Railway, Fly.io, a VPS, or another Node host can run the app with `npm run build` followed by `npm run start`. A temporary public link can be created with Cloudflare Tunnel when a permanent deployment is not needed. See [docs/deployment.md](docs/deployment.md) for local built-in API checks, Render Blueprint setup, non-Vercel Node hosting, Vercel steps, Cloudflare Tunnel notes, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
 
 For a short-lived public demo without Vercel, run the dev server on `3001` and then start the local tunnel:
 

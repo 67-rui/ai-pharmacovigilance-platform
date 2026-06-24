@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: ai-pharmacovigilance-platform
+    runtime: node
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: OPENFDA_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.5
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
+      - key: PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: PUBLIC_DEMO_FAERS_RATE_LIMIT
+        value: 30
+      - key: PUBLIC_DEMO_SIGNAL_RATE_LIMIT
+        value: 60
+      - key: PUBLIC_DEMO_RANKINGS_RATE_LIMIT
+        value: 20
+      - key: PUBLIC_DEMO_COMPARE_RATE_LIMIT
+        value: 30
+      - key: PUBLIC_DEMO_REPORT_RATE_LIMIT
+        value: 20
+      - key: PUBLIC_DEMO_INTAKE_RATE_LIMIT
+        value: 20

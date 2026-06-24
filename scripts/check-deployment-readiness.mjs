@@ -36,6 +36,7 @@ const REQUIRED_FILES = [
   "docs/deployment.md",
   "docs/sample-report.md",
   "vercel.json",
+  "render.yaml",
   "scripts/smoke-test-local-api.mjs",
   "scripts/smoke-test-live-demo.mjs",
 ];
@@ -123,6 +124,38 @@ export function checkReadmeDeploymentLinks(text) {
   return findings;
 }
 
+export function checkRenderBlueprint(text) {
+  const findings = [];
+
+  if (!text.includes("type: web") || !text.includes("runtime: node")) {
+    findings.push("render.yaml must define a Node web service.");
+  }
+
+  if (!text.includes("buildCommand: npm install && npm run build")) {
+    findings.push("render.yaml must build with npm install && npm run build.");
+  }
+
+  if (!text.includes("startCommand: npm run start")) {
+    findings.push("render.yaml must start with npm run start.");
+  }
+
+  if (!text.includes("healthCheckPath: /")) {
+    findings.push("render.yaml must expose / as the health check path.");
+  }
+
+  if (
+    !text.includes("OPENFDA_API_KEY") ||
+    !text.includes("OPENAI_API_KEY") ||
+    !text.includes("DEEPSEEK_API_KEY")
+  ) {
+    findings.push(
+      "render.yaml must document OPENFDA_API_KEY, OPENAI_API_KEY, and DEEPSEEK_API_KEY as environment variables.",
+    );
+  }
+
+  return findings;
+}
+
 export function checkSampleReport(text) {
   const findings = [];
 
@@ -196,6 +229,7 @@ function buildSecretScanFiles(rootDir) {
     "apps/web/.env.example",
     "package.json",
     "vercel.json",
+    "render.yaml",
   ];
 
   return filePaths
@@ -221,6 +255,10 @@ export function checkDeploymentReadiness(rootDir = process.cwd()) {
 
   if (existsSync(join(rootDir, "README.md"))) {
     findings.push(...checkReadmeDeploymentLinks(readText(rootDir, "README.md")));
+  }
+
+  if (existsSync(join(rootDir, "render.yaml"))) {
+    findings.push(...checkRenderBlueprint(readText(rootDir, "render.yaml")));
   }
 
   if (existsSync(join(rootDir, "docs/sample-report.md"))) {
