@@ -282,6 +282,8 @@ Quality guardrails:
 
 ```text
 ai-pharmacovigilance-platform/
+  scripts/
+    smoke-test-live-demo.mjs
   apps/web/
     src/app/api/faers/route.ts
     src/app/api/signal/route.ts
@@ -341,6 +343,7 @@ The repository includes `vercel.json` for a Next.js Vercel deployment from the r
 ```bash
 npm run test
 npm run test:e2e
+npm run smoke:demo -- http://localhost:3000 --mock
 npm run lint
 npm run build
 ```
@@ -369,6 +372,14 @@ Current tests cover:
 These unit tests do not make live openFDA requests.
 
 The Playwright smoke tests use mocked API responses to verify that `/?drug=metformin&workflow=full` loads the dashboard, runs the full reviewer workflow, renders schema-validated report content, and exposes Markdown/PDF export controls. They also verify the label-evidence path: editable OCR text, schema-validated medication intake, human confirmation, and confirmed-drug workflow launch. The local config uses the system Chrome channel; on a new machine or CI runner without Chrome, install a Playwright browser with `npx playwright install chromium` and adjust the channel if needed.
+
+After deploying a public demo, run the live smoke script against the deployed URL:
+
+```bash
+DEMO_URL=https://your-project.vercel.app npm run smoke:demo
+```
+
+The live smoke script does not mock API routes by default. It checks the homepage, shareable full-workflow URL, schema-validated report output, source provenance, and medication label-text confirmation path. Use `--mock` only for local self-checks of the script and browser selectors.
 
 ## Data And Safety Boundaries
 

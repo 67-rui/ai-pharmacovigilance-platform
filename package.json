@@ -12,10 +12,11 @@
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
-    "test": "vitest run apps/web/src",
+    "test": "vitest run apps/web/src scripts",
     "test:e2e": "playwright test",
     "screenshots": "node scripts/capture-readme-screenshots.mjs",
-    "demo:video": "node scripts/capture-demo-video.mjs"
+    "demo:video": "node scripts/capture-demo-video.mjs",
+    "smoke:demo": "node scripts/smoke-test-live-demo.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

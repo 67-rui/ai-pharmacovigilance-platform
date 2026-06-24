@@ -72,6 +72,20 @@ npx vercel --prod
 
 The app uses API routes for `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication`, so static-only hosting is not sufficient.
 
+After deployment, verify the public URL with the automated smoke script:
+
+```bash
+DEMO_URL=https://your-project.vercel.app npm run smoke:demo
+```
+
+The smoke script opens Chrome with Playwright and checks the homepage, `/?drug=metformin&workflow=full`, and the medication label-text confirmation path. It uses live API routes by default. For a local self-check of the smoke script itself, run against a local dev server with mocked API responses:
+
+```bash
+npm run smoke:demo -- http://localhost:3000 --mock
+```
+
+Live smoke failures can reflect deployment regressions, openFDA latency or rate limits, or optional AI-provider outages. Mock mode only proves the browser workflow and selectors; it is not a substitute for testing the deployed public URL.
+
 ## Safe Demo Configuration
 
 For a public portfolio demo:
@@ -84,7 +98,13 @@ For a public portfolio demo:
 
 ## Smoke Test After Deployment
 
-After deploying, run this checklist in the browser:
+After deploying, run:
+
+```bash
+DEMO_URL=https://your-project.vercel.app npm run smoke:demo
+```
+
+Then use this browser checklist for manual review:
 
 1. Open `/?drug=metformin`.
 2. Confirm the dashboard loads FAERS aggregate charts and source provenance.
