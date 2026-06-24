@@ -41,6 +41,12 @@ import { ChartPanel } from "./ChartPanel";
 import { EmptyChart } from "./EmptyChart";
 import { MetricCard } from "./MetricCard";
 import {
+  INTAKE_EVIDENCE_HISTORY_STORAGE_KEY,
+  addIntakeEvidenceHistoryEntry,
+  buildIntakeEvidenceHistoryEntry,
+  type IntakeEvidenceHistoryEntry,
+} from "@/lib/intakeEvidenceHistory";
+import {
   REPORT_HISTORY_STORAGE_KEY,
   addReportHistoryEntry,
   buildReportHistoryEntry,
@@ -141,6 +147,19 @@ function readReportHistory() {
     if (!value) return [];
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? (parsed as ReportHistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readIntakeEvidenceHistory() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const value = window.localStorage.getItem(INTAKE_EVIDENCE_HISTORY_STORAGE_KEY);
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as IntakeEvidenceHistoryEntry[]) : [];
   } catch {
     return [];
   }
@@ -1253,6 +1272,9 @@ export function PharmacovigilanceDashboard() {
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
   const [reportTone, setReportTone] = useState<ReportTone>("pharmacist-review");
   const [reportHistory, setReportHistory] = useState<ReportHistoryEntry[]>([]);
+  const [intakeEvidenceHistory, setIntakeEvidenceHistory] = useState<
+    IntakeEvidenceHistoryEntry[]
+  >([]);
   const [intakeText, setIntakeText] = useState("");
   const [intakeImageFile, setIntakeImageFile] = useState<File | null>(null);
   const [intakeFileName, setIntakeFileName] = useState<string | undefined>();
@@ -1286,6 +1308,7 @@ export function PharmacovigilanceDashboard() {
   useEffect(() => {
     window.setTimeout(() => {
       setReportHistory(readReportHistory());
+      setIntakeEvidenceHistory(readIntakeEvidenceHistory());
     }, 0);
   }, []);
 
@@ -1377,6 +1400,25 @@ export function PharmacovigilanceDashboard() {
       const nextEntries = addReportHistoryEntry(current, entry);
       window.localStorage.setItem(
         REPORT_HISTORY_STORAGE_KEY,
+        JSON.stringify(nextEntries),
+      );
+      return nextEntries;
+    });
+  }
+
+  function saveIntakeEvidenceHistory(nextDrug: string) {
+    if (!intakeResult) return;
+
+    const entry = buildIntakeEvidenceHistoryEntry(intakeResult, {
+      confirmedDrug: nextDrug,
+      labelText: intakeText,
+      savedAt: new Date().toISOString(),
+    });
+
+    setIntakeEvidenceHistory((current) => {
+      const nextEntries = addIntakeEvidenceHistoryEntry(current, entry);
+      window.localStorage.setItem(
+        INTAKE_EVIDENCE_HISTORY_STORAGE_KEY,
         JSON.stringify(nextEntries),
       );
       return nextEntries;
@@ -1513,6 +1555,7 @@ export function PharmacovigilanceDashboard() {
 
   function confirmIntakeDrug(nextDrug: string) {
     if (!nextDrug || nextDrug === "Needs human review") return;
+    saveIntakeEvidenceHistory(nextDrug);
     setDrug(nextDrug);
     void runAnalysis(nextDrug, { runWorkflow: true });
   }
@@ -1892,6 +1935,78 @@ export function PharmacovigilanceDashboard() {
           onRunIntake={() => void runMedicationIntake()}
           onConfirmDrug={confirmIntakeDrug}
         />
+
+        {intakeEvidenceHistory.length ? (
+          <section className="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                  Confirmed intake evidence
+                </div>
+                <h2 className="text-base font-semibold text-slate-950">
+                  Human-reviewed label candidates
+                </h2>
+              </div>
+              <div className="text-xs leading-5 text-slate-500">
+                Stored locally after confirmation
+              </div>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {intakeEvidenceHistory.slice(0, 4).map((item) => (
+                <article
+                  key={item.id}
+                  className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-sm font-semibold text-slate-950">
+                          {item.confirmedDrug}
+                        </div>
+                        <span className="rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                          confirmed
+                        </span>
+                      </div>
+                      <div className="mt-1 text-xs leading-5 text-slate-500">
+                        {formatSavedAt(item.savedAt)} · {item.provider} · {item.confidence}
+                        {" "}confidence
+                      </div>
+                    </div>
+                    <div className="text-xs leading-5 text-slate-500">
+                      {item.fileName ?? item.sourceType}
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold text-slate-700">Candidates:</span>{" "}
+                      {item.drugCandidates.join(", ")}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Strengths:</span>{" "}
+                      {item.strengths.join(", ") || "Not detected"}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Ingredients:</span>{" "}
+                      {item.activeIngredients.join(", ") || "Not detected"}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Keywords:</span>{" "}
+                      {item.riskKeywords.join(", ") || "Not detected"}
+                    </div>
+                  </div>
+                  <div className="mt-2 rounded-md bg-white p-2 text-sm leading-6 text-slate-700">
+                    {item.textSnippet}
+                  </div>
+                  {item.limitations.length ? (
+                    <div className="mt-2 text-xs leading-5 text-slate-500">
+                      {item.limitations[0]}
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard

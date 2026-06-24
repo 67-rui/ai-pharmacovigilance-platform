@@ -188,8 +188,9 @@ The result is schema-validated before rendering and includes:
 - Confidence label
 - Human-confirmation requirement
 - Extraction limitations
+- Local confirmed-evidence history with image metadata, provider mode, confidence, and confirmed drug name
 
-The UI exposes browser OCR progress, provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
+The UI exposes browser OCR progress, provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard and saved to local confirmed-evidence history. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
 
 The intake prompt is versioned in [docs/prompts/medication-label-intake-v1.md](docs/prompts/medication-label-intake-v1.md).
 
@@ -326,6 +327,7 @@ Current tests cover:
 - Full workflow request planning
 - Shareable analysis URL parsing and full-workflow query generation
 - Saved reviewer history entry generation, deduplication, and size limits
+- Saved intake evidence history entry generation, deduplication, and size limits
 - AI report tone modes and schema-preserving report generation
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
@@ -350,7 +352,6 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 
 Near-term priorities:
 
-- Add saved intake evidence records with image metadata and confirmed drug name.
 - Add a concise product walkthrough.
 - Add mocked API route tests.
 - Add PDF report export.

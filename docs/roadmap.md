@@ -111,12 +111,13 @@ Priority backlog:
 - Done: Require human confirmation before routing extracted candidates into FAERS analysis.
 - Done: Trigger the full reviewer workflow after confirming a medication-label candidate.
 - Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
+- Done: Add saved intake evidence records with image metadata and confirmed drug name.
 - P1: Add a dedicated OCR provider option for low-quality images.
-- P1: Add saved intake evidence records with image metadata and confirmed drug name.
 
 Acceptance criteria:
 
 - Users can upload a medication label image, run browser OCR or edit label text manually, extract structured fields, and confirm a drug candidate to run FAERS analysis, signal metrics, ranking, comparison, and structured report generation.
+- Confirmed intake candidates are stored locally with image metadata, provider mode, confidence, extracted fields, and limitations for reviewer traceability.
 - The app does not claim direct clinical decision support or autonomous medication identification.
 - Intake remains usable without DeepSeek through deterministic fallback.
 
@@ -255,8 +256,8 @@ Each meaningful feature should include:
 
 ## Following Actions
 
-1. Add saved intake evidence records with image metadata and confirmed drug name.
-2. Add saved report history.
-3. Add ranking filters for seriousness, frequency, PRR, and ROR.
-4. Add deployment-ready environment documentation.
+1. Add ranking filters for seriousness, frequency, PRR, and ROR.
+2. Add deployment-ready environment documentation.
+3. Add a dedicated OCR provider option for low-quality images.
+4. Add PDF report export.
 5. Done: Add a case study page for portfolio storytelling.
