@@ -91,6 +91,7 @@ The dashboard includes a `Run full workflow` action after FAERS analysis. It sel
 - One-click reviewer workflow for signal metrics, ranking, comparison, and AI report generation.
 - OpenAI-compatible structured report generation workflow.
 - Vitest coverage for core query builders, signal math, rankings, medication intake, and report schema behavior.
+- Observability plan for latency, provider fallback, schema validation failures, OCR quality, and privacy-safe healthcare-adjacent logs.
 
 ## Demo Script
 

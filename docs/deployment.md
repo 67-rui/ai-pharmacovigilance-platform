@@ -74,6 +74,17 @@ After deploying, run this checklist in the browser:
 6. Paste a short medication label text into the intake panel, run intake, confirm the candidate, and confirm the full workflow starts only after human confirmation.
 7. Check that fallback warnings are visible if provider keys are not configured.
 
+## Observability
+
+Use [observability.md](observability.md) as the production-thinking companion for this deployment guide. It lists latency boundaries, provider fallback events, schema validation failures, OCR quality signals, and healthcare-adjacent privacy rules worth tracking if this prototype is promoted beyond a local portfolio demo.
+
+At minimum, deployment logs should distinguish:
+
+- live openFDA failures or rate limits from no-result queries
+- expected deterministic fallback when provider keys are missing from unexpected fallback when keys are configured
+- schema validation failures from successful template fallback behavior
+- OCR quality problems from medication-intake provider failures
+
 ## Operational Notes
 
 - FAERS responses are live public-health data and may change over time.
