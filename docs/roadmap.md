@@ -113,7 +113,7 @@ Priority backlog:
 - Done: Trigger the full reviewer workflow after confirming a medication-label candidate.
 - Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
 - Done: Add saved intake evidence records with image metadata and confirmed drug name.
-- P1: Add a dedicated OCR provider option for low-quality images.
+- P1: Add a dedicated OCR provider option for low-quality images ([#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2)).
 
 Acceptance criteria:
 
@@ -132,12 +132,12 @@ Goal: Make the tool feel like a real workflow product.
 
 Priority backlog:
 
-- P0: Save analysis history locally with SQLite or a lightweight JSON store.
+- P0: Save analysis history locally with SQLite or a lightweight JSON store ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 - Done: Add saved reports list with timestamp, drug, top reaction, total reports, prompt version, and reopen links.
 - Done: Add CSV export for chart data and signal tables.
 - Done: Add shareable analysis URLs with query parameters.
-- P1: Add PDF report export.
-- P2: Add project-level cache invalidation by openFDA `last_updated`.
+- Done: Add PDF report export.
+- P2: Add project-level cache invalidation by openFDA `last_updated` ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 
 Acceptance criteria:
 
@@ -161,9 +161,9 @@ Priority backlog:
 - Done: Add unit tests for openFDA query builders and PRR/ROR calculations.
 - Done: Add API route tests with mocked openFDA responses.
 - Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.
-- P1: Add test fixtures for at least four drugs.
-- P1: Add error handling tests for no-result drugs and rate-limit responses.
-- P2: Add observability notes for API latency and failure rates.
+- P1: Add test fixtures for at least four drugs ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+- P1: Add error handling tests for no-result drugs and rate-limit responses ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+- P2: Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
 
 Acceptance criteria:
 
@@ -181,15 +181,15 @@ Goal: Make the project easy for recruiters and interviewers to understand in und
 
 Priority backlog:
 
-- P0: Deploy a public demo with safe rate limits.
-- P1: Add a short demo video or GIF.
+- P0: Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
+- P1: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 - Done: Add a concise architecture diagram in `README.md`.
 - Done: Add refreshed README product screenshots and `npm run screenshots`.
 - Done: Add deployment-ready environment documentation in `docs/deployment.md`.
 - Done: Add browser-side PDF report export.
 - Done: Add a technical case study page in `docs/case-study.md`.
 - Done: Add resume bullets and interview talking points in `docs/resume-interview-guide.md`.
-- P2: Add GitHub issues for each roadmap item.
+- Done: Add GitHub issues for remaining roadmap items ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1), [#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2), [#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3), [#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4), [#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5), [#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 
 Acceptance criteria:
 
@@ -259,8 +259,8 @@ Each meaningful feature should include:
 
 ## Following Actions
 
-1. Deploy a public demo with safe rate limits.
-2. Add a dedicated OCR provider option for low-quality images.
-3. Add GitHub issues for remaining roadmap items.
-4. Add a short demo video or GIF.
+1. Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
+2. Add a dedicated OCR provider option for low-quality images ([#2](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/2)).
+3. Add multi-drug fixtures and error-path tests ([#3](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/3)).
+4. Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.
