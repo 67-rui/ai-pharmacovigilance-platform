@@ -19,6 +19,7 @@ type RawCount = {
 export type OpenFdaDrugFixture = {
   drug: string;
   totalReports: number;
+  lastUpdated?: string;
   topReactions: ChartDatum[];
   seriousness: RawCount[];
   seriousOutcomes: Partial<Record<OutcomeField, number>>;
@@ -32,6 +33,7 @@ export const faersDrugFixtures = {
   metformin: {
     drug: "metformin",
     totalReports: 3210,
+    lastUpdated: "2026-06-01",
     topReactions: [
       { label: "NAUSEA", value: 120 },
       { label: "DIARRHOEA", value: 80 },
@@ -62,6 +64,7 @@ export const faersDrugFixtures = {
   atorvastatin: {
     drug: "atorvastatin",
     totalReports: 2780,
+    lastUpdated: "2026-06-01",
     topReactions: [
       { label: "MYALGIA", value: 210 },
       { label: "FATIGUE", value: 104 },
@@ -93,6 +96,7 @@ export const faersDrugFixtures = {
   ibuprofen: {
     drug: "ibuprofen",
     totalReports: 1915,
+    lastUpdated: "2026-06-01",
     topReactions: [
       { label: "RASH", value: 95 },
       { label: "NAUSEA", value: 82 },
@@ -124,6 +128,7 @@ export const faersDrugFixtures = {
   warfarin: {
     drug: "warfarin",
     totalReports: 4520,
+    lastUpdated: "2026-06-01",
     topReactions: [
       { label: "HAEMORRHAGE", value: 240 },
       { label: "INTERNATIONAL NORMALISED RATIO INCREASED", value: 132 },
@@ -186,7 +191,7 @@ export function createOpenFdaFixtureFetch(fixture: OpenFdaDrugFixture) {
     if (!count) {
       const total = totalForSearch(fixture, search);
       return responseJson({
-        meta: { results: { total } },
+        meta: { last_updated: fixture.lastUpdated, results: { total } },
         results: total > 0 ? [{}] : [],
       });
     }

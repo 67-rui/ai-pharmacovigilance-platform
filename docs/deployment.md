@@ -89,8 +89,9 @@ At minimum, deployment logs should distinguish:
 
 - FAERS responses are live public-health data and may change over time.
 - The dashboard intentionally uses aggregate count queries instead of downloading full case reports.
+- FAERS API calls use a `no-store` cache strategy in the app route. Source provenance displays openFDA `last_updated` metadata when the API response provides it, so reviewers can distinguish live query freshness from saved local history.
 - Public source URLs omit `OPENFDA_API_KEY` values.
-- Local reviewer history and confirmed intake evidence history are stored in the browser with `localStorage`; they are not server-side persistence.
+- Local FAERS analysis history, reviewer report history, and confirmed intake evidence history are stored in the browser with `localStorage`; they are not server-side persistence.
 - The app is not medical advice, clinical decision support, or a causality engine.
 
 ## Troubleshooting

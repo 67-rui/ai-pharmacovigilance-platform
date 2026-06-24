@@ -66,6 +66,11 @@ const analysisFixture = {
       "Uses suspect-drug role coding when available.",
       "Aggregate count queries are used instead of full report downloads.",
     ],
+    dataFreshness: {
+      status: "live",
+      lastUpdated: "2026-06-01",
+      cacheStrategy: "no-store",
+    },
     queries: [
       {
         label: "Matched reports",

@@ -50,6 +50,11 @@ describe("GET /api/faers", () => {
       { label: "18-44", value: 30 },
       { label: "65-74", value: 90 },
     ]);
+    expect(payload.source.dataFreshness).toEqual({
+      status: "live",
+      lastUpdated: "2026-06-01",
+      cacheStrategy: "no-store",
+    });
     expect(payload.source.queries.length).toBeGreaterThan(10);
     expect(payload.limitations.join(" ")).toContain("cannot establish incidence");
   });

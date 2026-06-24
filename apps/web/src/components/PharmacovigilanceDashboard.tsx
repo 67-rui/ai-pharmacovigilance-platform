@@ -26,6 +26,12 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { jsPDF } from "jspdf";
 import {
+  ANALYSIS_HISTORY_STORAGE_KEY,
+  addAnalysisHistoryEntry,
+  buildAnalysisHistoryEntry,
+  type AnalysisHistoryEntry,
+} from "@/lib/analysisHistory";
+import {
   Area,
   AreaChart,
   Bar,
@@ -274,6 +280,19 @@ function readReportHistory() {
     if (!value) return [];
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? (parsed as ReportHistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readAnalysisHistory() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const value = window.localStorage.getItem(ANALYSIS_HISTORY_STORAGE_KEY);
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as AnalysisHistoryEntry[]) : [];
   } catch {
     return [];
   }
@@ -1183,6 +1202,26 @@ function SourceQueryPanel({ analysis }: { analysis: FaersAnalysis }) {
             </div>
           </div>
 
+          <div className="rounded-md border border-emerald-100 bg-emerald-50 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              Data freshness
+            </div>
+            <div className="mt-2 grid gap-2 text-sm leading-6 text-emerald-950 sm:grid-cols-3">
+              <div>
+                <span className="font-semibold">Status:</span>{" "}
+                {analysis.source.dataFreshness?.status ?? "unknown"}
+              </div>
+              <div>
+                <span className="font-semibold">openFDA updated:</span>{" "}
+                {analysis.source.dataFreshness?.lastUpdated ?? "not reported"}
+              </div>
+              <div>
+                <span className="font-semibold">Cache:</span>{" "}
+                {analysis.source.dataFreshness?.cacheStrategy ?? "not reported"}
+              </div>
+            </div>
+          </div>
+
           <div>
             <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Search expression
@@ -1571,6 +1610,9 @@ export function PharmacovigilanceDashboard() {
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
   const [reportTone, setReportTone] = useState<ReportTone>("pharmacist-review");
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisHistoryEntry[]>(
+    [],
+  );
   const [reportHistory, setReportHistory] = useState<ReportHistoryEntry[]>([]);
   const [intakeEvidenceHistory, setIntakeEvidenceHistory] = useState<
     IntakeEvidenceHistoryEntry[]
@@ -1609,6 +1651,7 @@ export function PharmacovigilanceDashboard() {
 
   useEffect(() => {
     window.setTimeout(() => {
+      setAnalysisHistory(readAnalysisHistory());
       setReportHistory(readReportHistory());
       setIntakeEvidenceHistory(readIntakeEvidenceHistory());
     }, 0);
@@ -1714,6 +1757,25 @@ export function PharmacovigilanceDashboard() {
     });
   }
 
+  function saveAnalysisHistory(
+    nextAnalysis: FaersAnalysis,
+    options?: { runWorkflow?: boolean },
+  ) {
+    const entry = buildAnalysisHistoryEntry(nextAnalysis, {
+      savedAt: new Date().toISOString(),
+      workflowUrl: buildShareableAnalysisSearch(nextAnalysis.drug, options),
+    });
+
+    setAnalysisHistory((current) => {
+      const nextEntries = addAnalysisHistoryEntry(current, entry);
+      window.localStorage.setItem(
+        ANALYSIS_HISTORY_STORAGE_KEY,
+        JSON.stringify(nextEntries),
+      );
+      return nextEntries;
+    });
+  }
+
   function saveIntakeEvidenceHistory(nextDrug: string) {
     if (!intakeResult) return;
 
@@ -1770,6 +1832,7 @@ export function PharmacovigilanceDashboard() {
       }
       setDrug(payload.drug);
       setAnalysis(payload);
+      saveAnalysisHistory(payload, { runWorkflow: options?.runWorkflow });
       const nextComparatorDrug = payload.drug.toLowerCase() === "warfarin" ? "metformin" : "warfarin";
       setComparatorDrug(nextComparatorDrug);
       const defaultEvent = payload.topReactions?.[0]?.label ?? "";
@@ -2223,6 +2286,69 @@ export function PharmacovigilanceDashboard() {
                   </div>
                   <div className="mt-2 line-clamp-2 text-sm leading-6 text-slate-700">
                     {item.reportTitle}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {analysisHistory.length ? (
+          <section className="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                  Recent FAERS analyses
+                </div>
+                <h2 className="text-base font-semibold text-slate-950">
+                  Reopen analysis history
+                </h2>
+              </div>
+              <div className="text-xs leading-5 text-slate-500">
+                Stored locally without label images
+              </div>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {analysisHistory.slice(0, 4).map((item) => (
+                <article
+                  key={item.id}
+                  className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-950">
+                        {item.drug}
+                      </div>
+                      <div className="mt-1 text-xs leading-5 text-slate-500">
+                        {formatSavedAt(item.savedAt)} · {item.cacheStatus} ·{" "}
+                        {item.cacheStrategy}
+                      </div>
+                    </div>
+                    <a
+                      href={item.workflowUrl}
+                      className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+                    >
+                      <ExternalLink size={13} />
+                      Open
+                    </a>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold text-slate-700">Top reaction:</span>{" "}
+                      {item.topReaction}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Reports:</span>{" "}
+                      {formatNumber(item.totalReports)}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">openFDA updated:</span>{" "}
+                      {item.dataLastUpdated ?? "not reported"}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Generated:</span>{" "}
+                      {formatSavedAt(item.generatedAt)}
+                    </div>
                   </div>
                 </article>
               ))}

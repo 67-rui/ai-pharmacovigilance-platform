@@ -132,17 +132,19 @@ Goal: Make the tool feel like a real workflow product.
 
 Priority backlog:
 
-- P0: Save analysis history locally with SQLite or a lightweight JSON store ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
+- Done: Save analysis history locally with a lightweight browser JSON store ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 - Done: Add saved reports list with timestamp, drug, top reaction, total reports, prompt version, and reopen links.
 - Done: Add CSV export for chart data and signal tables.
 - Done: Add shareable analysis URLs with query parameters.
 - Done: Add PDF report export.
-- P2: Add project-level cache invalidation by openFDA `last_updated` ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
+- Done: Add project-level cache invalidation notes with openFDA `last_updated` metadata ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 
 Acceptance criteria:
 
 - A user can run an analysis, generate a report, leave the page, and reopen the saved report.
+- A user can reopen a recent FAERS analysis even if no report was generated.
 - Recent generated reports appear in a local browser history panel with reproducible workflow links.
+- Source provenance exposes live `no-store` query behavior and openFDA `last_updated` metadata when available.
 - A user can share a `?drug=` URL for a reproducible analysis or a `?workflow=full` URL for the full reviewer pass.
 - A PDF or Markdown report can be attached to a portfolio, GitHub release, or interview deck.
 
@@ -260,7 +262,7 @@ Each meaningful feature should include:
 ## Following Actions
 
 1. Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
-2. Add analysis history and cache invalidation strategy ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
+2. Done: Add analysis history and cache invalidation strategy ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
 3. Done: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 4. Done: Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
 5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.

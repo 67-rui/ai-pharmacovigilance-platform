@@ -124,4 +124,4 @@ See [resume-interview-guide.md](resume-interview-guide.md) for role-specific res
 - Browser OCR quality still depends on image clarity, orientation, and label typography, although Enhanced OCR preprocessing and quality scoring reduce silent failures.
 - FAERS data cannot establish incidence, prevalence, true risk, or causality.
 - A future external vision provider could improve recognition quality for very low-resolution or complex labels.
-- Additional workflow completeness could come from a public demo, authenticated review history, and richer export auditing.
+- Additional workflow completeness could come from a public demo, authenticated audit trails beyond browser history, and richer export auditing.

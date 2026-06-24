@@ -17,6 +17,7 @@ type OpenFdaCountResult = {
 
 type OpenFdaResponse<T> = {
   meta?: {
+    last_updated?: string;
     results?: {
       total?: number;
       limit?: number;
@@ -158,6 +159,18 @@ async function fetchTotal(search: string) {
   });
 
   return payload.meta?.results?.total ?? 0;
+}
+
+async function fetchTotalWithMetadata(search: string) {
+  const payload = await fetchOpenFda<unknown>({
+    search,
+    limit: 1,
+  });
+
+  return {
+    total: payload.meta?.results?.total ?? 0,
+    lastUpdated: payload.meta?.last_updated,
+  };
 }
 
 function mapLabels(items: ChartDatum[], labels: Record<string, string>) {
@@ -329,7 +342,7 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
 
   const search = buildDrugSearch(normalizedDrug);
   const [
-    totalReports,
+    totalMetadata,
     topReactions,
     seriousness,
     seriousOutcomes,
@@ -338,7 +351,7 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
     roleCounts,
     yearTrend,
   ] = await Promise.all([
-    fetchTotal(search),
+    fetchTotalWithMetadata(search),
     countField(search, "patient.reaction.reactionmeddrapt.exact", 12),
     countField(search, "serious", 2),
     getSeriousOutcomes(search),
@@ -347,6 +360,7 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
     countField(search, "patient.drug.drugcharacterization", 4),
     getYearTrend(search),
   ]);
+  const totalReports = totalMetadata.total;
 
   if (totalReports === 0) {
     throw new NoFaersResultsError(normalizedDrug);
@@ -386,6 +400,11 @@ export async function analyzeFaersDrug(drug: string): Promise<FaersAnalysis> {
     ],
     source: {
       ...buildSourceMetadata(search),
+      dataFreshness: {
+        status: "live",
+        lastUpdated: totalMetadata.lastUpdated,
+        cacheStrategy: "no-store",
+      },
     },
   };
 }

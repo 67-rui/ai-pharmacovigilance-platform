@@ -42,6 +42,11 @@ const analysisFixture = {
     endpoint: "https://api.fda.gov/drug/event.json",
     search: 'patient.drug.medicinalproduct:"METFORMIN"',
     assumptions: ["Suspect drug search."],
+    dataFreshness: {
+      status: "live",
+      lastUpdated: "2026-06-01",
+      cacheStrategy: "no-store",
+    },
     queries: [
       {
         label: "Top reactions",
@@ -217,6 +222,11 @@ test("loads a shareable full workflow and exposes report export controls", async
   await expect(page.getByText("No causal claims from FAERS report counts.")).toBeVisible();
   await expect(page.getByRole("button", { name: "PDF" })).toBeVisible();
   await expect(page.getByRole("button", { name: "MD" })).toBeVisible();
+  await expect(page.getByText("Recent FAERS analyses")).toBeVisible();
+  await expect(page.getByTestId("source-provenance").getByText("Data freshness")).toBeVisible();
+  await expect(
+    page.getByTestId("source-provenance").getByText("openFDA updated: 2026-06-01"),
+  ).toBeVisible();
   await expect(page.getByText("metformin has the higher event reporting share")).toBeVisible();
 });
 

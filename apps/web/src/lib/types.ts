@@ -29,6 +29,11 @@ export type FaersAnalysis = {
       purpose: string;
       url: string;
     }>;
+    dataFreshness?: {
+      status: "live" | "cached" | "unknown";
+      lastUpdated?: string;
+      cacheStrategy: string;
+    };
   };
 };
 

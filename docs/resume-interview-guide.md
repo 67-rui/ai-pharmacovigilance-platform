@@ -74,11 +74,11 @@ The AI report route supports OpenAI when configured and template mode otherwise.
 - Aggregate FAERS queries keep the dashboard responsive, but they do not support patient-level causality review.
 - Browser-side Standard/Enhanced OCR avoids server-side file handling, but recognition quality still depends on image clarity and requires human review before analysis.
 - Template fallback keeps the portfolio demo usable without paid AI keys, but live provider mode can produce richer narrative summaries.
-- LocalStorage history is enough for a portfolio workflow, but a production system would need authenticated persistence and audit trails.
+- LocalStorage analysis, report, and intake histories are enough for a portfolio workflow, but a production system would need authenticated persistence and audit trails.
 
 ### Testing Story
 
-- Unit tests cover query construction, four-drug FAERS fixtures, no-result and rate-limit error paths, signal math, signal ranking filters, structured report generation, medication intake parsing, API fallback behavior, and history helpers.
+- Unit tests cover query construction, four-drug FAERS fixtures, no-result and rate-limit error paths, signal math, signal ranking filters, structured report generation, medication intake parsing, API fallback behavior, analysis/report/intake history helpers, and freshness metadata.
 - Playwright smoke tests mock API responses and verify both the shareable full-workflow path `/?drug=metformin&workflow=full` and the label-evidence path from editable OCR text to human-confirmed workflow launch.
 - Screenshot generation uses the same mocked-workflow style so README assets are deterministic and do not depend on live API drift.
 - The short demo video is generated from the same deterministic mocked workflow, so recruiters can review the product without live API credentials.

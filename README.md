@@ -22,7 +22,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown/PDF reports.
 - Share reproducible analysis links with `?drug=` and full-workflow links with `?workflow=full`.
-- Save recent reviewer report history locally with drug, top reaction, report count, prompt version, and reopen links.
+- Save recent FAERS analysis and reviewer report history locally with drug, top reaction, report count, freshness metadata, prompt version, and reopen links.
 - Verify core query-building and signal-metric logic with Vitest.
 
 ## Demo Workflow
@@ -32,10 +32,10 @@ This project turns a drug name into adverse event patterns, disproportionality s
 3. Run DeepSeek medication intake, then confirm the extracted drug candidate to launch FAERS analysis and the full reviewer workflow.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
 5. If starting from a typed drug name, click `Run full workflow` to automatically compute default PRR/ROR signal metrics, signal ranking, drug comparison, and a structured AI safety report.
-6. Inspect the source provenance panel to understand exactly how openFDA was queried.
+6. Inspect the source provenance panel to understand exactly how openFDA was queried and when openFDA reports the dataset was last updated.
 7. Refine the selected MedDRA preferred term or comparator drug when needed.
 8. Copy the URL to reopen the selected drug analysis, or use a `?workflow=full` link to rerun the full reviewer pass.
-9. Reopen recent saved reviewer reports from the local history panel.
+9. Reopen recent saved analyses or reviewer reports from the local history panels.
 10. Export Markdown, PDF, or CSV artifacts.
 
 ## Product Screens
@@ -178,7 +178,7 @@ Shareable URLs make the workflow reproducible:
 - `/?drug=metformin` opens the dashboard and runs the FAERS analysis for metformin.
 - `/?drug=metformin&workflow=full` runs the FAERS analysis and then triggers the full reviewer workflow.
 
-Generated reports are also saved into local browser history. Each saved entry records the drug, top reported reaction, total report count, report mode, prompt version, saved time, and a workflow URL that can reopen the same reviewer pass.
+Successful FAERS analyses and generated reports are saved into local browser history. Analysis entries can be reopened without a generated report and include the drug, top reported reaction, total report count, openFDA `last_updated` metadata when available, the `no-store` live-query cache strategy, saved time, and a workflow URL.
 
 ### Drug Comparison
 
@@ -358,6 +358,7 @@ Current tests cover:
 - Signal ranking API route behavior
 - Full workflow request planning
 - Shareable analysis URL parsing and full-workflow query generation
+- Saved FAERS analysis history entry generation, deduplication, freshness metadata, and size limits
 - Saved reviewer history entry generation, deduplication, and size limits
 - Saved intake evidence history entry generation, deduplication, and size limits
 - AI report tone modes and schema-preserving report generation
@@ -388,7 +389,6 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 Near-term priorities:
 
 - Deploy a public demo with safe rate limits.
-- Add analysis history and cache invalidation strategy.
 
 ## Resume Bullet
 

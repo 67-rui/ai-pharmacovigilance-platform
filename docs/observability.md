@@ -51,6 +51,7 @@ Fallback is a deliberate safety behavior in this project, not always an error.
 - Provider responses that fail JSON parsing or zod schema validation should fall back and emit a visible warning.
 - openFDA 404/no-result should be treated differently from provider fallback. It means no matching FAERS reports were found for the query, not that the app generated a local replacement.
 - openFDA 429 indicates rate limiting. Add `OPENFDA_API_KEY`, retry later, or reduce automated test traffic.
+- FAERS analysis routes use `cache: "no-store"` for live aggregate queries. Saved browser history is a reopen convenience, not a server-side cache. The openFDA `last_updated` value should be treated as the source dataset freshness marker when present.
 - OCR poor quality is not a provider outage. The user should crop the image, use Enhanced OCR, or edit text before intake.
 
 ## Privacy And Safety Rules
