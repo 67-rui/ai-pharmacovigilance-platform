@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { analyzeFaersDrug } from "@/lib/openfda";
+import { analyzeFaersDrug } from "../../../lib/openfda";
 
 const querySchema = z.object({
   drug: z.string().trim().min(2).max(80),

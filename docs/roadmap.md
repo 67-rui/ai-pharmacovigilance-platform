@@ -157,7 +157,7 @@ Goal: Make the project defensible in interviews and code review.
 Priority backlog:
 
 - Done: Add unit tests for openFDA query builders and PRR/ROR calculations.
-- P0: Add API route tests with mocked openFDA responses.
+- Done: Add API route tests with mocked openFDA responses.
 - P1: Add Playwright smoke tests for dashboard loading and report generation.
 - P1: Add test fixtures for at least four drugs.
 - P1: Add error handling tests for no-result drugs and rate-limit responses.
@@ -166,6 +166,7 @@ Priority backlog:
 Acceptance criteria:
 
 - Tests can run locally without real openFDA calls.
+- The FAERS analysis route is covered for validation errors, mocked aggregate success responses, and upstream openFDA failure handling.
 - The README explains which tests are mocked and which are live integration checks.
 
 Resume value:
