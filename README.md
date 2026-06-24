@@ -92,7 +92,7 @@ flowchart LR
 
 ## Core Features
 
-For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md).
+For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md). For resume wording and interview talking points, see [docs/resume-interview-guide.md](docs/resume-interview-guide.md).
 
 ### FAERS Dashboard
 
@@ -375,3 +375,5 @@ Near-term priorities:
 ## Resume Bullet
 
 Built an AI-powered pharmacovigilance dashboard using openFDA FAERS data to analyze adverse event patterns, rank PRR/ROR signal candidates, compare drug-event reporting shares, extract medication label fields with DeepSeek-backed schema validation, and generate prompt-versioned safety summaries with explicit FAERS limitations and reviewer guardrails.
+
+More role-specific resume bullets and interview answers are available in [docs/resume-interview-guide.md](docs/resume-interview-guide.md).

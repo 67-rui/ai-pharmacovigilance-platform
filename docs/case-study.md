@@ -114,9 +114,11 @@ The dashboard includes a `Run full workflow` action after FAERS analysis. It sel
 - Integrated browser-side OCR and DeepSeek-compatible medication label extraction with human confirmation, deterministic fallback, and zod schema validation before routing confirmed drug candidates into FAERS workflows.
 - Implemented responsible AI controls for a healthcare-adjacent product, including prompt versioning, structured output validation, source provenance, explicit FAERS limitations, and no-causality/no-incidence guardrails.
 
+See [resume-interview-guide.md](resume-interview-guide.md) for role-specific resume bullets, a 30-second project pitch, and interview talking points.
+
 ## Limitations And Next Steps
 
 - Browser OCR quality depends on image clarity, orientation, and label typography.
 - FAERS data cannot establish incidence, prevalence, true risk, or causality.
 - A dedicated OCR provider could improve recognition quality for low-resolution or complex labels.
-- Additional workflow completeness could come from saved intake evidence, saved reports, and PDF export.
+- Additional workflow completeness could come from a public demo, authenticated review history, and richer export auditing.

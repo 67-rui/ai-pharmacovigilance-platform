@@ -181,14 +181,14 @@ Goal: Make the project easy for recruiters and interviewers to understand in und
 
 Priority backlog:
 
-- P0: Add a concise architecture diagram.
 - P0: Deploy a public demo with safe rate limits.
 - P1: Add a short demo video or GIF.
+- Done: Add a concise architecture diagram in `README.md`.
 - Done: Add refreshed README product screenshots and `npm run screenshots`.
 - Done: Add deployment-ready environment documentation in `docs/deployment.md`.
 - Done: Add browser-side PDF report export.
 - Done: Add a technical case study page in `docs/case-study.md`.
-- P1: Add resume bullets and interview talking points.
+- Done: Add resume bullets and interview talking points in `docs/resume-interview-guide.md`.
 - P2: Add GitHub issues for each roadmap item.
 
 Acceptance criteria:
@@ -259,8 +259,8 @@ Each meaningful feature should include:
 
 ## Following Actions
 
-1. Add a dedicated OCR provider option for low-quality images.
-2. Done: Add Playwright smoke tests for dashboard loading and report generation.
-3. Deploy a public demo with safe rate limits.
-4. Add final resume bullets and interview talking points.
-5. Done: Add a case study page for portfolio storytelling.
+1. Deploy a public demo with safe rate limits.
+2. Add a dedicated OCR provider option for low-quality images.
+3. Add GitHub issues for remaining roadmap items.
+4. Add a short demo video or GIF.
+5. Done: Add Playwright smoke tests for dashboard loading and report generation.
