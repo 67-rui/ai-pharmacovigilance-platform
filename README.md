@@ -367,6 +367,7 @@ The repository includes `vercel.json` for a Next.js Vercel deployment from the r
 npm run check:deploy
 npm run test
 npm run test:e2e
+npm run smoke:api -- http://localhost:3001
 npm run smoke:demo -- http://localhost:3001 --mock
 npm run lint
 npm run build
@@ -375,6 +376,7 @@ npm run build
 Current tests cover:
 
 - Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, and obvious plaintext API key patterns
+- Local API smoke checks for the homepage, FAERS endpoint, and signal endpoint
 - openFDA query construction
 - FAERS analysis API route validation, four-drug aggregate fixtures, no-result handling, and upstream rate-limit errors
 - MedDRA event query construction

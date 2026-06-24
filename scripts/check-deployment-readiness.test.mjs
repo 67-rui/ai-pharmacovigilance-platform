@@ -17,13 +17,14 @@ describe("deployment readiness checks", () => {
           "test:e2e": "playwright test",
           lint: "npm --workspace apps/web run lint",
           build: "npm --workspace apps/web run build",
+          "smoke:api": "node scripts/smoke-test-local-api.mjs",
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
         },
       }),
     ).toEqual([]);
 
     expect(checkPackageScripts({ scripts: { test: "vitest run" } })).toContain(
-      "Missing package script: smoke:demo",
+      "Missing package script: smoke:api",
     );
   });
 

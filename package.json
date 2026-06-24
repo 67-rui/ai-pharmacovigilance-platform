@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "screenshots": "node scripts/capture-readme-screenshots.mjs",
     "demo:video": "node scripts/capture-demo-video.mjs",
+    "smoke:api": "node scripts/smoke-test-local-api.mjs",
     "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
     "check:deploy": "node scripts/check-deployment-readiness.mjs"
   },

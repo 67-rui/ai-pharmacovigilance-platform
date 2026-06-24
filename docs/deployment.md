@@ -103,8 +103,7 @@ Use this path for interview screen sharing, local recordings, screenshot generat
 Quick API checks:
 
 ```bash
-curl 'http://localhost:3001/api/faers?drug=metformin'
-curl 'http://localhost:3001/api/signal?drug=metformin&event=NAUSEA'
+npm run smoke:api -- http://localhost:3001
 ```
 
 If another project already uses port `3000`, keep this project on `3001` to avoid confusing 404 responses from the wrong Next.js app.

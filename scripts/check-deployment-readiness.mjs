@@ -4,7 +4,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const REQUIRED_SCRIPTS = ["test", "test:e2e", "lint", "build", "smoke:demo"];
+const REQUIRED_SCRIPTS = [
+  "test",
+  "test:e2e",
+  "lint",
+  "build",
+  "smoke:api",
+  "smoke:demo",
+];
 const BLANK_PROVIDER_KEYS = [
   "OPENFDA_API_KEY",
   "OPENAI_API_KEY",
@@ -27,6 +34,7 @@ const REQUIRED_FILES = [
   "docs/deployment.md",
   "docs/sample-report.md",
   "vercel.json",
+  "scripts/smoke-test-local-api.mjs",
   "scripts/smoke-test-live-demo.mjs",
 ];
 const SECRET_PATTERNS = [
