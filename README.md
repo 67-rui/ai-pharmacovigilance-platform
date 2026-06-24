@@ -15,7 +15,7 @@ This project turns a drug name into adverse event patterns, disproportionality s
 - Enter custom MedDRA preferred terms for user-defined drug-event signal checks.
 - Rank top reported MedDRA terms by signal interpretation, drug-event report count, PRR, and ROR.
 - Compare two drugs by event reporting share per 1,000 suspect-drug reports.
-- Extract structured medication intake fields from OCR or label text with DeepSeek API fallback support.
+- Run browser-side OCR on medication label images, then extract structured medication intake fields with DeepSeek API fallback support.
 - Generate AI-assisted pharmacovigilance summaries with prompt versioning and report quality guardrails.
 - Validate AI report outputs with a structured zod schema before rendering or export.
 - Export dashboard data, signal tables, drug comparisons, and Markdown reports.
@@ -24,8 +24,8 @@ This project turns a drug name into adverse event patterns, disproportionality s
 ## Demo Workflow
 
 1. Enter a drug name, such as `metformin`, `warfarin`, `atorvastatin`, or `ibuprofen`.
-2. Optionally upload a medication label image and paste OCR/label text for DeepSeek medication intake.
-3. Confirm the extracted drug candidate to route it into FAERS analysis.
+2. Optionally upload a medication label image, run browser OCR, and review/edit the extracted label text.
+3. Run DeepSeek medication intake, then confirm the extracted drug candidate to route it into FAERS analysis.
 4. Review FAERS aggregate charts for adverse reactions, seriousness, demographics, and year trend.
 5. Inspect the source provenance panel to understand exactly how openFDA was queried.
 6. Select or type a MedDRA preferred term, then compute PRR/ROR signal metrics.
@@ -151,7 +151,7 @@ This is a reporting-share comparison, not a clinical risk comparison.
 
 ### Medication Image Intake
 
-The intake panel accepts an evidence image for preview plus OCR or label text. The API supports two modes:
+The intake panel accepts an evidence image, runs browser-side OCR with Tesseract.js, and keeps the OCR text editable before extraction. The API supports two modes:
 
 - `deepseek`: optional DeepSeek chat completions extraction when `DEEPSEEK_API_KEY` is available.
 - `fallback`: deterministic local extraction when no DeepSeek key is configured or the provider call fails.
@@ -167,7 +167,7 @@ The result is schema-validated before rendering and includes:
 - Human-confirmation requirement
 - Extraction limitations
 
-The UI exposes provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
+The UI exposes browser OCR progress, provider mode, prompt version, schema validation status, fallback warnings, extraction limitations, and the required human-confirmation step. Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
 
 The intake prompt is versioned in [docs/prompts/medication-label-intake-v1.md](docs/prompts/medication-label-intake-v1.md).
 
@@ -217,6 +217,7 @@ Quality guardrails:
 - zod
 - Vitest
 - openFDA Drug Adverse Event API
+- Tesseract.js browser-side OCR
 - DeepSeek chat completions-compatible medication intake endpoint
 - OpenAI Responses API-compatible report endpoint
 
@@ -273,7 +274,7 @@ DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-chat
 ```
 
-`OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction.
+`OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key.
 
 ## Verification
 
@@ -315,7 +316,7 @@ The detailed improvement plan lives in [docs/roadmap.md](docs/roadmap.md).
 
 Near-term priorities:
 
-- Add browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
+- Add saved intake evidence records with image metadata and confirmed drug name.
 - Add a concise product walkthrough.
 - Add mocked API route tests.
 - Add PDF report export.

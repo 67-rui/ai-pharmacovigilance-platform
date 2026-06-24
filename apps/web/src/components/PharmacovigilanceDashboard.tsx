@@ -21,6 +21,7 @@ import {
   RefreshCw,
   Search,
   Sparkles,
+  ScanText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -962,8 +963,12 @@ type MedicationIntakePanelProps = {
   intakeText: string;
   intakeResult: MedicationIntakeResult | null;
   isIntakeLoading: boolean;
+  isOcrLoading: boolean;
+  ocrProgress: number | null;
+  ocrError: string | null;
   onImageChange: (file: File | null) => void;
   onTextChange: (value: string) => void;
+  onRunOcr: () => void;
   onRunIntake: () => void;
   onConfirmDrug: (drug: string) => void;
 };
@@ -973,8 +978,12 @@ function MedicationIntakePanel({
   intakeText,
   intakeResult,
   isIntakeLoading,
+  isOcrLoading,
+  ocrProgress,
+  ocrError,
   onImageChange,
   onTextChange,
+  onRunOcr,
   onRunIntake,
   onConfirmDrug,
 }: MedicationIntakePanelProps) {
@@ -1005,17 +1014,50 @@ function MedicationIntakePanel({
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-3">
-          <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Evidence image
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(event) => onImageChange(event.target.files?.[0] ?? null)}
-              className="mt-2 block w-full text-sm text-slate-700 file:mr-3 file:h-9 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:text-sm file:font-semibold file:text-white"
-            />
-          </label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <label className="block flex-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Evidence image
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => onImageChange(event.target.files?.[0] ?? null)}
+                className="mt-2 block w-full text-sm text-slate-700 file:mr-3 file:h-9 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:text-sm file:font-semibold file:text-white"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={onRunOcr}
+              disabled={isOcrLoading || !imagePreviewUrl}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+            >
+              <LoadingActionIcon isLoading={isOcrLoading} Icon={ScanText} />
+              Run OCR
+            </button>
+          </div>
+
+          {isOcrLoading || ocrProgress !== null || ocrError ? (
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span>Browser OCR</span>
+                <span>{ocrProgress !== null ? `${Math.round(ocrProgress)}%` : "Ready"}</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-emerald-700 transition-all"
+                  style={{ width: `${ocrProgress ?? 0}%` }}
+                />
+              </div>
+              {ocrError ? (
+                <div className="mt-2 text-sm leading-6 text-rose-800">{ocrError}</div>
+              ) : (
+                <div className="mt-2 text-sm leading-6 text-slate-600">
+                  OCR runs locally in the browser and fills the label text field for review.
+                </div>
+              )}
+            </div>
+          ) : null}
 
           <div className="flex min-h-52 items-center justify-center overflow-hidden rounded-md border border-dashed border-slate-300 bg-slate-50">
             {imagePreviewUrl ? (
@@ -1172,6 +1214,7 @@ export function PharmacovigilanceDashboard() {
   const [comparatorDrug, setComparatorDrug] = useState("warfarin");
   const [comparison, setComparison] = useState<DrugComparison | null>(null);
   const [intakeText, setIntakeText] = useState("");
+  const [intakeImageFile, setIntakeImageFile] = useState<File | null>(null);
   const [intakeFileName, setIntakeFileName] = useState<string | undefined>();
   const [intakeImagePreviewUrl, setIntakeImagePreviewUrl] = useState("");
   const [intakeResult, setIntakeResult] = useState<MedicationIntakeResult | null>(
@@ -1183,6 +1226,9 @@ export function PharmacovigilanceDashboard() {
   const [isRankingLoading, setIsRankingLoading] = useState(false);
   const [isComparisonLoading, setIsComparisonLoading] = useState(false);
   const [isIntakeLoading, setIsIntakeLoading] = useState(false);
+  const [isOcrLoading, setIsOcrLoading] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<number | null>(null);
+  const [ocrError, setOcrError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const analysisRequestId = useRef(0);
   const reportRequestId = useRef(0);
@@ -1209,8 +1255,45 @@ export function PharmacovigilanceDashboard() {
       URL.revokeObjectURL(intakeImagePreviewUrl);
     }
 
+    setIntakeImageFile(file);
     setIntakeFileName(file?.name);
     setIntakeImagePreviewUrl(file ? URL.createObjectURL(file) : "");
+    setOcrProgress(null);
+    setOcrError(null);
+  }
+
+  async function runBrowserOcr() {
+    if (!intakeImageFile) return;
+
+    setIsOcrLoading(true);
+    setOcrProgress(0);
+    setOcrError(null);
+    setError(null);
+
+    try {
+      const { recognize } = await import("tesseract.js");
+      const result = await recognize(intakeImageFile, "eng", {
+        logger: (message) => {
+          if (message.status === "recognizing text") {
+            setOcrProgress(Math.round(message.progress * 100));
+          }
+        },
+      });
+      const text = result.data.text.trim();
+
+      if (!text) {
+        throw new Error("No readable text was detected in the selected image.");
+      }
+
+      intakeRequestId.current += 1;
+      setIntakeResult(null);
+      setIntakeText(text);
+      setOcrProgress(100);
+    } catch (error) {
+      setOcrError(error instanceof Error ? error.message : "Unable to run OCR.");
+    } finally {
+      setIsOcrLoading(false);
+    }
   }
 
   async function runAnalysis(nextDrug = drug) {
@@ -1547,12 +1630,16 @@ export function PharmacovigilanceDashboard() {
           intakeText={intakeText}
           intakeResult={intakeResult}
           isIntakeLoading={isIntakeLoading}
+          isOcrLoading={isOcrLoading}
+          ocrProgress={ocrProgress}
+          ocrError={ocrError}
           onImageChange={handleIntakeImageChange}
           onTextChange={(value) => {
             intakeRequestId.current += 1;
             setIntakeResult(null);
             setIntakeText(value);
           }}
+          onRunOcr={() => void runBrowserOcr()}
           onRunIntake={() => void runMedicationIntake()}
           onConfirmDrug={confirmIntakeDrug}
         />

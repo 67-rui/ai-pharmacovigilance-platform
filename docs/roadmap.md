@@ -101,17 +101,18 @@ Goal: Add a portfolio-ready multimodal intake path from medication label evidenc
 Priority backlog:
 
 - Done: Add medication label image preview and OCR/label text intake UI.
+- Done: Add browser-side OCR with editable extracted text before DeepSeek extraction.
 - Done: Add DeepSeek API-backed medication field extraction.
 - Done: Add deterministic local fallback when `DEEPSEEK_API_KEY` is missing or the provider fails.
 - Done: Add zod schema validation for extracted medication candidates, active ingredients, strengths, safety keywords, and limitations.
 - Done: Require human confirmation before routing extracted candidates into FAERS analysis.
 - Done: Expose provider mode, prompt version, fallback warnings, schema validation status, and extraction limitations in the intake UI.
-- P1: Add browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
+- P1: Add a dedicated OCR provider option for low-quality images.
 - P1: Add saved intake evidence records with image metadata and confirmed drug name.
 
 Acceptance criteria:
 
-- Users can upload a medication label image, paste OCR/label text, extract structured fields, and confirm a drug candidate.
+- Users can upload a medication label image, run browser OCR or edit label text manually, extract structured fields, and confirm a drug candidate.
 - The app does not claim direct clinical decision support or autonomous medication identification.
 - Intake remains usable without DeepSeek through deterministic fallback.
 
@@ -247,7 +248,7 @@ Each meaningful feature should include:
 
 ## Following Actions
 
-1. Add PDF report export.
+1. Add saved intake evidence records with image metadata and confirmed drug name.
 2. Add saved report history.
 3. Add ranking filters for seriousness, frequency, PRR, and ROR.
 4. Add deployment-ready environment documentation.

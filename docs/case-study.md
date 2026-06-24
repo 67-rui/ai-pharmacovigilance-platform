@@ -42,7 +42,7 @@ flowchart LR
 
 ### Medication Intake
 
-The intake panel accepts a medication image for evidence preview and OCR or label text for extraction. The `/api/intake/medication` route calls DeepSeek when `DEEPSEEK_API_KEY` is available and otherwise uses deterministic fallback extraction.
+The intake panel accepts a medication image, runs browser-side OCR with Tesseract.js, and keeps the extracted text editable for human review. The `/api/intake/medication` route calls DeepSeek when `DEEPSEEK_API_KEY` is available and otherwise uses deterministic fallback extraction.
 
 The output is validated against a zod schema before rendering:
 
@@ -62,6 +62,7 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 ## Responsible AI Controls
 
 - Model outputs are parsed as JSON and validated with zod schemas.
+- OCR text is editable before any model extraction step.
 - Medication intake cannot directly trigger analysis without human confirmation.
 - The intake UI exposes provider mode, prompt version, schema validation status, fallback warnings, and extraction limitations.
 - FAERS reports are framed as signal-triage evidence, not incidence or causal risk.
@@ -76,35 +77,37 @@ The `/api/report` route generates a structured pharmacovigilance summary from th
 - PRR/ROR disproportionality metrics with 2x2 table and ROR confidence interval.
 - Signal ranking across top MedDRA preferred terms.
 - Drug-vs-drug reporting-share comparison.
+- Browser-side medication label OCR with editable evidence text.
 - DeepSeek-compatible medication label extraction workflow.
 - OpenAI-compatible structured report generation workflow.
 - Vitest coverage for core query builders, signal math, rankings, medication intake, and report schema behavior.
 
 ## Demo Script
 
-1. Open the dashboard and paste OCR text such as:
+1. Open the dashboard and upload a medication label image, or paste label text such as:
 
    ```text
    Metformin hydrochloride tablets 500 mg. Adverse reactions include nausea and diarrhea. Contraindications: severe renal impairment.
    ```
 
-2. Run DeepSeek medication intake and review the schema-validated extraction.
-3. Confirm `Metformin` to launch FAERS analysis.
-4. Inspect adverse reaction charts, seriousness distribution, outcomes, demographics, and year trend.
-5. Review the source provenance panel to see the exact openFDA query URLs.
-6. Compute PRR/ROR for a selected MedDRA preferred term.
-7. Run drug comparison against another product.
-8. Generate the AI pharmacovigilance report and inspect guardrails, structured sections, and Markdown export.
+2. Run browser OCR if using an image, review/edit the label text, then run DeepSeek medication intake.
+3. Review the schema-validated extraction.
+4. Confirm `Metformin` to launch FAERS analysis.
+5. Inspect adverse reaction charts, seriousness distribution, outcomes, demographics, and year trend.
+6. Review the source provenance panel to see the exact openFDA query URLs.
+7. Compute PRR/ROR for a selected MedDRA preferred term.
+8. Run drug comparison against another product.
+9. Generate the AI pharmacovigilance report and inspect guardrails, structured sections, and Markdown export.
 
 ## Resume Bullets
 
 - Built an AI pharmacovigilance workspace that converts drug names or medication-label evidence into FAERS signal triage, PRR/ROR analytics, drug comparison, and schema-validated AI safety reports.
-- Integrated DeepSeek-compatible medication label extraction with human confirmation, deterministic fallback, and zod schema validation before routing confirmed drug candidates into FAERS workflows.
+- Integrated browser-side OCR and DeepSeek-compatible medication label extraction with human confirmation, deterministic fallback, and zod schema validation before routing confirmed drug candidates into FAERS workflows.
 - Implemented responsible AI controls for a healthcare-adjacent product, including prompt versioning, structured output validation, source provenance, explicit FAERS limitations, and no-causality/no-incidence guardrails.
 
 ## Limitations And Next Steps
 
-- Image upload currently provides evidence preview; OCR or label text must be supplied separately.
+- Browser OCR quality depends on image clarity, orientation, and label typography.
 - FAERS data cannot establish incidence, prevalence, true risk, or causality.
-- The next high-value improvement is browser-side OCR or a dedicated OCR provider before DeepSeek extraction.
+- A dedicated OCR provider could improve recognition quality for low-resolution or complex labels.
 - Additional workflow completeness could come from saved intake evidence, saved reports, and PDF export.
