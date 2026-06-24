@@ -17,6 +17,7 @@ describe("deployment readiness checks", () => {
           "test:e2e": "playwright test",
           lint: "npm --workspace apps/web run lint",
           build: "npm --workspace apps/web run build",
+          start: "npm --workspace apps/web run start --",
           "smoke:api": "node scripts/smoke-test-local-api.mjs",
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
           "tunnel:local": "npx localtunnel --port 3001",
@@ -25,8 +26,25 @@ describe("deployment readiness checks", () => {
     ).toEqual([]);
 
     const missingScripts = checkPackageScripts({ scripts: { test: "vitest run" } });
+    expect(missingScripts).toContain("Missing package script: start");
     expect(missingScripts).toContain("Missing package script: smoke:api");
     expect(missingScripts).toContain("Missing package script: tunnel:local");
+
+    const malformedStart = checkPackageScripts({
+      scripts: {
+        test: "vitest run",
+        "test:e2e": "playwright test",
+        lint: "eslint",
+        build: "next build",
+        start: "npm --workspace apps/web run start",
+        "smoke:api": "node scripts/smoke-test-local-api.mjs",
+        "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
+        "tunnel:local": "npx localtunnel --port 3001",
+      },
+    });
+    expect(malformedStart).toContain(
+      "Root start script must forward CLI arguments with: npm --workspace apps/web run start --",
+    );
   });
 
   test("requires optional provider keys to stay blank in env examples", () => {

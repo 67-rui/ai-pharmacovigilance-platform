@@ -42,12 +42,19 @@ Then open:
 http://localhost:3001
 ```
 
+For a production-mode local check after building from the repository root:
+
+```bash
+npm run build
+npm run start -- --port 3001
+```
+
 ## Environment
 
 Local environment variables live in `apps/web/.env.local`. Start from the root example:
 
 ```bash
-cp ../../.env.example .env.local
+cp apps/web/.env.example apps/web/.env.local
 ```
 
 Provider keys are optional:

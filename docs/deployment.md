@@ -84,6 +84,26 @@ npx vercel --prod
 
 The app uses API routes for `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication`, so static-only hosting is not sufficient.
 
+## Generic Node Hosting
+
+Vercel is optional. Render, Railway, Fly.io, a VPS, or another Node host can run the same Next.js frontend and built-in API routes as long as the platform supports a long-running Node process.
+
+Use these repository-root commands:
+
+```bash
+npm install
+npm run build
+npm run start
+```
+
+For local production-mode checks on a fixed port, pass the port to the workspace start command:
+
+```bash
+npm run start -- --port 3001
+```
+
+Most Node hosting providers set the `PORT` environment variable automatically. Keep the project root at the repository root so npm workspaces resolve `apps/web` correctly.
+
 ## Local Built-In API Demo
 
 Vercel is not required for the core workflow. The Next.js app already includes the internal API routes needed by the dashboard. For a local portfolio walkthrough, start the app on a free port:

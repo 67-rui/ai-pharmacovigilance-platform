@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
+    "start": "npm --workspace apps/web run start --",
     "lint": "npm --workspace apps/web run lint",
     "test": "vitest run apps/web/src scripts",
     "test:e2e": "playwright test",

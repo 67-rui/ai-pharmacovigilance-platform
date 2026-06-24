@@ -9,6 +9,7 @@ const REQUIRED_SCRIPTS = [
   "test:e2e",
   "lint",
   "build",
+  "start",
   "smoke:api",
   "smoke:demo",
   "tunnel:local",
@@ -67,9 +68,20 @@ function parseEnvExample(text) {
 
 export function checkPackageScripts(packageJson) {
   const scripts = packageJson?.scripts ?? {};
-  return REQUIRED_SCRIPTS.flatMap((scriptName) =>
+  const findings = REQUIRED_SCRIPTS.flatMap((scriptName) =>
     scripts[scriptName] ? [] : [`Missing package script: ${scriptName}`],
   );
+
+  if (
+    scripts.start &&
+    scripts.start.trim() !== "npm --workspace apps/web run start --"
+  ) {
+    findings.push(
+      "Root start script must forward CLI arguments with: npm --workspace apps/web run start --",
+    );
+  }
+
+  return findings;
 }
 
 export function checkEnvExample(text) {
