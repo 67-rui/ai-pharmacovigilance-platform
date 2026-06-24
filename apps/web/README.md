@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web App
 
-## Getting Started
+This workspace package contains the Next.js App Router implementation for the AI Pharmacovigilance Platform.
 
-First, run the development server:
+For the full portfolio overview, screenshots, architecture, deployment instructions, and resume framing, start at the repository root [README.md](../../README.md).
+
+## Responsibilities
+
+- Reviewer dashboard UI in `src/components/PharmacovigilanceDashboard.tsx`
+- openFDA FAERS aggregate API route in `src/app/api/faers/route.ts`
+- PRR/ROR signal route in `src/app/api/signal/route.ts`
+- Signal ranking route in `src/app/api/rankings/route.ts`
+- Drug comparison route in `src/app/api/compare/route.ts`
+- Medication-label intake route in `src/app/api/intake/medication/route.ts`
+- Structured report route in `src/app/api/report/route.ts`
+- Domain logic and tests in `src/lib/`
+
+## Local Development
+
+Run commands from the repository root so npm workspaces resolve correctly:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open the local URL printed by Next.js, usually:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment
 
-## Learn More
+Local environment variables live in `apps/web/.env.local`. Start from the root example:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp ../../.env.example .env.local
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Provider keys are optional:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `OPENFDA_API_KEY` raises openFDA rate limits.
+- `OPENAI_API_KEY` enables live OpenAI report generation.
+- `DEEPSEEK_API_KEY` enables live DeepSeek-compatible medication intake.
+- Missing OpenAI or DeepSeek keys intentionally trigger deterministic fallback modes with the same schema contracts.
 
-## Deploy on Vercel
+## Verification
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+From the repository root:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run check:deploy
+npm run test
+npm run test:e2e
+npm run lint
+npm run build
+```
+
+The Playwright smoke tests use mocked API responses so the main reviewer workflow can be verified without live provider keys.
