@@ -108,9 +108,9 @@ npm run smoke:api -- http://localhost:3001
 
 If another project already uses port `3000`, keep this project on `3001` to avoid confusing 404 responses from the wrong Next.js app.
 
-## Temporary Public Demo With Cloudflare Tunnel
+## Temporary Public Demo
 
-For a short-lived recruiter or interview link without creating a Vercel project, use Cloudflare Quick Tunnel. Cloudflare documents quick tunnels as a way to expose a localhost server by running `cloudflared tunnel --url http://localhost:8080`; for this project, use port `3001`.
+For a short-lived recruiter or interview link without creating a Vercel project, run the local app and expose port `3001` through a temporary tunnel. These links are useful for live review, but they are not permanent portfolio URLs and should not be committed to README as the final demo link.
 
 Terminal 1:
 
@@ -118,13 +118,19 @@ Terminal 1:
 npm --workspace apps/web run dev -- --port 3001
 ```
 
-Terminal 2:
+Terminal 2, Cloudflare Quick Tunnel:
 
 ```bash
 cloudflared tunnel --url http://localhost:3001
 ```
 
-`cloudflared` prints a temporary public URL. Share that URL only while the local dev server and tunnel process are running. This is useful for live review, but it is not a permanent portfolio URL and should not be committed to README as the final demo link.
+Terminal 2, localtunnel fallback through npm:
+
+```bash
+npx localtunnel --port 3001
+```
+
+Both tools print a temporary public URL. Share that URL only while the local dev server and tunnel process are running.
 
 After deployment, verify the public URL with the automated smoke script:
 
@@ -135,7 +141,7 @@ DEMO_URL=https://your-project.vercel.app npm run smoke:demo
 The smoke script opens Chrome with Playwright and checks the homepage, `/?drug=metformin&workflow=full`, and the medication label-text confirmation path. It uses live API routes by default. For a local self-check of the smoke script itself, run against a local dev server with mocked API responses:
 
 ```bash
-npm run smoke:demo -- http://localhost:3000 --mock
+npm run smoke:demo -- http://localhost:3001 --mock
 ```
 
 Live smoke failures can reflect deployment regressions, openFDA latency or rate limits, or optional AI-provider outages. Mock mode only proves the browser workflow and selectors; it is not a substitute for testing the deployed public URL.
