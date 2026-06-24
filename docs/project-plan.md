@@ -57,14 +57,14 @@ DEMO_URL=https://your-project.vercel.app npm run smoke:demo
 
 ## Remaining Portfolio Completion Work
 
-The core local product is implemented and verified. The remaining public-facing milestone is deployment:
+The core local product is implemented and verified. The remaining public-facing milestone is a shareable public access path:
 
-1. Deploy the repository to Vercel from `main`.
+1. Deploy the repository to Vercel, Render, Railway, another Next.js API-compatible host, or expose the local server temporarily with Cloudflare Tunnel.
 2. Keep OpenAI and DeepSeek keys optional so fallback modes remain demoable.
 3. Prefer configuring `OPENFDA_API_KEY` for public rate-limit stability.
-4. Run the live smoke test against the deployed URL.
-5. Add the final live demo link to `README.md` and `docs/deployment.md`.
-6. Close GitHub issue #1 after the live URL passes smoke testing.
+4. Run the live smoke test against the public URL when using a permanent deployment.
+5. Add the final permanent demo link to `README.md` and `docs/deployment.md`.
+6. Close GitHub issue #1 after the public URL passes smoke testing.
 
 ## Resume Framing
 

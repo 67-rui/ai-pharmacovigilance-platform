@@ -324,6 +324,18 @@ Open the local URL printed by Next.js, usually:
 http://localhost:3000
 ```
 
+If another local project is already using port `3000`, run this app on `3001`:
+
+```bash
+npm --workspace apps/web run dev -- --port 3001
+```
+
+Then open:
+
+```text
+http://localhost:3001
+```
+
 ## Environment
 
 Copy `.env.example` to `apps/web/.env.local` if you want API keys:
@@ -345,7 +357,7 @@ PUBLIC_DEMO_INTAKE_RATE_LIMIT=20
 
 `OPENFDA_API_KEY` is optional but increases openFDA rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key. `PUBLIC_DEMO_*_RATE_LIMIT` values tune the built-in per-IP, per-route fixed-window API limits for public portfolio deployments.
 
-The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. See [docs/deployment.md](docs/deployment.md) for deployment steps, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
+The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. Vercel is optional for the core product: the app's built-in Next.js API routes also work locally, and a temporary public link can be created with Cloudflare Tunnel when a permanent deployment is not needed. See [docs/deployment.md](docs/deployment.md) for local built-in API checks, Vercel steps, Cloudflare Tunnel notes, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F67-rui%2Fai-pharmacovigilance-platform)
 
@@ -355,7 +367,7 @@ The repository includes `vercel.json` for a Next.js Vercel deployment from the r
 npm run check:deploy
 npm run test
 npm run test:e2e
-npm run smoke:demo -- http://localhost:3000 --mock
+npm run smoke:demo -- http://localhost:3001 --mock
 npm run lint
 npm run build
 ```

@@ -47,7 +47,7 @@ This matrix maps the portfolio goal to concrete product behavior, code paths, te
 
 Local implementation and verification are complete for the core portfolio workflow. Public portfolio completion still requires:
 
-1. Deploy to Vercel or another host that supports Next.js App Router API routes.
-2. Run `DEMO_URL=https://your-project.vercel.app npm run smoke:demo`.
+1. Use a public access path that supports Next.js App Router API routes: Vercel, Render, Railway, another Node host, or a temporary Cloudflare Tunnel for short live reviews.
+2. Run `DEMO_URL=https://your-public-url.example npm run smoke:demo` for a permanent deployment.
 3. Add the live demo URL to `README.md`, `docs/deployment.md`, and the GitHub repository homepage.
 4. Close GitHub issue #1 after the deployed smoke test passes.

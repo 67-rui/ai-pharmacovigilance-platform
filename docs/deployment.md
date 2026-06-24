@@ -84,6 +84,49 @@ npx vercel --prod
 
 The app uses API routes for `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication`, so static-only hosting is not sufficient.
 
+## Local Built-In API Demo
+
+Vercel is not required for the core workflow. The Next.js app already includes the internal API routes needed by the dashboard. For a local portfolio walkthrough, start the app on a free port:
+
+```bash
+npm --workspace apps/web run dev -- --port 3001
+```
+
+Then open:
+
+```text
+http://localhost:3001
+```
+
+Use this path for interview screen sharing, local recordings, screenshot generation, and API checks. It runs the same `/api/faers`, `/api/signal`, `/api/rankings`, `/api/compare`, `/api/report`, and `/api/intake/medication` routes that a hosted deployment would run.
+
+Quick API checks:
+
+```bash
+curl 'http://localhost:3001/api/faers?drug=metformin'
+curl 'http://localhost:3001/api/signal?drug=metformin&event=NAUSEA'
+```
+
+If another project already uses port `3000`, keep this project on `3001` to avoid confusing 404 responses from the wrong Next.js app.
+
+## Temporary Public Demo With Cloudflare Tunnel
+
+For a short-lived recruiter or interview link without creating a Vercel project, use Cloudflare Quick Tunnel. Cloudflare documents quick tunnels as a way to expose a localhost server by running `cloudflared tunnel --url http://localhost:8080`; for this project, use port `3001`.
+
+Terminal 1:
+
+```bash
+npm --workspace apps/web run dev -- --port 3001
+```
+
+Terminal 2:
+
+```bash
+cloudflared tunnel --url http://localhost:3001
+```
+
+`cloudflared` prints a temporary public URL. Share that URL only while the local dev server and tunnel process are running. This is useful for live review, but it is not a permanent portfolio URL and should not be committed to README as the final demo link.
+
 After deployment, verify the public URL with the automated smoke script:
 
 ```bash
@@ -120,6 +163,7 @@ A full CI gate should also run unit tests, Playwright smoke tests, lint, build, 
 For a public portfolio demo:
 
 - Prefer setting `OPENFDA_API_KEY` to reduce public API rate-limit friction.
+- Vercel is optional; any host or tunnel must support the Next.js API routes listed above.
 - Keep the built-in public demo rate limits enabled. API routes return `429` with `Retry-After` after the per-IP, per-route fixed-window limit is reached.
 - Keep `OPENAI_API_KEY` and `DEEPSEEK_API_KEY` optional unless you want live provider calls.
 - Leave browser OCR enabled; it runs locally in the browser and does not require a server-side key.

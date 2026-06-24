@@ -30,6 +30,18 @@ Then open the local URL printed by Next.js, usually:
 http://localhost:3000
 ```
 
+If port `3000` is already used by another local Next.js app, run this package on `3001`:
+
+```bash
+npm --workspace apps/web run dev -- --port 3001
+```
+
+Then open:
+
+```text
+http://localhost:3001
+```
+
 ## Environment
 
 Local environment variables live in `apps/web/.env.local`. Start from the root example:
