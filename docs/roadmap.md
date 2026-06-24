@@ -182,7 +182,7 @@ Goal: Make the project easy for recruiters and interviewers to understand in und
 Priority backlog:
 
 - P0: Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
-- P1: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
+- Done: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 - Done: Add a concise architecture diagram in `README.md`.
 - Done: Add refreshed README product screenshots and `npm run screenshots`.
 - Done: Add deployment-ready environment documentation in `docs/deployment.md`.
@@ -261,6 +261,6 @@ Each meaningful feature should include:
 
 1. Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
 2. Add analysis history and cache invalidation strategy ([#6](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/6)).
-3. Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
+3. Done: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 4. Done: Add observability notes for API latency and failure rates ([#4](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/4)).
 5. Done: Add Playwright smoke tests for dashboard loading, report generation, and label-evidence confirmation.

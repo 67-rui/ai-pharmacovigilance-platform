@@ -95,6 +95,8 @@ The dashboard includes a `Run full workflow` action after FAERS analysis. It sel
 
 ## Demo Script
 
+The repository includes a short deterministic demo video at [docs/assets/pharmacovigilance-demo.webm](assets/pharmacovigilance-demo.webm). It can be regenerated with `npm run demo:video` after installing Playwright's ffmpeg helper with `npx playwright install ffmpeg`.
+
 1. Open the dashboard and upload a medication label image, or paste label text such as:
 
    ```text

@@ -40,7 +40,18 @@ This project turns a drug name into adverse event patterns, disproportionality s
 
 ## Product Screens
 
-Regenerate these deterministic mocked-workflow screenshots with:
+### Demo Video
+
+[Watch the short mocked-workflow demo video](docs/assets/pharmacovigilance-demo.webm).
+
+Regenerate the deterministic demo video with:
+
+```bash
+npx playwright install ffmpeg
+npm run demo:video
+```
+
+Regenerate the deterministic mocked-workflow screenshots with:
 
 ```bash
 npm run screenshots
@@ -378,7 +389,6 @@ Near-term priorities:
 
 - Deploy a public demo with safe rate limits.
 - Add analysis history and cache invalidation strategy.
-- Add a concise demo video or GIF for recruiters.
 
 ## Resume Bullet
 

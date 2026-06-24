@@ -11,7 +11,8 @@
     "lint": "npm --workspace apps/web run lint",
     "test": "vitest run apps/web/src",
     "test:e2e": "playwright test",
-    "screenshots": "node scripts/capture-readme-screenshots.mjs"
+    "screenshots": "node scripts/capture-readme-screenshots.mjs",
+    "demo:video": "node scripts/capture-demo-video.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
