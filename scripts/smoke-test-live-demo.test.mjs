@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   assertLiveHealthPayload,
+  buildSmokeBrowserContextOptions,
   buildSmokeUrls,
   resolveSmokeOptions,
 } from "./smoke-test-live-demo.mjs";
@@ -26,6 +27,20 @@ describe("live demo smoke-test CLI helpers", () => {
 
     expect(options.baseUrl).toBe("https://preview.example.com");
     expect(options.mockApis).toBe(true);
+  });
+
+  test("can add the localtunnel reminder bypass header for temporary public demos", () => {
+    const options = resolveSmokeOptions(
+      ["https://temporary.loca.lt", "--bypass-tunnel-reminder"],
+      {},
+    );
+
+    expect(options.bypassTunnelReminder).toBe(true);
+    expect(buildSmokeBrowserContextOptions(options)).toEqual({
+      extraHTTPHeaders: {
+        "bypass-tunnel-reminder": "true",
+      },
+    });
   });
 
   test("builds a reproducible full-workflow URL from the base URL", () => {

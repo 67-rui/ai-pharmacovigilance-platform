@@ -28,6 +28,7 @@ describe("deployment readiness checks", () => {
           "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
           "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
           "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
+          "tunnel:cloudflare": "npx cloudflared tunnel --url http://localhost:3001",
           "tunnel:local": "npx localtunnel --port 3001",
         },
       }),
@@ -38,6 +39,7 @@ describe("deployment readiness checks", () => {
     expect(missingScripts).toContain("Missing package script: smoke:api");
     expect(missingScripts).toContain("Missing package script: audit:portfolio");
     expect(missingScripts).toContain("Missing package script: verify:portfolio");
+    expect(missingScripts).toContain("Missing package script: tunnel:cloudflare");
     expect(missingScripts).toContain("Missing package script: tunnel:local");
 
     const malformedStart = checkPackageScripts({
@@ -51,6 +53,7 @@ describe("deployment readiness checks", () => {
         "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
         "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
         "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
+        "tunnel:cloudflare": "npx cloudflared tunnel --url http://localhost:3001",
         "tunnel:local": "npx localtunnel --port 3001",
       },
     });
@@ -129,12 +132,14 @@ describe("deployment readiness checks", () => {
     const guide = [
       "DEMO_URL=https://your-project.vercel.app npm run smoke:demo",
       "The smoke script opens Chrome and checks `/api/health`, `/?drug=metformin&workflow=full`, `/?label=sample`, and `--mock` local self-checks.",
+      "For localtunnel, pass `--bypass-tunnel-reminder`.",
     ].join("\n");
 
     expect(checkDeploymentGuide(guide)).toEqual([]);
     expect(checkDeploymentGuide("DEMO_URL=https://your-project.vercel.app npm run smoke:demo")).toEqual([
       "docs/deployment.md must document that live smoke covers /api/health.",
       "docs/deployment.md must document that live smoke covers /?label=sample.",
+      "docs/deployment.md must document --bypass-tunnel-reminder for localtunnel smoke checks.",
     ]);
   });
 
@@ -154,6 +159,7 @@ describe("deployment readiness checks", () => {
             "smoke:api": "node scripts/smoke-test-local-api.mjs",
             "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
             "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
+            "tunnel:cloudflare": "npx cloudflared tunnel --url http://localhost:3001",
             "tunnel:local": "npx localtunnel --port 3001",
           },
         }),
@@ -194,6 +200,7 @@ describe("deployment readiness checks", () => {
             "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
             "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
             "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
+            "tunnel:cloudflare": "npx cloudflared tunnel --url http://localhost:3001",
             "tunnel:local": "npx localtunnel --port 3001",
           },
         }),

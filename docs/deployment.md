@@ -165,7 +165,7 @@ npm --workspace apps/web run dev -- --port 3001
 Terminal 2, Cloudflare Quick Tunnel:
 
 ```bash
-cloudflared tunnel --url http://localhost:3001
+npm run tunnel:cloudflare
 ```
 
 Terminal 2, localtunnel fallback through npm:
@@ -175,6 +175,18 @@ npm run tunnel:local
 ```
 
 Both tools print a temporary public URL. Share that URL only while the local dev server and tunnel process are running.
+
+Cloudflare Quick Tunnel is the preferred temporary smoke-test path because it does not show the localtunnel browser interstitial and worked with the standard live smoke command during local verification:
+
+```bash
+DEMO_URL=https://your-temporary-url.trycloudflare.com npm run smoke:demo
+```
+
+Localtunnel shows an interstitial reminder in Chrome-based smoke tests. Keep the reminder visible for ordinary visitors, but add the smoke-test bypass header when validating your own temporary tunnel:
+
+```bash
+DEMO_URL=https://your-temporary-url.loca.lt npm run smoke:demo -- --bypass-tunnel-reminder
+```
 
 After deployment, verify the public URL with the automated smoke script:
 

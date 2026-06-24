@@ -234,6 +234,7 @@ function parsePositiveInteger(value, label) {
 
 export function resolveSmokeOptions(argv = process.argv.slice(2), env = process.env) {
   let positionalUrl;
+  let bypassTunnelReminder = parseBoolean(env.SMOKE_BYPASS_TUNNEL_REMINDER);
   let mockApis = parseBoolean(env.SMOKE_MOCK_APIS);
   let headed = parseBoolean(env.SMOKE_HEADED);
   let timeoutMs = env.SMOKE_TIMEOUT_MS
@@ -248,6 +249,8 @@ export function resolveSmokeOptions(argv = process.argv.slice(2), env = process.
       mockApis = false;
     } else if (arg === "--headed") {
       headed = true;
+    } else if (arg === "--bypass-tunnel-reminder") {
+      bypassTunnelReminder = true;
     } else if (arg.startsWith("--timeout-ms=")) {
       timeoutMs = parsePositiveInteger(arg.slice("--timeout-ms=".length), "--timeout-ms");
     } else if (arg.startsWith("--drug=")) {
@@ -263,11 +266,26 @@ export function resolveSmokeOptions(argv = process.argv.slice(2), env = process.
 
   return {
     baseUrl: normalizeBaseUrl(positionalUrl ?? env.DEMO_URL),
+    bypassTunnelReminder,
     drug,
     headed,
     mockApis,
     timeoutMs,
   };
+}
+
+function buildTunnelReminderHeaders(options) {
+  return options.bypassTunnelReminder
+    ? { "bypass-tunnel-reminder": "true" }
+    : {};
+}
+
+export function buildSmokeBrowserContextOptions(options) {
+  const extraHTTPHeaders = buildTunnelReminderHeaders(options);
+
+  return Object.keys(extraHTTPHeaders).length > 0
+    ? { extraHTTPHeaders }
+    : {};
 }
 
 export function buildSmokeUrls(baseUrl, drug = DEFAULT_DRUG) {
@@ -317,8 +335,10 @@ export function assertLiveHealthPayload(payload) {
   }
 }
 
-async function verifyHealthApi(healthUrl) {
-  const response = await fetch(healthUrl);
+async function verifyHealthApi(healthUrl, options) {
+  const response = await fetch(healthUrl, {
+    headers: buildTunnelReminderHeaders(options),
+  });
 
   if (!response.ok) {
     throw new Error(`Health API returned HTTP ${response.status}.`);
@@ -369,15 +389,30 @@ async function verifyFullWorkflow(page, workflowUrl, timeoutMs) {
   await expect(
     page.getByRole("heading", { name: "Pharmacovigilance report" }),
   ).toBeVisible({ timeout: timeoutMs });
-  await expect(page.getByText("Schema validated")).toBeVisible({
+  await expect(page.getByText(/^schema validated$/i)).toBeVisible({
     timeout: 20_000,
   });
-  await expect(page.getByRole("button", { name: "PDF" })).toBeVisible({
-    timeout: 20_000,
-  });
+  await verifyReportExportControls(page, timeoutMs);
   await expect(page.getByTestId("source-provenance")).toBeVisible({
     timeout: 20_000,
   });
+}
+
+async function verifyReportExportControls(page, timeoutMs) {
+  const pdfButton = page.getByRole("button", { name: "PDF" });
+
+  try {
+    await expect(pdfButton).toBeVisible({ timeout: 20_000 });
+    return;
+  } catch (error) {
+    const reportButton = page.getByRole("button", {
+      name: "Report",
+      exact: true,
+    });
+    await expect(reportButton).toBeEnabled({ timeout: 20_000 });
+    await reportButton.click();
+    await expect(pdfButton).toBeVisible({ timeout: timeoutMs });
+  }
 }
 
 async function verifyLabelIntakePath(page, labelSampleUrl, timeoutMs) {
@@ -397,10 +432,10 @@ async function verifyLabelIntakePath(page, labelSampleUrl, timeoutMs) {
   await expect(intakeButton).toBeEnabled({ timeout: 20_000 });
   await intakeButton.click();
 
-  await expect(page.getByText("Schema validated")).toBeVisible({
+  await expect(page.getByText(/^schema validated$/i)).toBeVisible({
     timeout: timeoutMs,
   });
-  await expect(page.getByText("Human confirmation")).toBeVisible({
+  await expect(page.getByText(/human confirmation/i)).toBeVisible({
     timeout: 20_000,
   });
   await expect(
@@ -411,13 +446,11 @@ async function verifyLabelIntakePath(page, labelSampleUrl, timeoutMs) {
   await expect(
     page.getByRole("heading", { name: "Pharmacovigilance report" }),
   ).toBeVisible({ timeout: timeoutMs });
-  await expect(page.getByRole("button", { name: "PDF" })).toBeVisible({
-    timeout: 20_000,
-  });
+  await verifyReportExportControls(page, timeoutMs);
 }
 
 async function newSmokePage(browser, options) {
-  const page = await browser.newPage();
+  const page = await browser.newPage(buildSmokeBrowserContextOptions(options));
   page.setDefaultTimeout(20_000);
 
   if (options.mockApis) {
@@ -441,7 +474,7 @@ export async function runLiveDemoSmoke(options) {
     console.log(`Smoke target: ${options.baseUrl}`);
     console.log(`API mode: ${options.mockApis ? "mocked" : "live"}`);
 
-    await verifyHealthApi(healthUrl);
+    await verifyHealthApi(healthUrl, options);
     console.log("PASS health API safety boundaries");
 
     let page = await newSmokePage(browser, options);

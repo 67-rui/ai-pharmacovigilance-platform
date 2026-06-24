@@ -21,6 +21,7 @@
     "smoke:demo": "node scripts/smoke-test-live-demo.mjs",
     "audit:portfolio": "node scripts/audit-portfolio-goal.mjs",
     "verify:portfolio": "node scripts/verify-portfolio-gate.mjs",
+    "tunnel:cloudflare": "npx cloudflared tunnel --url http://localhost:3001",
     "tunnel:local": "npx localtunnel --port 3001",
     "check:deploy": "node scripts/check-deployment-readiness.mjs"
   },

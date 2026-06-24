@@ -15,6 +15,7 @@ const REQUIRED_SCRIPTS = [
   "smoke:demo",
   "audit:portfolio",
   "verify:portfolio",
+  "tunnel:cloudflare",
   "tunnel:local",
 ];
 const BLANK_PROVIDER_KEYS = [
@@ -150,6 +151,12 @@ export function checkDeploymentGuide(text) {
   if (!text.includes("/?label=sample")) {
     findings.push(
       "docs/deployment.md must document that live smoke covers /?label=sample.",
+    );
+  }
+
+  if (!text.includes("--bypass-tunnel-reminder")) {
+    findings.push(
+      "docs/deployment.md must document --bypass-tunnel-reminder for localtunnel smoke checks.",
     );
   }
 
