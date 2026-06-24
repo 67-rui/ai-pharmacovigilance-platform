@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import type { MedicationIntakeResult } from "@/lib/types";
+import { resetPublicDemoRateLimits } from "../../../../lib/publicDemoRateLimit";
 
 const originalApiKey = process.env.DEEPSEEK_API_KEY;
 const originalModel = process.env.DEEPSEEK_MODEL;
@@ -11,6 +12,8 @@ describe("POST /api/intake/medication", () => {
     process.env.DEEPSEEK_API_KEY = originalApiKey;
     process.env.DEEPSEEK_MODEL = originalModel;
     global.fetch = originalFetch;
+    resetPublicDemoRateLimits();
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
@@ -100,5 +103,35 @@ describe("POST /api/intake/medication", () => {
         }),
       }),
     );
+  });
+
+  it("returns 429 when the public demo medication-intake limit is reached", async () => {
+    delete process.env.DEEPSEEK_API_KEY;
+    vi.stubEnv("PUBLIC_DEMO_INTAKE_RATE_LIMIT", "1");
+    vi.stubEnv("PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS", "60000");
+    const requestInit = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-forwarded-for": "203.0.113.70",
+      },
+      body: JSON.stringify({
+        ocrText: "Ibuprofen tablets 200 mg. Warnings include stomach bleeding.",
+        fileName: "ibuprofen-label.jpg",
+      }),
+    };
+
+    const firstResponse = await POST(
+      new Request("http://localhost/api/intake/medication", requestInit),
+    );
+    const limitedResponse = await POST(
+      new Request("http://localhost/api/intake/medication", requestInit),
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(limitedResponse.status).toBe(429);
+    await expect(limitedResponse.json()).resolves.toMatchObject({
+      error: "Public demo rate limit reached for medication intake.",
+    });
   });
 });

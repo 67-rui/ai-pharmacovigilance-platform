@@ -38,6 +38,13 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` for local development, or 
 | `OPENAI_MODEL` | No | Selects the OpenAI Responses API model. | Defaults to `gpt-5.5`. |
 | `DEEPSEEK_API_KEY` | No | Enables DeepSeek medication-label extraction after OCR text is produced. | `/api/intake/medication` returns deterministic local extraction with the same schema. |
 | `DEEPSEEK_MODEL` | No | Selects the DeepSeek chat model. | Defaults to `deepseek-chat`. |
+| `PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS` | No | Fixed-window duration for public demo API limits. | Defaults to `60000`. |
+| `PUBLIC_DEMO_FAERS_RATE_LIMIT` | No | Requests per window for `/api/faers`. | Defaults to `30`. |
+| `PUBLIC_DEMO_SIGNAL_RATE_LIMIT` | No | Requests per window for `/api/signal`. | Defaults to `60`. |
+| `PUBLIC_DEMO_RANKINGS_RATE_LIMIT` | No | Requests per window for `/api/rankings`. | Defaults to `20`. |
+| `PUBLIC_DEMO_COMPARE_RATE_LIMIT` | No | Requests per window for `/api/compare`. | Defaults to `30`. |
+| `PUBLIC_DEMO_REPORT_RATE_LIMIT` | No | Requests per window for `/api/report`. | Defaults to `20`. |
+| `PUBLIC_DEMO_INTAKE_RATE_LIMIT` | No | Requests per window for `/api/intake/medication`. | Defaults to `20`. |
 
 Browser OCR, Enhanced OCR preprocessing, and OCR quality scoring run locally in the browser and do not require a provider key. Do not commit `.env.local` or plaintext API keys. The app is designed so a portfolio reviewer can still see the core workflow without OpenAI or DeepSeek keys.
 
@@ -91,6 +98,7 @@ Live smoke failures can reflect deployment regressions, openFDA latency or rate 
 For a public portfolio demo:
 
 - Prefer setting `OPENFDA_API_KEY` to reduce public API rate-limit friction.
+- Keep the built-in public demo rate limits enabled. API routes return `429` with `Retry-After` after the per-IP, per-route fixed-window limit is reached.
 - Keep `OPENAI_API_KEY` and `DEEPSEEK_API_KEY` optional unless you want live provider calls.
 - Leave browser OCR enabled; it runs locally in the browser and does not require a server-side key.
 - Use the fallback modes as a deliberate responsible-AI demo: the UI exposes provider mode, warning state, prompt version, schema validation, and limitations.
@@ -130,6 +138,7 @@ At minimum, deployment logs should distinguish:
 - FAERS responses are live public-health data and may change over time.
 - The dashboard intentionally uses aggregate count queries instead of downloading full case reports.
 - FAERS API calls use a `no-store` cache strategy in the app route. Source provenance displays openFDA `last_updated` metadata when the API response provides it, so reviewers can distinguish live query freshness from saved local history.
+- API routes use lightweight in-memory public-demo rate limits keyed by client IP and route namespace. This is suitable for a portfolio deployment on serverless instances, not a replacement for a managed production API gateway.
 - Public source URLs omit `OPENFDA_API_KEY` values.
 - Local FAERS analysis history, reviewer report history, and confirmed intake evidence history are stored in the browser with `localStorage`; they are not server-side persistence.
 - The app is not medical advice, clinical decision support, or a causality engine.
@@ -137,6 +146,7 @@ At minimum, deployment logs should distinguish:
 ## Troubleshooting
 
 - **openFDA 429 or intermittent failures:** configure `OPENFDA_API_KEY` or retry later.
+- **App returns 429 Public demo rate limit:** wait for the `Retry-After` window or raise the relevant `PUBLIC_DEMO_*_RATE_LIMIT` value in the hosting environment.
 - **No FAERS reports found:** try a generic or brand name that exists in FAERS; the app returns a 404 rather than rendering an empty analysis as evidence.
 - **Report returns template mode:** `OPENAI_API_KEY` is missing or the provider response failed schema validation.
 - **Medication intake returns fallback mode:** `DEEPSEEK_API_KEY` is missing or the provider response failed schema validation.

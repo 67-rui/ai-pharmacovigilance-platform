@@ -6,6 +6,7 @@ import {
   parseMedicationIntake,
 } from "../../../../lib/medicationIntake";
 import type { MedicationIntakeResult } from "@/lib/types";
+import { limitPublicDemoRequest } from "../../publicDemoRateLimit";
 
 const bodySchema = z.object({
   ocrText: z.string().min(8).max(8000),
@@ -105,6 +106,17 @@ export async function POST(request: Request) {
       { error: "Invalid medication intake payload." },
       { status: 400 },
     );
+  }
+
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "intake",
+    envLimitName: "PUBLIC_DEMO_INTAKE_RATE_LIMIT",
+    defaultLimit: 20,
+    label: "medication intake",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   if (!process.env.DEEPSEEK_API_KEY) {

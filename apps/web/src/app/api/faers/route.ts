@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { NoFaersResultsError, analyzeFaersDrug } from "../../../lib/openfda";
+import { limitPublicDemoRequest } from "../publicDemoRateLimit";
 
 const querySchema = z.object({
   drug: z.string().trim().min(2).max(80),
@@ -19,6 +20,17 @@ export async function GET(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "faers",
+    envLimitName: "PUBLIC_DEMO_FAERS_RATE_LIMIT",
+    defaultLimit: 30,
+    label: "FAERS analysis",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {

@@ -7,12 +7,15 @@ import {
   createOpenFdaRateLimitFetch,
   faersDrugFixtures,
 } from "../../../test-utils/openFdaFixtures";
+import { resetPublicDemoRateLimits } from "../../../lib/publicDemoRateLimit";
 
 const originalFetch = global.fetch;
 
 describe("GET /api/faers", () => {
   afterEach(() => {
     global.fetch = originalFetch;
+    resetPublicDemoRateLimits();
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
@@ -104,5 +107,30 @@ describe("GET /api/faers", () => {
     expect(response.status).toBe(502);
     const payload = (await response.json()) as { error: string };
     expect(payload.error).toContain("openFDA request failed (429)");
+  });
+
+  it("returns 429 before querying openFDA when the public demo rate limit is reached", async () => {
+    vi.stubEnv("PUBLIC_DEMO_FAERS_RATE_LIMIT", "1");
+    vi.stubEnv("PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS", "60000");
+    global.fetch = vi.fn(createOpenFdaFixtureFetch(faersDrugFixtures.metformin)) as typeof fetch;
+    const headers = { "x-forwarded-for": "203.0.113.50" };
+
+    const firstResponse = await GET(
+      new Request("http://localhost/api/faers?drug=metformin", { headers }),
+    );
+    const fetchCallsAfterFirstRequest = vi.mocked(global.fetch).mock.calls.length;
+    const limitedResponse = await GET(
+      new Request("http://localhost/api/faers?drug=metformin", { headers }),
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(limitedResponse.status).toBe(429);
+    expect(limitedResponse.headers.get("Retry-After")).toBeTruthy();
+    await expect(limitedResponse.json()).resolves.toMatchObject({
+      error: "Public demo rate limit reached for FAERS analysis.",
+    });
+    expect(vi.mocked(global.fetch).mock.calls.length).toBe(
+      fetchCallsAfterFirstRequest,
+    );
   });
 });

@@ -186,6 +186,7 @@ Priority backlog:
 - P0: Deploy a public demo with safe rate limits ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
 - Done: Add Vercel deployment configuration and deployment commands ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
 - Done: Add an automated deployed-demo smoke test command with live and mocked modes ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
+- Done: Add built-in per-IP public demo rate limits for API routes ([#1](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/1)).
 - Done: Add a short demo video or GIF ([#5](https://github.com/67-rui/ai-pharmacovigilance-platform/issues/5)).
 - Done: Add a concise architecture diagram in `README.md`.
 - Done: Add refreshed README product screenshots and `npm run screenshots`.

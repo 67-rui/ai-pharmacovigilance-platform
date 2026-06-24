@@ -1,7 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 import type { SignalAnalysis } from "@/lib/types";
 import { analyzeSignal } from "../../../lib/signal";
+import { resetPublicDemoRateLimits } from "../../../lib/publicDemoRateLimit";
 
 vi.mock("../../../lib/signal", () => ({
   analyzeSignal: vi.fn(),
@@ -39,6 +40,12 @@ function signal(event: string, eventReports: number): SignalAnalysis {
 }
 
 describe("GET /api/rankings", () => {
+  afterEach(() => {
+    resetPublicDemoRateLimits();
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+  });
+
   it("returns ranked signal rows for repeated event parameters", async () => {
     analyzeSignalMock
       .mockResolvedValueOnce(signal("HEADACHE", 40))
@@ -68,5 +75,33 @@ describe("GET /api/rankings", () => {
     });
     expect(analyzeSignalMock).toHaveBeenCalledWith("metformin", "HEADACHE");
     expect(analyzeSignalMock).toHaveBeenCalledWith("metformin", "NAUSEA");
+  });
+
+  it("returns 429 before computing rankings when the public demo limit is reached", async () => {
+    vi.stubEnv("PUBLIC_DEMO_RANKINGS_RATE_LIMIT", "1");
+    vi.stubEnv("PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS", "60000");
+    analyzeSignalMock.mockResolvedValue(signal("NAUSEA", 180));
+    const headers = { "x-forwarded-for": "203.0.113.80" };
+
+    const firstResponse = await GET(
+      new Request(
+        "http://localhost/api/rankings?drug=metformin&event=NAUSEA",
+        { headers },
+      ),
+    );
+    const callsAfterFirstRequest = analyzeSignalMock.mock.calls.length;
+    const limitedResponse = await GET(
+      new Request(
+        "http://localhost/api/rankings?drug=metformin&event=NAUSEA",
+        { headers },
+      ),
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(limitedResponse.status).toBe(429);
+    await expect(limitedResponse.json()).resolves.toMatchObject({
+      error: "Public demo rate limit reached for signal ranking.",
+    });
+    expect(analyzeSignalMock.mock.calls.length).toBe(callsAfterFirstRequest);
   });
 });

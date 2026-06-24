@@ -332,9 +332,16 @@ OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.5
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-chat
+PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS=60000
+PUBLIC_DEMO_FAERS_RATE_LIMIT=30
+PUBLIC_DEMO_SIGNAL_RATE_LIMIT=60
+PUBLIC_DEMO_RANKINGS_RATE_LIMIT=20
+PUBLIC_DEMO_COMPARE_RATE_LIMIT=30
+PUBLIC_DEMO_REPORT_RATE_LIMIT=20
+PUBLIC_DEMO_INTAKE_RATE_LIMIT=20
 ```
 
-`OPENFDA_API_KEY` is optional but increases rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key.
+`OPENFDA_API_KEY` is optional but increases openFDA rate limits. `OPENAI_API_KEY` is optional; without it, the app generates a local template report. `DEEPSEEK_API_KEY` is optional; without it, medication intake uses local fallback extraction. Browser OCR runs locally and does not require an API key. `PUBLIC_DEMO_*_RATE_LIMIT` values tune the built-in per-IP, per-route fixed-window API limits for public portfolio deployments.
 
 The repository includes `vercel.json` for a Next.js Vercel deployment from the repository root. See [docs/deployment.md](docs/deployment.md) for deployment steps, safe demo configuration, fallback behavior, and post-deploy smoke tests. See [docs/observability.md](docs/observability.md) for latency, provider fallback, schema validation, and healthcare-adjacent logging notes.
 
@@ -368,6 +375,7 @@ Current tests cover:
 - PDF report section generation for reviewer-ready exports
 - Medication intake schema parsing and fallback extraction
 - Medication intake API fallback and mocked DeepSeek responses
+- Public demo rate limiting for FAERS, signal ranking, report generation, and medication intake routes
 
 These unit tests do not make live openFDA requests.
 

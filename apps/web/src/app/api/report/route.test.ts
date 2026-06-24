@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import type { FaersAnalysis, ReportResponse } from "@/lib/types";
+import { resetPublicDemoRateLimits } from "../../../lib/publicDemoRateLimit";
 
 const originalApiKey = process.env.OPENAI_API_KEY;
 
@@ -43,6 +44,8 @@ const analysis: FaersAnalysis = {
 describe("POST /api/report", () => {
   afterEach(() => {
     process.env.OPENAI_API_KEY = originalApiKey;
+    resetPublicDemoRateLimits();
+    vi.unstubAllEnvs();
   });
 
   it("returns 400 for malformed JSON bodies", async () => {
@@ -90,5 +93,32 @@ describe("POST /api/report", () => {
     expect(payload.qualityChecklist).toContain(
       "No causal claims from FAERS report counts.",
     );
+  });
+
+  it("returns 429 when the public demo report limit is reached", async () => {
+    delete process.env.OPENAI_API_KEY;
+    vi.stubEnv("PUBLIC_DEMO_REPORT_RATE_LIMIT", "1");
+    vi.stubEnv("PUBLIC_DEMO_RATE_LIMIT_WINDOW_MS", "60000");
+    const requestInit = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-forwarded-for": "203.0.113.60",
+      },
+      body: JSON.stringify({ analysis, tone: "portfolio-summary" }),
+    };
+
+    const firstResponse = await POST(
+      new Request("http://localhost/api/report", requestInit),
+    );
+    const limitedResponse = await POST(
+      new Request("http://localhost/api/report", requestInit),
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(limitedResponse.status).toBe(429);
+    await expect(limitedResponse.json()).resolves.toMatchObject({
+      error: "Public demo rate limit reached for AI report generation.",
+    });
   });
 });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { compareDrugs } from "@/lib/comparison";
+import { limitPublicDemoRequest } from "../publicDemoRateLimit";
 
 const querySchema = z.object({
   primary: z.string().trim().min(2).max(80),
@@ -23,6 +24,17 @@ export async function GET(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "compare",
+    envLimitName: "PUBLIC_DEMO_COMPARE_RATE_LIMIT",
+    defaultLimit: 30,
+    label: "drug comparison",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {

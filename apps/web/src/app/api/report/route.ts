@@ -10,6 +10,7 @@ import {
   structuredReportToMarkdown,
 } from "../../../lib/report";
 import type { FaersAnalysis, ReportResponse, ReportTone } from "@/lib/types";
+import { limitPublicDemoRequest } from "../publicDemoRateLimit";
 
 const chartDatumSchema = z.object({
   label: z.string(),
@@ -186,6 +187,16 @@ export async function POST(request: Request) {
 
   const analysis = parsed.data.analysis as FaersAnalysis;
   const tone = parsed.data.tone;
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "report",
+    envLimitName: "PUBLIC_DEMO_REPORT_RATE_LIMIT",
+    defaultLimit: 20,
+    label: "AI report generation",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(

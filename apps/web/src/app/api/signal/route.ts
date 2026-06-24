@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { analyzeSignal } from "@/lib/signal";
+import { limitPublicDemoRequest } from "../publicDemoRateLimit";
 
 const querySchema = z.object({
   drug: z.string().trim().min(2).max(80),
@@ -21,6 +22,17 @@ export async function GET(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "signal",
+    envLimitName: "PUBLIC_DEMO_SIGNAL_RATE_LIMIT",
+    defaultLimit: 60,
+    label: "signal analysis",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {

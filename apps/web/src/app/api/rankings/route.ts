@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildSignalRanking } from "../../../lib/ranking";
 import { analyzeSignal } from "../../../lib/signal";
+import { limitPublicDemoRequest } from "../publicDemoRateLimit";
 
 const MAX_RANKING_EVENTS = 8;
 
@@ -36,6 +37,17 @@ export async function GET(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  const rateLimitResponse = limitPublicDemoRequest(request, {
+    namespace: "rankings",
+    envLimitName: "PUBLIC_DEMO_RANKINGS_RATE_LIMIT",
+    defaultLimit: 20,
+    label: "signal ranking",
+  });
+
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
