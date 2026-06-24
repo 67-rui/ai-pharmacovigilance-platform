@@ -80,6 +80,8 @@ flowchart LR
 
 ## Core Features
 
+For a recruiter/interviewer-oriented walkthrough, see [docs/case-study.md](docs/case-study.md).
+
 ### FAERS Dashboard
 
 The dashboard builds a suspect-drug search expression and uses aggregate `count` queries instead of large report downloads. This keeps the UI responsive while still showing meaningful signal-triage patterns.
@@ -167,6 +169,8 @@ The result is schema-validated before rendering and includes:
 
 Confirmed drug candidates are routed into the FAERS dashboard. The workflow is intentionally confirmation-first because OCR and label extraction can be incomplete or wrong.
 
+The intake prompt is versioned in [docs/prompts/medication-label-intake-v1.md](docs/prompts/medication-label-intake-v1.md).
+
 ### AI Report Generation
 
 The report API supports two modes:
@@ -236,8 +240,10 @@ ai-pharmacovigilance-platform/
     src/lib/*.test.ts
   docs/
     assets/
+    case-study.md
     prompts/faers-safety-report-v1.md
     prompts/faers-safety-report-v2.md
+    prompts/medication-label-intake-v1.md
     project-plan.md
     roadmap.md
 ```

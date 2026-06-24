@@ -174,7 +174,7 @@ Priority backlog:
 - P0: Add a concise architecture diagram.
 - P0: Deploy a public demo with safe rate limits.
 - P1: Add a short demo video or GIF.
-- P1: Add a technical case study page in `docs/case-study.md`.
+- Done: Add a technical case study page in `docs/case-study.md`.
 - P1: Add resume bullets and interview talking points.
 - P2: Add GitHub issues for each roadmap item.
 
@@ -250,4 +250,4 @@ Each meaningful feature should include:
 2. Add saved report history.
 3. Add ranking filters for seriousness, frequency, PRR, and ROR.
 4. Add deployment-ready environment documentation.
-5. Add a case study page for portfolio storytelling.
+5. Done: Add a case study page for portfolio storytelling.
