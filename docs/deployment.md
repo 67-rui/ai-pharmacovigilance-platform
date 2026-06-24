@@ -22,6 +22,7 @@ Recommended commands:
 
 ```bash
 npm install
+npm run check:deploy
 npm run test
 npm run lint
 npm run build
@@ -92,6 +93,23 @@ npm run smoke:demo -- http://localhost:3000 --mock
 ```
 
 Live smoke failures can reflect deployment regressions, openFDA latency or rate limits, or optional AI-provider outages. Mock mode only proves the browser workflow and selectors; it is not a substitute for testing the deployed public URL.
+
+## Deployment Readiness Gate
+
+Run the deployment readiness check locally or in CI before deploying:
+
+```bash
+npm run check:deploy
+```
+
+The deployment readiness check verifies:
+
+- Required deployment files are present, including `vercel.json`, `docs/deployment.md`, and the live-demo smoke script.
+- Required npm scripts exist.
+- `apps/web/.env.example` keeps provider API keys blank while documenting public-demo rate-limit variables.
+- Obvious OpenAI/DeepSeek-style API keys and GitHub tokens are not present in common public-facing repository files.
+
+A full CI gate should also run unit tests, Playwright smoke tests, lint, build, and `npm audit --audit-level=moderate`.
 
 ## Safe Demo Configuration
 

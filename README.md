@@ -348,6 +348,7 @@ The repository includes `vercel.json` for a Next.js Vercel deployment from the r
 ## Verification
 
 ```bash
+npm run check:deploy
 npm run test
 npm run test:e2e
 npm run smoke:demo -- http://localhost:3000 --mock
@@ -357,6 +358,7 @@ npm run build
 
 Current tests cover:
 
+- Deployment readiness checks for required files, scripts, blank provider-key examples, public-demo rate-limit variables, and obvious plaintext API key patterns
 - openFDA query construction
 - FAERS analysis API route validation, four-drug aggregate fixtures, no-result handling, and upstream rate-limit errors
 - MedDRA event query construction
@@ -380,6 +382,8 @@ Current tests cover:
 These unit tests do not make live openFDA requests.
 
 The Playwright smoke tests use mocked API responses to verify that `/?drug=metformin&workflow=full` loads the dashboard, runs the full reviewer workflow, renders schema-validated report content, and exposes Markdown/PDF export controls. They also verify the label-evidence path: editable OCR text, schema-validated medication intake, human confirmation, and confirmed-drug workflow launch. The local config uses the system Chrome channel; on a new machine or CI runner without Chrome, install a Playwright browser with `npx playwright install chromium` and adjust the channel if needed.
+
+For CI, run the same deployment readiness check, unit tests, Playwright smoke tests, lint, build, and dependency audit before deploying.
 
 After deploying a public demo, run the live smoke script against the deployed URL:
 
